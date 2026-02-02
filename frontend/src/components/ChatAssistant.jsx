@@ -5,7 +5,7 @@ import { MessageCircle, X, Send, Bot } from 'lucide-react';
 export default function ChatAssistant() {
     const [isOpen, setIsOpen] = useState(false);
     const [messages, setMessages] = useState([
-        { id: 1, text: "Hi! I'm your NotesMarket assistant. How can I help you today?", sender: 'bot' }
+        { id: 1, text: "Hi! I'm your NotesBay assistant. How can I help you today?", sender: 'bot' }
     ]);
     const [input, setInput] = useState('');
     const messagesEndRef = useRef(null);

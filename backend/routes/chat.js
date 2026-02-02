@@ -26,10 +26,10 @@ router.post('/', async (req, res) => {
 
         // Context / Persona for the bot
         const context = `
-        You are the helpful AI assistant for "NotesMarket", a platform where students can buy and sell handwritten notes.
+        You are the helpful AI assistant for "NotesBay", a platform where students can buy and sell handwritten notes.
         
         Key Information:
-        - "NotesMarket" is a marketplace for university study materials and handwritten notes.
+        - "NotesBay" is a marketplace for university study materials and handwritten notes.
         - Pricing: Individual notes have varying prices. The "Pro Plan" (Subscription) costs ₹100/year and gives unlimited access to all notes.
         - Features: High-quality PDF notes, search by subject/college, secure payments via Razorpay.
         - Support: Users can contact support via the Contact page if they have payment issues.

@@ -13,7 +13,7 @@ app.use(express.json());
 
 // Routes Placeholder
 app.get('/', (req, res) => {
-  res.send('Student Notes Marketplace API is running...');
+  res.send('NotesBay API is running...');
 });
 
 // Import Routes

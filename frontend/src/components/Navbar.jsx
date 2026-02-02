@@ -44,7 +44,7 @@ export default function Navbar() {
                     <div className="flex">
                         <Link to="/" className="flex-shrink-0 flex items-center">
                             <BookOpen className="h-8 w-8 text-indigo-600 dark:text-indigo-400" />
-                            <span className="ml-2 text-xl font-bold text-gray-900 dark:text-white">NotesMarket</span>
+                            <span className="ml-2 text-xl font-bold text-gray-900 dark:text-white">NotesBay</span>
                         </Link>
                     </div>
 

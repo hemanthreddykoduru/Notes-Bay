@@ -11,7 +11,7 @@ const Footer = () => {
                     <div className="space-y-4">
                         <Link to="/" className="flex items-center space-x-2">
                             <BookOpen className="h-8 w-8 text-indigo-600 dark:text-indigo-400" />
-                            <span className="text-xl font-bold text-gray-900 dark:text-white">NotesMarket</span>
+                            <span className="text-xl font-bold text-gray-900 dark:text-white">NotesBay</span>
                         </Link>
                         <p className="text-gray-600 dark:text-gray-400 text-sm">
                             Your one-stop destination for premium study materials. Ace your exams with high-quality notes from top students.
@@ -92,7 +92,7 @@ const Footer = () => {
 
                 <div className="border-t border-gray-200 dark:border-gray-800 pt-8 mt-8 text-center">
                     <p className="text-sm text-gray-500 dark:text-gray-400">
-                        &copy; {new Date().getFullYear()} NotesMarket. All rights reserved.
+                        &copy; {new Date().getFullYear()} NotesBay. All rights reserved.
                     </p>
                 </div>
             </div>
