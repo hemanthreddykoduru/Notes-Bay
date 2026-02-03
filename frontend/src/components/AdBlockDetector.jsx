@@ -1,8 +1,8 @@
-import { useEffect } from 'react';
-import { useAdContext } from '../context/AdContext';
+import { useEffect, useState } from 'react';
+import { AlertTriangle } from 'lucide-react';
 
 export default function AdBlockDetector() {
-    const { setShowFallbackAds } = useAdContext();
+    const [adBlockDetected, setAdBlockDetected] = useState(false);
 
     useEffect(() => {
         let isMounted = true;
@@ -71,9 +71,8 @@ export default function AdBlockDetector() {
                 testAd.remove();
             }
 
-            if (isMounted) {
-                // UPDATE GLOBAL CONTEXT INSTEAD OF LOCAL STATE
-                setShowFallbackAds(detected);
+            if (isMounted && detected) {
+                setAdBlockDetected(true);
             }
 
             // Cleanup bait
@@ -82,7 +81,6 @@ export default function AdBlockDetector() {
             }
         };
 
-        // Run detection after a small delay to allow extensions to act
         const timeoutId = setTimeout(detect, 2000);
 
         return () => {
@@ -92,8 +90,43 @@ export default function AdBlockDetector() {
                 document.body.removeChild(bait);
             }
         };
-    }, [setShowFallbackAds]);
+    }, []);
 
-    // RENDER NOTHING - Logic only
-    return null;
+    if (!adBlockDetected) return null;
+
+    return (
+        <div className="fixed inset-0 z-[9999] bg-gray-900/95 backdrop-blur-md flex items-center justify-center p-4">
+            <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl max-w-lg w-full p-8 text-center border border-gray-200 dark:border-gray-700 animate-in fade-in zoom-in duration-300">
+                <div className="mb-6 flex justify-center">
+                    <div className="bg-red-100 dark:bg-red-900/30 p-4 rounded-full ring-4 ring-red-50 dark:ring-red-900/10">
+                        <AlertTriangle className="w-12 h-12 text-red-600 dark:text-red-400" />
+                    </div>
+                </div>
+
+                <h2 className="text-3xl font-bold text-gray-900 dark:text-white mb-4">
+                    Ad Blocker Detected
+                </h2>
+
+                <p className="text-gray-600 dark:text-gray-300 mb-8 leading-relaxed text-lg">
+                    We've detected that you are using an ad blocker. Our content is free thanks to our sponsors.
+                    <br /><br />
+                    <span className="font-semibold text-gray-900 dark:text-white bg-red-50 dark:bg-red-900/20 px-2 py-1 rounded">
+                        Please disable your ad blocker to continue accessing NotesBay.
+                    </span>
+                </p>
+
+                <div className="space-y-4">
+                    <button
+                        onClick={() => window.location.reload()}
+                        className="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-4 px-6 rounded-xl transition-all duration-200 shadow-xl hover:shadow-indigo-500/25 transform hover:-translate-y-0.5"
+                    >
+                        I've Disabled It, Refresh Page
+                    </button>
+                    <p className="text-sm text-gray-400 dark:text-gray-500">
+                        Refresh required after disabling
+                    </p>
+                </div>
+            </div>
+        </div>
+    );
 }
