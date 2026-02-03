@@ -5,6 +5,7 @@ import { supabase } from '../lib/supabase';
 import NoteCard from '../components/NoteCard';
 import Hero3D from '../components/Hero3D';
 import NativeAd from '../components/NativeAd';
+import LeaderboardAd from '../components/LeaderboardAd';
 import { Search, Filter, X, Sparkles, CheckCircle } from 'lucide-react';
 
 export default function Home() {
@@ -154,11 +155,9 @@ export default function Home() {
                 <Hero3D />
             </div>
 
-            {/* Native Ad - Below Hero (Non-Subscribers Only) */}
+            {/* Leaderboard Ad - Below Hero (Non-Subscribers Only) */}
             {!isSubscribed && (
-                <div className="mb-8">
-                    <NativeAd />
-                </div>
+                <LeaderboardAd />
             )}
 
             {/* Search & Filter Bar */}
