@@ -28,7 +28,7 @@ export default function SkyscraperAd() {
 
     return (
         <div className="flex justify-center h-full">
-            <div ref={adRef} className="bg-gray-50 dark:bg-gray-800 rounded-lg overflow-hidden sticky top-8">
+            <div ref={adRef} className="bg-gray-50 dark:bg-gray-800 rounded-lg overflow-hidden sticky top-8 flex items-center justify-center w-[160px] h-[600px]">
                 {/* Skyscraper Ad Container (160x600) */}
             </div>
         </div>

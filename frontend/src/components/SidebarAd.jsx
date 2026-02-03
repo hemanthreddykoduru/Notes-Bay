@@ -28,7 +28,7 @@ export default function SidebarAd() {
 
     return (
         <div className="flex justify-center my-6">
-            <div ref={adRef} className="bg-gray-50 dark:bg-gray-800 rounded-lg overflow-hidden">
+            <div ref={adRef} className="bg-gray-50 dark:bg-gray-800 rounded-lg overflow-hidden flex items-center justify-center w-[300px] h-[250px]">
                 {/* Ad Container */}
             </div>
         </div>

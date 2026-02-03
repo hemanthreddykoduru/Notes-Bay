@@ -9,7 +9,7 @@ import SocialShare from '../components/SocialShare';
 import RelatedNotes from '../components/RelatedNotes';
 import NoteDetailSkeleton from '../components/NoteDetailSkeleton';
 import SecurePDFViewer from '../components/SecurePDFViewer';
-import SidebarAd from '../components/SidebarAd';
+
 import SkyscraperAd from '../components/SkyscraperAd';
 import LeaderboardAd from '../components/LeaderboardAd';
 
@@ -239,10 +239,7 @@ export default function NoteDetails() {
                                             </button>
                                         </div>
 
-                                        {/* Sidebar Ad (300x250) */}
-                                        <div className="mt-6 flex justify-center">
-                                            <SidebarAd />
-                                        </div>
+
 
                                     </div>
                                 )}
