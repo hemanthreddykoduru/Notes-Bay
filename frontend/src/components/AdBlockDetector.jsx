@@ -32,17 +32,24 @@ export default function AdBlockDetector() {
                 console.log('AdBlock detected via Bait Element');
             }
 
-            // Check B: Network Request to Known Ad Server
+            // Check B: Script Injection (More reliable for network blocking)
             if (!detected) {
                 try {
-                    await fetch('https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js', {
-                        method: 'HEAD',
-                        mode: 'no-cors',
-                        cache: 'no-store'
+                    await new Promise((resolve, reject) => {
+                        const script = document.createElement('script');
+                        script.src = 'https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js';
+                        script.onerror = () => {
+                            reject(new Error('Blocked'));
+                        };
+                        script.onload = () => {
+                            resolve();
+                            script.remove();
+                        };
+                        document.head.appendChild(script);
                     });
                 } catch (e) {
                     detected = true;
-                    console.log('AdBlock detected via Network Request Block');
+                    console.log('AdBlock detected via Script Error');
                 }
             }
 
