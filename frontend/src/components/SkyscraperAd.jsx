@@ -1,9 +1,16 @@
 import { useEffect, useRef } from 'react';
+import { useAdContext } from '../context/AdContext';
+import { useNavigate } from 'react-router-dom';
 
 export default function SkyscraperAd() {
     const containerRef = useRef(null);
+    const { showFallbackAds } = useAdContext();
+    const navigate = useNavigate();
 
     useEffect(() => {
+        // Only inject script if NOT in fallback mode
+        if (showFallbackAds) return;
+
         const container = containerRef.current;
         if (!container) return;
 
@@ -45,7 +52,25 @@ export default function SkyscraperAd() {
         doc.write(adContent);
         doc.close();
 
-    }, []);
+    }, [showFallbackAds]);
+
+    // Render fallback image if ad blocker detected
+    if (showFallbackAds) {
+        return (
+            <div className="flex justify-center h-full">
+                <div
+                    className="bg-gray-50 dark:bg-gray-800 rounded-lg overflow-hidden sticky top-8 flex items-center justify-center w-[160px] h-[600px] cursor-pointer hover:opacity-90 transition-opacity"
+                    onClick={() => navigate('/pricing')}
+                >
+                    <img
+                        src="/fallback-skyscraper.png"
+                        alt="Upgrade to Pro"
+                        className="w-full h-full object-cover"
+                    />
+                </div>
+            </div>
+        );
+    }
 
     return (
         <div className="flex justify-center h-full">
