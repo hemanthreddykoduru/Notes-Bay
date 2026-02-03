@@ -129,11 +129,7 @@ export default function NoteDetails() {
             <Breadcrumbs items={breadcrumbItems} />
 
             <div className="flex flex-col lg:flex-row gap-6">
-                {!purchased && (
-                    <div className="hidden lg:block shrink-0">
-                        <SkyscraperAd />
-                    </div>
-                )}
+
                 <div className="flex-1 bg-white dark:bg-gray-800 shadow overflow-hidden sm:rounded-lg min-w-0">
                     <div className="px-4 py-5 sm:px-6 flex justify-between items-start flex-wrap gap-4">
                         <div>
@@ -254,17 +250,28 @@ export default function NoteDetails() {
                         </div>
                     </div>
                 </div>
+                {/* Right Sidebar Ad (Skyscraper 160x600) - Desktop Only */}
+                {!purchased && (
+                    <div className="hidden lg:block shrink-0 w-[160px]">
+                        <SkyscraperAd />
+                    </div>
+                )}
+
             </div>
+
+
 
             {/* Related Notes Section */}
             <RelatedNotes currentNoteId={id} subject={note.subject} />
 
             {/* Native Ad (Non-Subscribers Only) */}
-            {!purchased && (
-                <div className="mt-8">
-                    <NativeAd />
-                </div>
-            )}
+            {
+                !purchased && (
+                    <div className="mt-8">
+                        <NativeAd />
+                    </div>
+                )
+            }
 
             {/* Reviews Section */}
             <div className="mt-8 px-4 sm:px-6">
@@ -272,13 +279,15 @@ export default function NoteDetails() {
             </div>
 
             {/* Secure Reader Modal */}
-            {showReader && purchased && note.file_url && (
-                <SecurePDFViewer
-                    fileUrl={note.file_url}
-                    title={note.title}
-                    onClose={() => setShowReader(false)}
-                />
-            )}
-        </div>
+            {
+                showReader && purchased && note.file_url && (
+                    <SecurePDFViewer
+                        fileUrl={note.file_url}
+                        title={note.title}
+                        onClose={() => setShowReader(false)}
+                    />
+                )
+            }
+        </div >
     );
 }
