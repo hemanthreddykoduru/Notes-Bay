@@ -10,6 +10,7 @@ import RelatedNotes from '../components/RelatedNotes';
 import NoteDetailSkeleton from '../components/NoteDetailSkeleton';
 import SecurePDFViewer from '../components/SecurePDFViewer';
 import NativeAd from '../components/NativeAd';
+import SidebarAd from '../components/SidebarAd';
 
 export default function NoteDetails() {
     const { id } = useParams();
@@ -233,6 +234,11 @@ export default function NoteDetails() {
                                         >
                                             {processing ? 'Processing...' : 'Buy This Note Only'}
                                         </button>
+                                    </div>
+
+                                    {/* Sidebar Ad (300x250) */}
+                                    <div className="mt-6 flex justify-center">
+                                        <SidebarAd />
                                     </div>
 
                                 </div>
