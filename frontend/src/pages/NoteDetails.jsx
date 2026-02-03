@@ -9,9 +9,9 @@ import SocialShare from '../components/SocialShare';
 import RelatedNotes from '../components/RelatedNotes';
 import NoteDetailSkeleton from '../components/NoteDetailSkeleton';
 import SecurePDFViewer from '../components/SecurePDFViewer';
-import NativeAd from '../components/NativeAd';
 import SidebarAd from '../components/SidebarAd';
 import SkyscraperAd from '../components/SkyscraperAd';
+import LeaderboardAd from '../components/LeaderboardAd';
 
 export default function NoteDetails() {
     const { id } = useParams();
@@ -264,12 +264,10 @@ export default function NoteDetails() {
             {/* Related Notes Section */}
             <RelatedNotes currentNoteId={id} subject={note.subject} />
 
-            {/* Native Ad (Non-Subscribers Only) */}
+            {/* Leaderboard Ad (Non-Subscribers Only) */}
             {
                 !purchased && (
-                    <div className="mt-8">
-                        <NativeAd />
-                    </div>
+                    <LeaderboardAd />
                 )
             }
 
