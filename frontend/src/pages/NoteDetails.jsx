@@ -9,6 +9,7 @@ import SocialShare from '../components/SocialShare';
 import RelatedNotes from '../components/RelatedNotes';
 import NoteDetailSkeleton from '../components/NoteDetailSkeleton';
 import SecurePDFViewer from '../components/SecurePDFViewer';
+import NativeAd from '../components/NativeAd';
 
 export default function NoteDetails() {
     const { id } = useParams();
@@ -243,6 +244,13 @@ export default function NoteDetails() {
 
             {/* Related Notes Section */}
             <RelatedNotes currentNoteId={id} subject={note.subject} />
+
+            {/* Native Ad (Non-Subscribers Only) */}
+            {!purchased && (
+                <div className="mt-8">
+                    <NativeAd />
+                </div>
+            )}
 
             {/* Reviews Section */}
             <div className="mt-8 px-4 sm:px-6">

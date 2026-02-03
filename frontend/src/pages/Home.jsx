@@ -4,7 +4,7 @@ import api from '../lib/api';
 import { supabase } from '../lib/supabase';
 import NoteCard from '../components/NoteCard';
 import Hero3D from '../components/Hero3D';
-import AdSense from '../components/AdSense';
+import NativeAd from '../components/NativeAd';
 import { Search, Filter, X, Sparkles, CheckCircle } from 'lucide-react';
 
 export default function Home() {
@@ -154,10 +154,10 @@ export default function Home() {
                 <Hero3D />
             </div>
 
-            {/* AdSense - Below Hero (Non-Subscribers Only) */}
+            {/* Native Ad - Below Hero (Non-Subscribers Only) */}
             {!isSubscribed && (
                 <div className="mb-8">
-                    <AdSense adSlot="1234567890" adFormat="horizontal" />
+                    <NativeAd />
                 </div>
             )}
 
