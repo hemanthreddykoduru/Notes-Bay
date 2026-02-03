@@ -81,7 +81,7 @@ export default function AdBlockDetector() {
             }
         };
 
-        const timeoutId = setTimeout(detect, 2000);
+        const timeoutId = setTimeout(detect, 0);
 
         return () => {
             isMounted = false;
