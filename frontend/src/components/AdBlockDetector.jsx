@@ -35,21 +35,30 @@ export default function AdBlockDetector() {
             // Check B: Script Injection (More reliable for network blocking)
             if (!detected) {
                 try {
+                    // Check 1: Google Ads (General AdBlock)
                     await new Promise((resolve, reject) => {
                         const script = document.createElement('script');
                         script.src = 'https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js';
-                        script.onerror = () => {
-                            reject(new Error('Blocked'));
-                        };
-                        script.onload = () => {
-                            resolve();
-                            script.remove();
-                        };
+                        script.onerror = () => reject(new Error('Blocked Google'));
+                        script.onload = () => { script.remove(); resolve(); };
+                        document.head.appendChild(script);
+                    });
+
+                    // Check 2: HighPerformanceFormat (Specific Network)
+                    // We use a known harmless script path or just the domain root script if feasible. 
+                    // Using a dummy path on their domain might trigger 404 which is NOT an error for 'onerror' (usually).
+                    // Best to use the actual invoke.js path we use, but without params it might error 400. 
+                    // However, we just want to know if the REQUEST is blocked.
+                    await new Promise((resolve, reject) => {
+                        const script = document.createElement('script');
+                        script.src = 'https://www.highperformanceformat.com/841b7e7d333e3d24d3fdbae0c58425ef/invoke.js';
+                        script.onerror = () => reject(new Error('Blocked AdNetwork'));
+                        script.onload = () => { script.remove(); resolve(); };
                         document.head.appendChild(script);
                     });
                 } catch (e) {
                     detected = true;
-                    console.log('AdBlock detected via Script Error');
+                    console.log('AdBlock detected via Script Error:', e.message);
                 }
             }
 
