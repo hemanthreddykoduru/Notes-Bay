@@ -11,6 +11,7 @@ import NoteDetailSkeleton from '../components/NoteDetailSkeleton';
 import SecurePDFViewer from '../components/SecurePDFViewer';
 import NativeAd from '../components/NativeAd';
 import SidebarAd from '../components/SidebarAd';
+import SkyscraperAd from '../components/SkyscraperAd';
 
 export default function NoteDetails() {
     const { id } = useParams();
@@ -127,122 +128,129 @@ export default function NoteDetails() {
             {/* Breadcrumbs */}
             <Breadcrumbs items={breadcrumbItems} />
 
-            <div className="bg-white dark:bg-gray-800 shadow overflow-hidden sm:rounded-lg">
-                <div className="px-4 py-5 sm:px-6 flex justify-between items-start flex-wrap gap-4">
-                    <div>
-                        <h3 className="text-2xl leading-6 font-medium text-gray-900 dark:text-white">{note.title}</h3>
-                        <p className="mt-1 max-w-2xl text-sm text-gray-500 dark:text-gray-400">{note.subject}</p>
+            <div className="flex flex-col lg:flex-row gap-6">
+                {!purchased && (
+                    <div className="hidden lg:block shrink-0">
+                        <SkyscraperAd />
                     </div>
-                    {/* Social Share */}
-                    <SocialShare title={note.title} url={window.location.href} />
-                </div>
-                <div className="border-t border-gray-200 dark:border-gray-700">
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-8 p-6">
-                        <div className="h-96 bg-gray-100 dark:bg-gray-900 flex items-center justify-center border border-gray-200 dark:border-gray-700 rounded overflow-hidden relative">
-                            {note.preview_url ? (
-                                note.preview_url.match(/\.(jpeg|jpg|gif|png)$/i) ? (
-                                    <img
-                                        src={note.preview_url}
-                                        alt={note.title}
-                                        className="w-full h-full object-contain"
-                                    />
-                                ) : (
-                                    <iframe
-                                        src={`${note.preview_url}#toolbar=0&navpanes=0&scrollbar=0`}
-                                        className="w-full h-full overflow-hidden"
-                                        title="Preview"
-                                        scrolling="no"
-                                    />
-                                )
-                            ) : (
-                                <FileText className="h-24 w-24 text-gray-400 dark:text-gray-600" />
-                            )}
+                )}
+                <div className="flex-1 bg-white dark:bg-gray-800 shadow overflow-hidden sm:rounded-lg min-w-0">
+                    <div className="px-4 py-5 sm:px-6 flex justify-between items-start flex-wrap gap-4">
+                        <div>
+                            <h3 className="text-2xl leading-6 font-medium text-gray-900 dark:text-white">{note.title}</h3>
+                            <p className="mt-1 max-w-2xl text-sm text-gray-500 dark:text-gray-400">{note.subject}</p>
                         </div>
-
-                        <div className="flex flex-col justify-between space-y-6">
-                            <div>
-                                <h4 className="text-lg font-bold text-gray-900 dark:text-white mb-2">Description</h4>
-                                <p className="text-gray-700 dark:text-gray-300 whitespace-pre-line">
-                                    {note.description || "No description available for this note."}
-                                </p>
+                        {/* Social Share */}
+                        <SocialShare title={note.title} url={window.location.href} />
+                    </div>
+                    <div className="border-t border-gray-200 dark:border-gray-700">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 p-6">
+                            <div className="h-96 bg-gray-100 dark:bg-gray-900 flex items-center justify-center border border-gray-200 dark:border-gray-700 rounded overflow-hidden relative">
+                                {note.preview_url ? (
+                                    note.preview_url.match(/\.(jpeg|jpg|gif|png)$/i) ? (
+                                        <img
+                                            src={note.preview_url}
+                                            alt={note.title}
+                                            className="w-full h-full object-contain"
+                                        />
+                                    ) : (
+                                        <iframe
+                                            src={`${note.preview_url}#toolbar=0&navpanes=0&scrollbar=0`}
+                                            className="w-full h-full overflow-hidden"
+                                            title="Preview"
+                                            scrolling="no"
+                                        />
+                                    )
+                                ) : (
+                                    <FileText className="h-24 w-24 text-gray-400 dark:text-gray-600" />
+                                )}
                             </div>
 
-                            {purchased ? ( // Show Secure Reader Button
-                                <div className="space-y-4">
-                                    <div className="p-4 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 text-green-800 dark:text-green-300 rounded-lg text-center font-medium flex items-center justify-center">
-                                        <Lock className="w-5 h-5 mr-2" />
-                                        You have full access
-                                    </div>
-                                    <button
-                                        onClick={() => setShowReader(true)}
-                                        className="w-full flex justify-center items-center py-3 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-colors"
-                                    >
-                                        <BookOpen className="h-5 w-5 mr-2" />
-                                        Read Now (Secure Viewer)
-                                    </button>
+                            <div className="flex flex-col justify-between space-y-6">
+                                <div>
+                                    <h4 className="text-lg font-bold text-gray-900 dark:text-white mb-2">Description</h4>
+                                    <p className="text-gray-700 dark:text-gray-300 whitespace-pre-line">
+                                        {note.description || "No description available for this note."}
+                                    </p>
                                 </div>
-                            ) : (
-                                <div className="space-y-4">
 
-                                    {/* Subscription Option (Best Value) */}
-                                    <div className="border-2 border-indigo-500 rounded-xl p-4 bg-indigo-50 dark:bg-indigo-900/20 relative overflow-hidden cursor-pointer hover:bg-indigo-100 dark:hover:bg-indigo-900/40 transition-colors" onClick={() => navigate('/pricing')}>
-                                        <div className="absolute top-0 right-0 bg-indigo-500 text-white text-xs font-bold px-3 py-1 rounded-bl-lg">
-                                            BEST VALUE
-                                        </div>
-                                        <div className="flex justify-between items-center">
-                                            <div>
-                                                <h5 className="font-bold text-gray-900 dark:text-white">Unlock All Notes</h5>
-                                                <p className="text-sm text-indigo-700 dark:text-indigo-300">Get unlimited access to everything</p>
-                                            </div>
-                                            <div className="text-right">
-                                                <span className="block text-2xl font-bold text-indigo-900 dark:text-indigo-200">₹{subPrice}</span>
-                                                <span className="text-xs text-indigo-600 dark:text-indigo-400">/ year</span>
-                                            </div>
-                                        </div>
-                                        <div className="mt-3">
-                                            <button className="w-full py-2 bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-medium rounded-md shadow-sm transition-colors">
-                                                Upgrade to Pro
-                                            </button>
-                                        </div>
-                                    </div>
-
-                                    {/* OR Divider */}
-                                    <div className="relative">
-                                        <div className="absolute inset-0 flex items-center" aria-hidden="true">
-                                            <div className="w-full border-t border-gray-300 dark:border-gray-600"></div>
-                                        </div>
-                                        <div className="relative flex justify-center">
-                                            <span className="px-2 bg-white dark:bg-gray-800 text-sm text-gray-500 dark:text-gray-400">or buy individually</span>
-                                        </div>
-                                    </div>
-
-                                    {/* Single Purchase Option */}
-                                    <div className="border border-gray-200 dark:border-gray-700 rounded-xl p-4 hover:border-gray-300 dark:hover:border-gray-600 transition-colors bg-white dark:bg-gray-800">
-                                        <div className="flex justify-between items-center mb-3">
-                                            <div>
-                                                <h5 className="font-medium text-gray-900 dark:text-white">Single Note Access</h5>
-                                                <p className="text-sm text-gray-500 dark:text-gray-400">Lifetime access to this note only</p>
-                                            </div>
-                                            <div className="text-right">
-                                                <span className="block text-xl font-bold text-gray-900 dark:text-white">₹{note.price}</span>
-                                            </div>
+                                {purchased ? ( // Show Secure Reader Button
+                                    <div className="space-y-4">
+                                        <div className="p-4 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 text-green-800 dark:text-green-300 rounded-lg text-center font-medium flex items-center justify-center">
+                                            <Lock className="w-5 h-5 mr-2" />
+                                            You have full access
                                         </div>
                                         <button
-                                            onClick={handleBuy}
-                                            disabled={processing}
-                                            className="w-full py-2 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-600 text-sm font-medium rounded-md shadow-sm transition-colors"
+                                            onClick={() => setShowReader(true)}
+                                            className="w-full flex justify-center items-center py-3 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-colors"
                                         >
-                                            {processing ? 'Processing...' : 'Buy This Note Only'}
+                                            <BookOpen className="h-5 w-5 mr-2" />
+                                            Read Now (Secure Viewer)
                                         </button>
                                     </div>
+                                ) : (
+                                    <div className="space-y-4">
 
-                                    {/* Sidebar Ad (300x250) */}
-                                    <div className="mt-6 flex justify-center">
-                                        <SidebarAd />
+                                        {/* Subscription Option (Best Value) */}
+                                        <div className="border-2 border-indigo-500 rounded-xl p-4 bg-indigo-50 dark:bg-indigo-900/20 relative overflow-hidden cursor-pointer hover:bg-indigo-100 dark:hover:bg-indigo-900/40 transition-colors" onClick={() => navigate('/pricing')}>
+                                            <div className="absolute top-0 right-0 bg-indigo-500 text-white text-xs font-bold px-3 py-1 rounded-bl-lg">
+                                                BEST VALUE
+                                            </div>
+                                            <div className="flex justify-between items-center">
+                                                <div>
+                                                    <h5 className="font-bold text-gray-900 dark:text-white">Unlock All Notes</h5>
+                                                    <p className="text-sm text-indigo-700 dark:text-indigo-300">Get unlimited access to everything</p>
+                                                </div>
+                                                <div className="text-right">
+                                                    <span className="block text-2xl font-bold text-indigo-900 dark:text-indigo-200">₹{subPrice}</span>
+                                                    <span className="text-xs text-indigo-600 dark:text-indigo-400">/ year</span>
+                                                </div>
+                                            </div>
+                                            <div className="mt-3">
+                                                <button className="w-full py-2 bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-medium rounded-md shadow-sm transition-colors">
+                                                    Upgrade to Pro
+                                                </button>
+                                            </div>
+                                        </div>
+
+                                        {/* OR Divider */}
+                                        <div className="relative">
+                                            <div className="absolute inset-0 flex items-center" aria-hidden="true">
+                                                <div className="w-full border-t border-gray-300 dark:border-gray-600"></div>
+                                            </div>
+                                            <div className="relative flex justify-center">
+                                                <span className="px-2 bg-white dark:bg-gray-800 text-sm text-gray-500 dark:text-gray-400">or buy individually</span>
+                                            </div>
+                                        </div>
+
+                                        {/* Single Purchase Option */}
+                                        <div className="border border-gray-200 dark:border-gray-700 rounded-xl p-4 hover:border-gray-300 dark:hover:border-gray-600 transition-colors bg-white dark:bg-gray-800">
+                                            <div className="flex justify-between items-center mb-3">
+                                                <div>
+                                                    <h5 className="font-medium text-gray-900 dark:text-white">Single Note Access</h5>
+                                                    <p className="text-sm text-gray-500 dark:text-gray-400">Lifetime access to this note only</p>
+                                                </div>
+                                                <div className="text-right">
+                                                    <span className="block text-xl font-bold text-gray-900 dark:text-white">₹{note.price}</span>
+                                                </div>
+                                            </div>
+                                            <button
+                                                onClick={handleBuy}
+                                                disabled={processing}
+                                                className="w-full py-2 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-600 text-sm font-medium rounded-md shadow-sm transition-colors"
+                                            >
+                                                {processing ? 'Processing...' : 'Buy This Note Only'}
+                                            </button>
+                                        </div>
+
+                                        {/* Sidebar Ad (300x250) */}
+                                        <div className="mt-6 flex justify-center">
+                                            <SidebarAd />
+                                        </div>
+
                                     </div>
-
-                                </div>
-                            )}
+                                )}
+                            </div>
                         </div>
                     </div>
                 </div>
