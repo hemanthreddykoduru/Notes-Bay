@@ -17,6 +17,7 @@ import CancellationRefund from './pages/CancellationRefund';
 import AuthHandler from './components/AuthHandler';
 import GoogleAdSenseLoader from './components/GoogleAdSenseLoader';
 import ChatAssistant from './components/ChatAssistant';
+import AdBlockDetector from './components/AdBlockDetector';
 
 // Placeholders for now
 const NoteDetailsPlaceholder = () => <div>Details Page</div>;
@@ -31,6 +32,7 @@ function App() {
       <Router>
         <AuthHandler />
         <GoogleAdSenseLoader />
+        <AdBlockDetector />
         <ChatAssistant />
         <div className="min-h-screen bg-gray-50 dark:bg-gray-900 transition-colors duration-200 flex flex-col">
           <Navbar />

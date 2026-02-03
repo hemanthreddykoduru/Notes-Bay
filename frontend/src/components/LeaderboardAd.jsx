@@ -1,35 +1,56 @@
 import { useEffect, useRef } from 'react';
 
 export default function LeaderboardAd() {
-    const adRef = useRef(null);
+    const containerRef = useRef(null);
 
     useEffect(() => {
-        if (adRef.current && !adRef.current.querySelector('script')) {
-            const scriptContent = document.createElement('script');
-            scriptContent.type = 'text/javascript';
-            scriptContent.text = `
-                atOptions = {
-                    'key' : '841b7e7d333e3d24d3fdbae0c58425ef',
-                    'format' : 'iframe',
-                    'height' : 90,
-                    'width' : 728,
-                    'params' : {}
-                };
-            `;
+        const container = containerRef.current;
+        if (!container) return;
 
-            const scriptSrc = document.createElement('script');
-            scriptSrc.type = 'text/javascript';
-            scriptSrc.src = "https://www.highperformanceformat.com/841b7e7d333e3d24d3fdbae0c58425ef/invoke.js";
+        // Clear previous content
+        container.innerHTML = '';
 
-            adRef.current.appendChild(scriptContent);
-            adRef.current.appendChild(scriptSrc);
-        }
+        const iframe = document.createElement('iframe');
+        iframe.style.width = '728px';
+        iframe.style.height = '90px';
+        iframe.style.border = 'none';
+        iframe.style.overflow = 'hidden';
+        iframe.scrolling = 'no';
+
+        container.appendChild(iframe);
+
+        const adContent = `
+            <!DOCTYPE html>
+            <html>
+            <head>
+                <style>body { margin: 0; padding: 0; display: flex; justify-content: center; align-items: center; height: 100%; }</style>
+            </head>
+            <body>
+                <script type="text/javascript">
+                    atOptions = {
+                        'key' : '841b7e7d333e3d24d3fdbae0c58425ef',
+                        'format' : 'iframe',
+                        'height' : 90,
+                        'width' : 728,
+                        'params' : {}
+                    };
+                </script>
+                <script type="text/javascript" src="https://www.highperformanceformat.com/841b7e7d333e3d24d3fdbae0c58425ef/invoke.js"></script>
+            </body>
+            </html>
+        `;
+
+        const doc = iframe.contentWindow.document;
+        doc.open();
+        doc.write(adContent);
+        doc.close();
+
     }, []);
 
     return (
-        <div className="flex justify-center my-8">
-            <div ref={adRef} className="bg-gray-50 dark:bg-gray-800 rounded-lg overflow-hidden flex items-center justify-center border border-dashed border-gray-300 dark:border-gray-700 w-[728px] h-[90px]">
-                {/* Leaderboard Ad Container (728x90) */}
+        <div className="flex justify-center my-6">
+            <div ref={containerRef} className="bg-gray-50 dark:bg-gray-800 rounded-lg overflow-hidden flex items-center justify-center w-[728px] h-[90px]">
+                {/* Ad will be injected here into an iframe */}
             </div>
         </div>
     );
