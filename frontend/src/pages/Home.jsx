@@ -214,6 +214,10 @@ export default function Home() {
         setSort('latest');
     };
 
+    if (loading && notes.length === 0) {
+        return <HomeSkeleton />;
+    }
+
     return (
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
             <div className="mb-12">
@@ -235,12 +239,7 @@ export default function Home() {
                         }}
                         className={`mt-8 flex items-center justify-center ${!loading && !isSubscribed ? 'cursor-pointer' : 'cursor-default'} group`}
                     >
-                        {loading ? (
-                            <div className="inline-flex items-center gap-2 bg-gray-100 dark:bg-gray-800 text-gray-500 font-bold py-2 sm:py-3 px-6 sm:px-8 rounded-full shadow-lg">
-                                <span className="w-4 h-4 border-2 border-gray-400 border-t-transparent rounded-full animate-spin"></span>
-                                <span className="text-base sm:text-lg tracking-wide">Checking status...</span>
-                            </div>
-                        ) : isSubscribed ? (
+                        {isSubscribed ? (
                             <div className="inline-flex items-center gap-2 bg-gradient-to-r from-amber-400 via-yellow-500 to-amber-600 text-white font-bold py-2 sm:py-3 px-6 sm:px-8 rounded-full shadow-lg shadow-amber-500/30">
                                 <CheckCircle className="w-4 h-4 sm:w-5 sm:h-5 text-white" />
                                 <span className="text-base sm:text-lg tracking-wide">Premium Access Active</span>
@@ -344,7 +343,7 @@ export default function Home() {
             </h2>
 
             {loading ? (
-                <HomeSkeleton />
+                <HomeSkeleton onlyGrid={true} />
             ) : (
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
                     {notes.length > 0 ? (
