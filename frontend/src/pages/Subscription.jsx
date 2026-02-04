@@ -11,6 +11,8 @@ export default function Subscription() {
     const [canUseTrial, setCanUseTrial] = useState(true);
     const [price, setPrice] = useState(100);
     const [showSuccessModal, setShowSuccessModal] = useState(false);
+    const [subscriptionDetails, setSubscriptionDetails] = useState(null);
+    const [timeRemaining, setTimeRemaining] = useState(null);
     const navigate = useNavigate();
 
     useEffect(() => {
@@ -43,6 +45,7 @@ export default function Subscription() {
 
             if (subscriptions && subscriptions.length > 0) {
                 setHasSubscription(true);
+                setSubscriptionDetails(subscriptions[0]);
             }
         } catch (error) {
             console.error('Error checking subscription:', error);
@@ -95,6 +98,39 @@ export default function Subscription() {
             setTrialLoading(false);
         }
     };
+
+    // Countdown timer for trial subscriptions
+    useEffect(() => {
+        if (!subscriptionDetails || !subscriptionDetails.is_trial) {
+            setTimeRemaining(null);
+            return;
+        }
+
+        const calculateTimeRemaining = () => {
+            const endDate = new Date(subscriptionDetails.end_date);
+            const now = new Date();
+            const diff = endDate - now;
+
+            if (diff <= 0) {
+                setTimeRemaining({ expired: true });
+                return;
+            }
+
+            const hours = Math.floor(diff / (1000 * 60 * 60));
+            const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+            const seconds = Math.floor((diff % (1000 * 60)) / 1000);
+
+            setTimeRemaining({ hours, minutes, seconds, expired: false });
+        };
+
+        // Calculate immediately
+        calculateTimeRemaining();
+
+        // Update every second
+        const interval = setInterval(calculateTimeRemaining, 1000);
+
+        return () => clearInterval(interval);
+    }, [subscriptionDetails]);
 
     const handleSubscribe = async () => {
         if (hasSubscription) return;
@@ -180,13 +216,60 @@ export default function Subscription() {
                 {hasSubscription ? (
                     // Active Subscription Card
                     <div className="relative transform hover:scale-[1.01] transition-all duration-300 ease-out">
-                        <div className="absolute -inset-0.5 bg-gradient-to-r from-green-500 to-emerald-500 rounded-2xl blur opacity-75"></div>
+                        <div className={`absolute -inset-0.5 ${subscriptionDetails?.is_trial ? 'bg-gradient-to-r from-cyan-500 to-blue-500' : 'bg-gradient-to-r from-green-500 to-emerald-500'} rounded-2xl blur opacity-75`}></div>
                         <div className="relative bg-white dark:bg-gray-800 rounded-2xl shadow-xl p-12 text-center">
-                            <div className="w-20 h-20 mx-auto mb-6 rounded-full bg-green-100 dark:bg-green-900/30 flex items-center justify-center">
-                                <Check className="w-10 h-10 text-green-600 dark:text-green-400" />
+                            <div className={`w-20 h-20 mx-auto mb-6 rounded-full ${subscriptionDetails?.is_trial ? 'bg-cyan-100 dark:bg-cyan-900/30' : 'bg-green-100 dark:bg-green-900/30'} flex items-center justify-center`}>
+                                {subscriptionDetails?.is_trial ? (
+                                    <Zap className="w-10 h-10 text-cyan-600 dark:text-cyan-400" />
+                                ) : (
+                                    <Check className="w-10 h-10 text-green-600 dark:text-green-400" />
+                                )}
                             </div>
-                            <h3 className="text-3xl font-bold text-gray-900 dark:text-white mb-4">Active Subscription</h3>
-                            <p className="text-gray-600 dark:text-gray-300 mb-8">You have unlimited access to all premium features!</p>
+
+                            <h3 className="text-3xl font-bold text-gray-900 dark:text-white mb-4">
+                                {subscriptionDetails?.is_trial ? 'Free Trial Active' : 'Active Subscription'}
+                            </h3>
+
+                            {subscriptionDetails?.is_trial && timeRemaining && !timeRemaining.expired ? (
+                                <>
+                                    <p className="text-gray-600 dark:text-gray-300 mb-6">Trial expires in:</p>
+
+                                    {/* Countdown Timer */}
+                                    <div className="flex justify-center gap-4 mb-8">
+                                        <div className="flex flex-col items-center">
+                                            <div className="w-20 h-20 rounded-xl bg-gradient-to-br from-cyan-500 to-blue-500 flex items-center justify-center shadow-lg">
+                                                <span className="text-3xl font-bold text-white">{String(timeRemaining.hours).padStart(2, '0')}</span>
+                                            </div>
+                                            <span className="text-xs text-gray-500 dark:text-gray-400 mt-2 font-medium">Hours</span>
+                                        </div>
+                                        <div className="flex items-center">
+                                            <span className="text-3xl font-bold text-gray-400 dark:text-gray-500">:</span>
+                                        </div>
+                                        <div className="flex flex-col items-center">
+                                            <div className="w-20 h-20 rounded-xl bg-gradient-to-br from-cyan-500 to-blue-500 flex items-center justify-center shadow-lg">
+                                                <span className="text-3xl font-bold text-white">{String(timeRemaining.minutes).padStart(2, '0')}</span>
+                                            </div>
+                                            <span className="text-xs text-gray-500 dark:text-gray-400 mt-2 font-medium">Minutes</span>
+                                        </div>
+                                        <div className="flex items-center">
+                                            <span className="text-3xl font-bold text-gray-400 dark:text-gray-500">:</span>
+                                        </div>
+                                        <div className="flex flex-col items-center">
+                                            <div className="w-20 h-20 rounded-xl bg-gradient-to-br from-cyan-500 to-blue-500 flex items-center justify-center shadow-lg">
+                                                <span className="text-3xl font-bold text-white">{String(timeRemaining.seconds).padStart(2, '0')}</span>
+                                            </div>
+                                            <span className="text-xs text-gray-500 dark:text-gray-400 mt-2 font-medium">Seconds</span>
+                                        </div>
+                                    </div>
+
+                                    <p className="text-sm text-gray-500 dark:text-gray-400 mb-6">
+                                        Upgrade to Pro Pass for unlimited access!
+                                    </p>
+                                </>
+                            ) : (
+                                <p className="text-gray-600 dark:text-gray-300 mb-8">You have unlimited access to all premium features!</p>
+                            )}
+
                             <button
                                 onClick={() => navigate('/')}
                                 className="px-8 py-3 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-xl transition-colors"
