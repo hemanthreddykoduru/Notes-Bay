@@ -499,11 +499,11 @@ export default function Subscription() {
                 <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm animate-in fade-in duration-200">
                     <div className="relative bg-white dark:bg-gray-800 rounded-2xl shadow-2xl max-w-md w-full p-8 animate-in zoom-in duration-300">
                         {/* Decorative gradient border */}
-                        <div className="absolute -inset-0.5 bg-gradient-to-r from-cyan-500 via-blue-500 to-indigo-500 rounded-2xl blur opacity-30 animate-pulse"></div>
+                        <div className="absolute -inset-0.5 bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 rounded-2xl blur opacity-30 animate-pulse"></div>
 
                         <div className="relative">
                             {/* Success Icon */}
-                            <div className="w-20 h-20 mx-auto mb-6 rounded-full bg-gradient-to-r from-cyan-500 to-blue-500 flex items-center justify-center animate-in zoom-in duration-500">
+                            <div className="w-20 h-20 mx-auto mb-6 rounded-full bg-gradient-to-r from-indigo-500 to-purple-500 flex items-center justify-center animate-in zoom-in duration-500">
                                 <Sparkles className="w-10 h-10 text-white" />
                             </div>
 
@@ -514,7 +514,7 @@ export default function Subscription() {
 
                             {/* Message */}
                             <p className="text-center text-gray-600 dark:text-gray-300 mb-8 text-lg">
-                                Enjoy <span className="font-bold text-cyan-600 dark:text-cyan-400">2 hours</span> of premium access to all notes!
+                                Enjoy <span className="font-bold text-indigo-600 dark:text-indigo-400">2 hours</span> of premium access to all notes!
                             </p>
 
                             {/* Features List */}
@@ -526,7 +526,7 @@ export default function Subscription() {
                                         "Premium quality PDFs"
                                     ].map((feature, index) => (
                                         <li key={index} className="flex items-center text-sm text-gray-700 dark:text-gray-300">
-                                            <Check className="w-4 h-4 mr-2 text-cyan-500 flex-shrink-0" />
+                                            <Check className="w-4 h-4 mr-2 text-indigo-500 flex-shrink-0" />
                                             {feature}
                                         </li>
                                     ))}
@@ -539,7 +539,7 @@ export default function Subscription() {
                                     setShowSuccessModal(false);
                                     navigate('/');
                                 }}
-                                className="w-full py-4 px-6 rounded-xl bg-gradient-to-r from-cyan-500 to-blue-500 text-white font-bold text-lg hover:from-cyan-600 hover:to-blue-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-cyan-500 transition-all shadow-lg"
+                                className="w-full py-4 px-6 rounded-xl bg-gradient-to-r from-indigo-600 to-purple-600 text-white font-bold text-lg hover:from-indigo-700 hover:to-purple-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-all shadow-lg"
                             >
                                 Start Exploring Notes
                             </button>
