@@ -10,6 +10,7 @@ export default function Subscription() {
     const [hasSubscription, setHasSubscription] = useState(false);
     const [canUseTrial, setCanUseTrial] = useState(true);
     const [price, setPrice] = useState(100);
+    const [showSuccessModal, setShowSuccessModal] = useState(false);
     const navigate = useNavigate();
 
     useEffect(() => {
@@ -83,10 +84,9 @@ export default function Subscription() {
             }
 
             const { data } = await api.post('/payments/activate-free-trial');
-            alert(`🎉 ${data.message}! Enjoy 7 days of premium access.`);
+            setShowSuccessModal(true);
             setHasSubscription(true);
             setCanUseTrial(false);
-            navigate('/');
         } catch (error) {
             console.error('Error activating free trial:', error);
             const errorMessage = error.response?.data?.error || error.message || 'Failed to activate free trial';
@@ -208,7 +208,7 @@ export default function Subscription() {
                                             <h3 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">Free Trial</h3>
                                             <div className="flex justify-center items-baseline my-4">
                                                 <span className="text-5xl font-extrabold text-gray-900 dark:text-white">₹0</span>
-                                                <span className="text-xl text-gray-500 dark:text-gray-400 ml-2">/7 days</span>
+                                                <span className="text-xl text-gray-500 dark:text-gray-400 ml-2">/2 hours</span>
                                             </div>
                                             <p className="text-sm text-gray-600 dark:text-gray-400">
                                                 Try all premium features free
@@ -220,7 +220,7 @@ export default function Subscription() {
                                                 "Full access to all notes",
                                                 "No credit card required",
                                                 "Cancel anytime",
-                                                "7 days of premium features"
+                                                "2 hours of premium features"
                                             ].map((feature, index) => (
                                                 <li key={index} className="flex items-center text-gray-700 dark:text-gray-300">
                                                     <Check className="w-5 h-5 mr-3 text-cyan-500 flex-shrink-0" />
@@ -323,6 +323,60 @@ export default function Subscription() {
                     </div>
                 )}
             </div>
+
+            {/* Success Modal */}
+            {showSuccessModal && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm animate-in fade-in duration-200">
+                    <div className="relative bg-white dark:bg-gray-800 rounded-2xl shadow-2xl max-w-md w-full p-8 animate-in zoom-in duration-300">
+                        {/* Decorative gradient border */}
+                        <div className="absolute -inset-0.5 bg-gradient-to-r from-cyan-500 via-blue-500 to-indigo-500 rounded-2xl blur opacity-30 animate-pulse"></div>
+
+                        <div className="relative">
+                            {/* Success Icon */}
+                            <div className="w-20 h-20 mx-auto mb-6 rounded-full bg-gradient-to-r from-cyan-500 to-blue-500 flex items-center justify-center animate-in zoom-in duration-500">
+                                <Sparkles className="w-10 h-10 text-white" />
+                            </div>
+
+                            {/* Title */}
+                            <h3 className="text-3xl font-bold text-center text-gray-900 dark:text-white mb-3">
+                                🎉 Free Trial Activated!
+                            </h3>
+
+                            {/* Message */}
+                            <p className="text-center text-gray-600 dark:text-gray-300 mb-8 text-lg">
+                                Enjoy <span className="font-bold text-cyan-600 dark:text-cyan-400">2 hours</span> of premium access to all notes!
+                            </p>
+
+                            {/* Features List */}
+                            <div className="bg-gray-50 dark:bg-gray-700/50 rounded-xl p-4 mb-6">
+                                <ul className="space-y-2">
+                                    {[
+                                        "Unlimited note access",
+                                        "Ad-free experience",
+                                        "Premium quality PDFs"
+                                    ].map((feature, index) => (
+                                        <li key={index} className="flex items-center text-sm text-gray-700 dark:text-gray-300">
+                                            <Check className="w-4 h-4 mr-2 text-cyan-500 flex-shrink-0" />
+                                            {feature}
+                                        </li>
+                                    ))}
+                                </ul>
+                            </div>
+
+                            {/* Action Button */}
+                            <button
+                                onClick={() => {
+                                    setShowSuccessModal(false);
+                                    navigate('/');
+                                }}
+                                className="w-full py-4 px-6 rounded-xl bg-gradient-to-r from-cyan-500 to-blue-500 text-white font-bold text-lg hover:from-cyan-600 hover:to-blue-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-cyan-500 transition-all shadow-lg"
+                            >
+                                Start Exploring Notes
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
         </div>
     );
 }

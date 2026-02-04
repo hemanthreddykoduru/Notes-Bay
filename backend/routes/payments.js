@@ -346,7 +346,7 @@ router.post('/activate-free-trial', requireAuth, async (req, res) => {
     // 3. Create free trial subscription
     const startDate = new Date();
     const endDate = new Date();
-    endDate.setDate(endDate.getDate() + 7); // 7 days trial
+    endDate.setHours(endDate.getHours() + 2); // 2 hours trial
 
     const { data: subscription, error } = await supabase
       .from('subscriptions')
