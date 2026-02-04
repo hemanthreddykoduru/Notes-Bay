@@ -5,18 +5,12 @@ export default function AdBlockDetector() {
     const [adBlockDetected, setAdBlockDetected] = useState(false);
 
     useEffect(() => {
-        // TEMPORARILY DISABLED: Ad blocker detection causing false positives
-        // The ad network (highperformanceformat.com) is slow/unreliable and times out
-        // This triggers the detection even without an actual ad blocker
+        // Skip detection on localhost/development
+        if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
+            console.log('AdBlock detection skipped (localhost)');
+            return;
+        }
 
-        // TODO: Re-enable with better detection logic:
-        // - Increase timeout to 10+ seconds
-        // - Require multiple checks to fail (not just one)
-        // - Add whitelist for development/localhost
-
-        return; // Early return to disable detection
-
-        /* ORIGINAL DETECTION CODE (DISABLED)
         let isMounted = true;
         const baitClass = 'adsbygoogle ad-banner';
         const baitStyle = 'width: 1px !important; height: 1px !important; position: absolute !important; left: -10000px !important; top: -1000px !important;';
@@ -28,7 +22,8 @@ export default function AdBlockDetector() {
         document.body.appendChild(bait);
 
         const detect = async () => {
-            let detected = false;
+            let failedChecks = 0; // Count how many checks fail
+            const REQUIRED_FAILURES = 2; // Require at least 2 checks to fail
 
             // Check A: Bait Element Properties
             if (
@@ -40,58 +35,61 @@ export default function AdBlockDetector() {
                 window.getComputedStyle(bait).display === 'none' ||
                 window.getComputedStyle(bait).visibility === 'hidden'
             ) {
-                detected = true;
-                console.log('AdBlock detected via Bait Element');
+                failedChecks++;
+                console.log('AdBlock Check 1 Failed: Bait Element');
             }
 
-            // Check B: Script Injection with Timeout
-            if (!detected) {
-                try {
-                    // Check 1: Google Ads (with 3s timeout)
-                    await Promise.race([
-                        new Promise((resolve, reject) => {
-                            const script = document.createElement('script');
-                            script.src = 'https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js';
-                            script.async = true; // Make async to not block page load
-                            script.onerror = () => reject(new Error('Blocked Google'));
-                            script.onload = () => { script.remove(); resolve(); };
-                            document.head.appendChild(script);
-                        }),
-                        new Promise((_, reject) => setTimeout(() => reject(new Error('Timeout Google')), 3000))
-                    ]);
-
-                    // Check 2: HighPerformanceFormat (with 3s timeout)
-                    await Promise.race([
-                        new Promise((resolve, reject) => {
-                            const script = document.createElement('script');
-                            script.src = 'https://www.highperformanceformat.com/841b7e7d333e3d24d3fdbae0c58425ef/invoke.js';
-                            script.async = true; // Make async to not block page load
-                            script.onerror = () => reject(new Error('Blocked AdNetwork'));
-                            script.onload = () => { script.remove(); resolve(); };
-                            document.head.appendChild(script);
-                        }),
-                        new Promise((_, reject) => setTimeout(() => reject(new Error('Timeout AdNetwork')), 3000))
-                    ]);
-                } catch (e) {
-                    detected = true;
-                    console.log('AdBlock detected via Script Error:', e.message);
-                }
+            // Check B: Script Injection with 10s Timeout (increased from 3s)
+            try {
+                // Check 1: Google Ads (with 10s timeout)
+                await Promise.race([
+                    new Promise((resolve, reject) => {
+                        const script = document.createElement('script');
+                        script.src = 'https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js';
+                        script.async = true;
+                        script.onerror = () => reject(new Error('Blocked Google'));
+                        script.onload = () => { script.remove(); resolve(); };
+                        document.head.appendChild(script);
+                    }),
+                    new Promise((_, reject) => setTimeout(() => reject(new Error('Timeout Google')), 10000))
+                ]);
+            } catch (e) {
+                failedChecks++;
+                console.log('AdBlock Check 2 Failed: Google Ads -', e.message);
             }
 
-            // Check C: Generic Class
-            if (!detected) {
-                const testAd = document.createElement('div');
-                testAd.innerHTML = '&nbsp;';
-                testAd.className = 'adsbox';
-                document.body.appendChild(testAd);
-                if (testAd.offsetHeight === 0) {
-                    detected = true;
-                    console.log('AdBlock detected via Generic Class Block');
-                }
-                testAd.remove();
+            // Check C: HighPerformanceFormat (with 10s timeout)
+            try {
+                await Promise.race([
+                    new Promise((resolve, reject) => {
+                        const script = document.createElement('script');
+                        script.src = 'https://www.highperformanceformat.com/841b7e7d333e3d24d3fdbae0c58425ef/invoke.js';
+                        script.async = true;
+                        script.onerror = () => reject(new Error('Blocked AdNetwork'));
+                        script.onload = () => { script.remove(); resolve(); };
+                        document.head.appendChild(script);
+                    }),
+                    new Promise((_, reject) => setTimeout(() => reject(new Error('Timeout AdNetwork')), 10000))
+                ]);
+            } catch (e) {
+                failedChecks++;
+                console.log('AdBlock Check 3 Failed: HighPerformanceFormat -', e.message);
             }
 
-            if (isMounted && detected) {
+            // Check D: Generic Class
+            const testAd = document.createElement('div');
+            testAd.innerHTML = '&nbsp;';
+            testAd.className = 'adsbox';
+            document.body.appendChild(testAd);
+            if (testAd.offsetHeight === 0) {
+                failedChecks++;
+                console.log('AdBlock Check 4 Failed: Generic Class Block');
+            }
+            testAd.remove();
+
+            // Only trigger if at least 2 checks failed
+            console.log(`AdBlock Detection: ${failedChecks} checks failed (need ${REQUIRED_FAILURES})`);
+            if (isMounted && failedChecks >= REQUIRED_FAILURES) {
                 setAdBlockDetected(true);
             }
 
@@ -101,7 +99,7 @@ export default function AdBlockDetector() {
             }
         };
 
-        const timeoutId = setTimeout(detect, 0);
+        const timeoutId = setTimeout(detect, 1000); // Delay detection by 1s to let page load
 
         return () => {
             isMounted = false;
@@ -110,7 +108,6 @@ export default function AdBlockDetector() {
                 document.body.removeChild(bait);
             }
         };
-        */
     }, []);
 
     if (!adBlockDetected) return null;
