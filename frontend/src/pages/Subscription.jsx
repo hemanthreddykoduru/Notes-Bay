@@ -6,12 +6,15 @@ import { Sparkles, Check, Shield, Zap, BookOpen, Star } from 'lucide-react';
 
 export default function Subscription() {
     const [loading, setLoading] = useState(false);
+    const [trialLoading, setTrialLoading] = useState(false);
     const [hasSubscription, setHasSubscription] = useState(false);
+    const [canUseTrial, setCanUseTrial] = useState(true);
     const [price, setPrice] = useState(100);
     const navigate = useNavigate();
 
     useEffect(() => {
         checkSubscriptionStatus();
+        checkTrialEligibility();
         fetchPrice();
     }, []);
 
@@ -42,6 +45,54 @@ export default function Subscription() {
             }
         } catch (error) {
             console.error('Error checking subscription:', error);
+        }
+    };
+
+    const checkTrialEligibility = async () => {
+        try {
+            const { data: { session } } = await supabase.auth.getSession();
+            if (!session) {
+                setCanUseTrial(true); // Allow trial for non-logged-in users (will redirect to login)
+                return;
+            }
+
+            // Check if user has already used a trial
+            const { data: previousTrial } = await supabase
+                .from('subscriptions')
+                .select('*')
+                .eq('user_id', session.user.id)
+                .eq('is_trial', true)
+                .limit(1);
+
+            if (previousTrial && previousTrial.length > 0) {
+                setCanUseTrial(false);
+            }
+        } catch (error) {
+            console.error('Error checking trial eligibility:', error);
+        }
+    };
+
+    const handleFreeTrial = async () => {
+        if (hasSubscription || !canUseTrial) return;
+        setTrialLoading(true);
+        try {
+            const { data: { user } } = await supabase.auth.getUser();
+            if (!user) {
+                navigate('/login');
+                return;
+            }
+
+            const { data } = await api.post('/payments/activate-free-trial');
+            alert(`🎉 ${data.message}! Enjoy 7 days of premium access.`);
+            setHasSubscription(true);
+            setCanUseTrial(false);
+            navigate('/');
+        } catch (error) {
+            console.error('Error activating free trial:', error);
+            const errorMessage = error.response?.data?.error || error.message || 'Failed to activate free trial';
+            alert(`Error: ${errorMessage}`);
+        } finally {
+            setTrialLoading(false);
         }
     };
 
@@ -116,48 +167,140 @@ export default function Subscription() {
                         Premium Access
                     </span>
                     <h2 className="text-4xl md:text-5xl font-extrabold text-gray-900 dark:text-white tracking-tight mb-4">
-                        {hasSubscription ? 'You are a Pro Member!' : 'Invest in Your Knowledge'}
+                        {hasSubscription ? 'You are a Pro Member!' : 'Choose Your Plan'}
                     </h2>
                     <p className="mt-4 text-xl text-gray-600 dark:text-gray-300 max-w-2xl mx-auto">
                         {hasSubscription
                             ? 'You have unlimited access to every note. Keep learning and growing!'
-                            : `Get unlimited access to high-quality study materials, exam notes, and more for less than ₹${price}.`
+                            : 'Start with a free trial or go premium for unlimited access.'
                         }
                     </p>
                 </div>
 
-                <div className="relative transform hover:scale-[1.01] transition-all duration-300 ease-out">
-                    {/* Gradient Border Glow */}
-                    <div className="absolute -inset-0.5 bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 rounded-2xl blur opacity-75 animate-pulse"></div>
+                {hasSubscription ? (
+                    // Active Subscription Card
+                    <div className="relative transform hover:scale-[1.01] transition-all duration-300 ease-out">
+                        <div className="absolute -inset-0.5 bg-gradient-to-r from-green-500 to-emerald-500 rounded-2xl blur opacity-75"></div>
+                        <div className="relative bg-white dark:bg-gray-800 rounded-2xl shadow-xl p-12 text-center">
+                            <div className="w-20 h-20 mx-auto mb-6 rounded-full bg-green-100 dark:bg-green-900/30 flex items-center justify-center">
+                                <Check className="w-10 h-10 text-green-600 dark:text-green-400" />
+                            </div>
+                            <h3 className="text-3xl font-bold text-gray-900 dark:text-white mb-4">Active Subscription</h3>
+                            <p className="text-gray-600 dark:text-gray-300 mb-8">You have unlimited access to all premium features!</p>
+                            <button
+                                onClick={() => navigate('/')}
+                                className="px-8 py-3 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-xl transition-colors"
+                            >
+                                Browse Notes
+                            </button>
+                        </div>
+                    </div>
+                ) : (
+                    // Two Pricing Cards
+                    <div className="grid md:grid-cols-2 gap-8 max-w-5xl mx-auto">
+                        {/* Free Trial Card */}
+                        {canUseTrial && (
+                            <div className="relative group">
+                                <div className="absolute -inset-0.5 bg-gradient-to-r from-cyan-500 to-blue-500 rounded-2xl blur opacity-60 group-hover:opacity-100 transition duration-300"></div>
+                                <div className="relative bg-white dark:bg-gray-800 rounded-2xl shadow-xl overflow-hidden h-full flex flex-col">
+                                    <div className="p-8 flex-grow">
+                                        <div className="text-center mb-6">
+                                            <h3 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">Free Trial</h3>
+                                            <div className="flex justify-center items-baseline my-4">
+                                                <span className="text-5xl font-extrabold text-gray-900 dark:text-white">₹0</span>
+                                                <span className="text-xl text-gray-500 dark:text-gray-400 ml-2">/7 days</span>
+                                            </div>
+                                            <p className="text-sm text-gray-600 dark:text-gray-400">
+                                                Try all premium features free
+                                            </p>
+                                        </div>
 
-                    <div className="relative bg-white dark:bg-gray-800 rounded-2xl shadow-xl overflow-hidden flex flex-col md:flex-row">
-                        {/* Price Section */}
-                        <div className="md:w-5/12 bg-gray-900 text-white p-8 md:p-12 flex flex-col justify-center items-center relative overflow-hidden">
-                            <div className="absolute inset-0 bg-gradient-to-br from-indigo-600 to-purple-700 opacity-90"></div>
-                            <div className="relative z-10 text-center">
-                                <h3 className="text-2xl font-semibold mb-2 text-indigo-100">Pro Pass</h3>
-                                <div className="flex justify-center items-baseline my-6">
-                                    <span className="text-6xl font-extrabold tracking-tight">₹{price}</span>
-                                    <span className="text-xl text-indigo-200 ml-2">/year</span>
-                                </div>
-                                <p className="text-indigo-100 mb-8 text-sm opacity-90">
-                                    Billed annually. Cancel anytime.
-                                </p>
-
-                                {hasSubscription ? (
-                                    <div className="w-full py-3 px-6 rounded-lg bg-green-500 text-white font-bold flex items-center justify-center shadow-lg">
-                                        <Check className="w-5 h-5 mr-2" />
-                                        Active
+                                        <ul className="space-y-4 mb-8">
+                                            {[
+                                                "Full access to all notes",
+                                                "No credit card required",
+                                                "Cancel anytime",
+                                                "7 days of premium features"
+                                            ].map((feature, index) => (
+                                                <li key={index} className="flex items-center text-gray-700 dark:text-gray-300">
+                                                    <Check className="w-5 h-5 mr-3 text-cyan-500 flex-shrink-0" />
+                                                    <span className="text-sm">{feature}</span>
+                                                </li>
+                                            ))}
+                                        </ul>
                                     </div>
-                                ) : (
+
+                                    <div className="p-8 pt-0">
+                                        <button
+                                            onClick={handleFreeTrial}
+                                            disabled={trialLoading}
+                                            className="w-full py-4 px-6 rounded-xl bg-gradient-to-r from-cyan-500 to-blue-500 text-white font-bold text-lg hover:from-cyan-600 hover:to-blue-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-cyan-500 transition-all shadow-lg flex items-center justify-center"
+                                        >
+                                            {trialLoading ? (
+                                                <span className="flex items-center">
+                                                    <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                                                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                                    </svg>
+                                                    Activating...
+                                                </span>
+                                            ) : (
+                                                <>
+                                                    <Zap className="w-5 h-5 mr-2" />
+                                                    Start Free Trial
+                                                </>
+                                            )}
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        )}
+
+                        {/* Pro Pass Card */}
+                        <div className={`relative group ${!canUseTrial ? 'md:col-span-2 max-w-md mx-auto' : ''}`}>
+                            <div className="absolute -inset-0.5 bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 rounded-2xl blur opacity-75 group-hover:opacity-100 transition duration-300 animate-pulse"></div>
+                            <div className="relative bg-white dark:bg-gray-800 rounded-2xl shadow-xl overflow-hidden h-full flex flex-col">
+                                {/* Popular Badge */}
+                                <div className="absolute top-4 right-4 bg-gradient-to-r from-indigo-500 to-purple-500 text-white text-xs font-bold px-3 py-1 rounded-full">
+                                    POPULAR
+                                </div>
+
+                                <div className="p-8 flex-grow">
+                                    <div className="text-center mb-6">
+                                        <h3 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">Pro Pass</h3>
+                                        <div className="flex justify-center items-baseline my-4">
+                                            <span className="text-5xl font-extrabold text-gray-900 dark:text-white">₹{price}</span>
+                                            <span className="text-xl text-gray-500 dark:text-gray-400 ml-2">/year</span>
+                                        </div>
+                                        <p className="text-sm text-gray-600 dark:text-gray-400">
+                                            Billed annually. Best value!
+                                        </p>
+                                    </div>
+
+                                    <ul className="space-y-4 mb-8">
+                                        {[
+                                            { icon: BookOpen, text: "Access to entire library" },
+                                            { icon: Zap, text: "Priority access to new uploads" },
+                                            { icon: Star, text: "Ad-free experience" },
+                                            { icon: Shield, text: "Premium quality PDFs" },
+                                        ].map((feature, index) => (
+                                            <li key={index} className="flex items-center text-gray-700 dark:text-gray-300">
+                                                <feature.icon className="w-5 h-5 mr-3 text-indigo-500 flex-shrink-0" />
+                                                <span className="text-sm font-medium">{feature.text}</span>
+                                            </li>
+                                        ))}
+                                    </ul>
+                                </div>
+
+                                <div className="p-8 pt-0">
                                     <button
                                         onClick={handleSubscribe}
                                         disabled={loading}
-                                        className="w-full py-4 px-8 rounded-xl bg-white text-indigo-600 font-bold text-lg hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 focus:ring-offset-gray-900 transition-all shadow-lg flex items-center justify-center"
+                                        className="w-full py-4 px-6 rounded-xl bg-gradient-to-r from-indigo-600 to-purple-600 text-white font-bold text-lg hover:from-indigo-700 hover:to-purple-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-all shadow-lg flex items-center justify-center"
                                     >
                                         {loading ? (
                                             <span className="flex items-center">
-                                                <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-indigo-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                                <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                                                     <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
                                                     <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                                                 </svg>
@@ -170,44 +313,15 @@ export default function Subscription() {
                                             </>
                                         )}
                                     </button>
-                                )}
-                                <p className="mt-4 text-xs text-indigo-200 flex items-center justify-center">
-                                    <Shield className="w-3 h-3 mr-1" />
-                                    Secure payment via Razorpay
-                                </p>
+                                    <p className="mt-4 text-xs text-gray-500 dark:text-gray-400 text-center flex items-center justify-center">
+                                        <Shield className="w-3 h-3 mr-1" />
+                                        Secure payment via Razorpay
+                                    </p>
+                                </div>
                             </div>
                         </div>
-
-                        {/* Features Section */}
-                        <div className="md:w-7/12 p-8 md:p-12 bg-white dark:bg-gray-800">
-                            <h4 className="text-xl font-bold text-gray-900 dark:text-white mb-6">What's included in Pro:</h4>
-                            <ul className="space-y-6">
-                                {[
-                                    { icon: BookOpen, text: "Access to entire library of notes", sub: "Unlock every subject and topic instantly." },
-                                    { icon: Zap, text: "Priority access to new uploads", sub: "Be the first to see new study materials." },
-                                    { icon: Star, text: "Ad-free experience", sub: "Focus on your studies without distractions." },
-                                    { icon: Shield, text: "Premium quality PDFs", sub: "High-resolution downloads for clarity." },
-                                ].map((feature, index) => (
-                                    <li key={index} className="flex items-start">
-                                        <div className="flex-shrink-0">
-                                            <div className="flex items-center justify-center h-10 w-10 rounded-lg bg-indigo-50 dark:bg-gray-700 text-indigo-600 dark:text-indigo-400">
-                                                <feature.icon className="h-6 w-6" aria-hidden="true" />
-                                            </div>
-                                        </div>
-                                        <div className="ml-4">
-                                            <p className="text-base font-semibold text-gray-900 dark:text-white">
-                                                {feature.text}
-                                            </p>
-                                            <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
-                                                {feature.sub}
-                                            </p>
-                                        </div>
-                                    </li>
-                                ))}
-                            </ul>
-                        </div>
                     </div>
-                </div>
+                )}
             </div>
         </div>
     );

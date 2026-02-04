@@ -309,4 +309,79 @@ router.get('/subscription-status', requireAuth, async (req, res) => {
   }
 });
 
+// POST /api/payments/activate-free-trial
+router.post('/activate-free-trial', requireAuth, async (req, res) => {
+  try {
+    const userId = req.user.id;
+
+    // 1. Check if user already has an active subscription
+    const { data: activeSubscription } = await supabase
+      .from('subscriptions')
+      .select('*')
+      .eq('user_id', userId)
+      .eq('status', 'active')
+      .gt('end_date', new Date().toISOString())
+      .limit(1);
+
+    if (activeSubscription && activeSubscription.length > 0) {
+      return res.status(400).json({ 
+        error: 'You already have an active subscription' 
+      });
+    }
+
+    // 2. Check if user has already used a free trial
+    const { data: previousTrial } = await supabase
+      .from('subscriptions')
+      .select('*')
+      .eq('user_id', userId)
+      .eq('is_trial', true)
+      .limit(1);
+
+    if (previousTrial && previousTrial.length > 0) {
+      return res.status(400).json({ 
+        error: 'You have already used your free trial' 
+      });
+    }
+
+    // 3. Create free trial subscription
+    const startDate = new Date();
+    const endDate = new Date();
+    endDate.setDate(endDate.getDate() + 7); // 7 days trial
+
+    const { data: subscription, error } = await supabase
+      .from('subscriptions')
+      .insert([{
+        user_id: userId,
+        start_date: startDate.toISOString(),
+        end_date: endDate.toISOString(),
+        payment_id: 'free_trial',
+        order_id: `trial_${userId}_${Date.now()}`,
+        amount: 0,
+        status: 'active',
+        is_trial: true
+      }])
+      .select()
+      .single();
+
+    if (error) {
+      console.error('Error creating free trial:', error);
+      return res.status(500).json({ error: 'Failed to activate free trial' });
+    }
+
+    res.json({ 
+      success: true, 
+      message: 'Free trial activated successfully',
+      subscription: {
+        start_date: subscription.start_date,
+        end_date: subscription.end_date,
+        is_trial: true
+      }
+    });
+
+  } catch (error) {
+    console.error('Error activating free trial:', error);
+    res.status(500).json({ error: 'Error activating free trial' });
+  }
+});
+
 module.exports = router;
