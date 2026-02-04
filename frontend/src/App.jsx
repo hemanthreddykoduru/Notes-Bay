@@ -9,6 +9,15 @@ import { ThemeProvider } from './context/ThemeContext';
 import Footer from './components/Footer';
 import ProtectedRoute from './components/ProtectedRoute';
 
+// Skeletons
+import HomeSkeleton from './components/skeletons/HomeSkeleton';
+import AuthSkeleton from './components/skeletons/AuthSkeleton';
+import SubscriptionSkeleton from './components/skeletons/SubscriptionSkeleton';
+import MyAccountSkeleton from './components/skeletons/MyAccountSkeleton';
+import MyPurchasesSkeleton from './components/skeletons/MyPurchasesSkeleton';
+import NoteDetailSkeleton from './components/NoteDetailSkeleton';
+import GenericPageSkeleton from './components/skeletons/GenericPageSkeleton';
+
 // Lazy load heavy components
 const ChatAssistant = lazy(() => import('./components/ChatAssistant'));
 
@@ -27,16 +36,6 @@ const TermsOfService = lazy(() => import('./pages/TermsOfService'));
 const PrivacyPolicy = lazy(() => import('./pages/PrivacyPolicy'));
 const CancellationRefund = lazy(() => import('./pages/CancellationRefund'));
 
-// Loading fallback component
-const PageLoader = () => (
-  <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-gray-900">
-    <div className="text-center">
-      <div className="inline-block animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-indigo-500 mb-4"></div>
-      <p className="text-gray-600 dark:text-gray-400">Loading...</p>
-    </div>
-  </div>
-);
-
 function App() {
   return (
     <ThemeProvider>
@@ -51,46 +50,98 @@ function App() {
           <div className="min-h-screen bg-gray-50 dark:bg-gray-900 transition-colors duration-200 flex flex-col">
             <Navbar />
             <div className="flex-grow">
-              <Suspense fallback={<PageLoader />}>
-                <Routes>
-                  <Route path="/" element={<Home />} />
-                  <Route path="/login" element={<Login />} />
-                  <Route path="/notes/:id" element={<NoteDetails />} />
-                  <Route
-                    path="/my-purchases"
-                    element={
+              <Routes>
+                {/* Home */}
+                <Route path="/" element={
+                  <Suspense fallback={<HomeSkeleton />}>
+                    <Home />
+                  </Suspense>
+                } />
+
+                {/* Auth */}
+                <Route path="/login" element={
+                  <Suspense fallback={<AuthSkeleton />}>
+                    <Login />
+                  </Suspense>
+                } />
+                <Route path="/update-password" element={
+                  <Suspense fallback={<AuthSkeleton />}>
+                    <UpdatePassword />
+                  </Suspense>
+                } />
+
+                {/* Notes */}
+                <Route path="/notes/:id" element={
+                  <Suspense fallback={<NoteDetailSkeleton />}>
+                    <NoteDetails />
+                  </Suspense>
+                } />
+
+                {/* Specific Functional Pages */}
+                <Route path="/pricing" element={
+                  <Suspense fallback={<SubscriptionSkeleton />}>
+                    <Subscription />
+                  </Suspense>
+                } />
+
+                {/* Account & Protected Routes */}
+                <Route
+                  path="/my-purchases"
+                  element={
+                    <Suspense fallback={<MyPurchasesSkeleton />}>
                       <ProtectedRoute>
                         <MyPurchases />
                       </ProtectedRoute>
-                    }
-                  />
-                  <Route path="/admin" element={
+                    </Suspense>
+                  }
+                />
+                <Route path="/admin" element={
+                  <Suspense fallback={<GenericPageSkeleton />}>
                     <ProtectedRoute>
                       <AdminDashboard />
                     </ProtectedRoute>
-                  } />
-                  <Route path="/wishlist" element={
+                  </Suspense>
+                } />
+                <Route path="/wishlist" element={
+                  <Suspense fallback={<GenericPageSkeleton />}>
                     <ProtectedRoute>
                       <Wishlist />
                     </ProtectedRoute>
-                  } />
-                  <Route path="/update-password" element={<UpdatePassword />} />
-                  <Route path="/pricing" element={<Subscription />} />
-                  <Route
-                    path="/account"
-                    element={
+                  </Suspense>
+                } />
+                <Route
+                  path="/account"
+                  element={
+                    <Suspense fallback={<MyAccountSkeleton />}>
                       <ProtectedRoute>
                         <MyAccount />
                       </ProtectedRoute>
-                    }
-                  />
-                  {/* Legal Pages */}
-                  <Route path="/support" element={<Support />} />
-                  <Route path="/terms-of-service" element={<TermsOfService />} />
-                  <Route path="/privacy-policy" element={<PrivacyPolicy />} />
-                  <Route path="/cancellation-refund" element={<CancellationRefund />} />
-                </Routes>
-              </Suspense>
+                    </Suspense>
+                  }
+                />
+
+                {/* Legal & Text Pages */}
+                <Route path="/support" element={
+                  <Suspense fallback={<GenericPageSkeleton />}>
+                    <Support />
+                  </Suspense>
+                } />
+                <Route path="/terms-of-service" element={
+                  <Suspense fallback={<GenericPageSkeleton />}>
+                    <TermsOfService />
+                  </Suspense>
+                } />
+                <Route path="/privacy-policy" element={
+                  <Suspense fallback={<GenericPageSkeleton />}>
+                    <PrivacyPolicy />
+                  </Suspense>
+                } />
+                <Route path="/cancellation-refund" element={
+                  <Suspense fallback={<GenericPageSkeleton />}>
+                    <CancellationRefund />
+                  </Suspense>
+                } />
+              </Routes>
             </div>
             <Footer />
           </div>

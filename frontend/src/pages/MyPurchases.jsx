@@ -3,6 +3,7 @@ import api from '../lib/api';
 import { supabase } from '../lib/supabase';
 import { Link } from 'react-router-dom';
 import { Download, FileText } from 'lucide-react';
+import MyPurchasesSkeleton from '../components/skeletons/MyPurchasesSkeleton';
 
 export default function MyPurchases() {
     const [purchases, setPurchases] = useState([]);
@@ -46,7 +47,7 @@ export default function MyPurchases() {
         }
     };
 
-    if (loading) return <div className="max-w-7xl mx-auto px-4 py-8">Loading...</div>;
+    if (loading) return <MyPurchasesSkeleton />;
 
     return (
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">

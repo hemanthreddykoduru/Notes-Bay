@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '../lib/supabase';
+import GenericPageSkeleton from './skeletons/GenericPageSkeleton';
 
 export default function ProtectedRoute({ children }) {
     const navigate = useNavigate();
@@ -15,7 +16,7 @@ export default function ProtectedRoute({ children }) {
         });
     }, [navigate]);
 
-    if (loading) return <div className="p-4 text-center">Loading...</div>;
+    if (loading) return <GenericPageSkeleton />;
 
     return children;
 }
