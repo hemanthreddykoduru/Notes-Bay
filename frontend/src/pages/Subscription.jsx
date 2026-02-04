@@ -145,7 +145,8 @@ export default function Subscription() {
     }, [subscriptionDetails]);
 
     const handleSubscribe = async () => {
-        if (hasSubscription) return;
+        // Allow subscription if user has no subscription OR if they are currently on a trial
+        if (hasSubscription && !subscriptionDetails?.is_trial) return;
         setLoading(true);
         try {
             const { data: { user } } = await supabase.auth.getUser();
