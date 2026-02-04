@@ -42,6 +42,7 @@ export default function NoteCard({ note, isWishlisted, isSubscribed, subPrice = 
             <img
                 src={note.preview_url || "https://images.unsplash.com/photo-1544716278-ca5e3f4abd8c?auto=format&fit=crop&q=80&w=1000"} // Better placeholder
                 alt={note.title}
+                loading="lazy"
                 className="w-full h-48 object-cover"
             />
             <div className="p-4">
