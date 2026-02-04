@@ -1,9 +1,9 @@
-import { useEffect, useState, useCallback } from 'react';
+import { useEffect, useState, useCallback, lazy, Suspense } from 'react';
 import { useNavigate } from 'react-router-dom';
 import api from '../lib/api';
 import { supabase } from '../lib/supabase';
 import NoteCard from '../components/NoteCard';
-import Hero3D from '../components/Hero3D';
+const Hero3D = lazy(() => import('../components/Hero3D'));
 import NativeAd from '../components/NativeAd';
 import LeaderboardAd from '../components/LeaderboardAd';
 import { Search, Filter, X, Sparkles, CheckCircle } from 'lucide-react';
@@ -25,6 +25,12 @@ export default function Home() {
 
     const [isSubscribed, setIsSubscribed] = useState(false);
     const [subPrice, setSubPrice] = useState(100);
+
+    // Pagination State
+    const [currentPage, setCurrentPage] = useState(1);
+    const [totalPages, setTotalPages] = useState(1);
+    const [totalNotes, setTotalNotes] = useState(0);
+    const NOTES_PER_PAGE = 12;
 
     // Real-time Subscriptions
     useEffect(() => {
@@ -61,11 +67,16 @@ export default function Home() {
 
     useEffect(() => {
         const timeoutId = setTimeout(() => {
+            setCurrentPage(1); // Reset to page 1 when filters change
             fetchData();
         }, 500);
 
         return () => clearTimeout(timeoutId);
     }, [search, minPrice, maxPrice, sort]);
+
+    useEffect(() => {
+        fetchData();
+    }, [currentPage]);
 
     const fetchData = async () => {
         setLoading(true);
@@ -76,6 +87,10 @@ export default function Home() {
         if (sort) params.append('sort', sort);
 
         try {
+            // Add pagination params
+            params.append('page', currentPage);
+            params.append('limit', NOTES_PER_PAGE);
+
             const notesReq = api.get(`/notes?${params.toString()}`);
             // Catch wishlist errors silently (e.g. 401 if not logged in)
             const wishlistReq = api.get('/wishlist').catch(() => ({ data: [] }));
@@ -84,14 +99,58 @@ export default function Home() {
 
             const [notesRes, wishlistRes, subRes] = await Promise.all([notesReq, wishlistReq, subReq]);
 
-            setNotes(notesRes.data);
+            // Handle paginated response
+            setNotes(notesRes.data.notes || notesRes.data);
+            setTotalPages(notesRes.data.pagination?.totalPages || 1);
+            setTotalNotes(notesRes.data.pagination?.total || notesRes.data.length);
             setWishlistIds(new Set(wishlistRes.data.map(n => n.id)));
             setIsSubscribed(subRes.data.isSubscribed);
 
-            // Fetch config separately or bundle it if possible. Separate for now.
+            // Cache subscription status for 5 minutes
+            if (subRes.data.isSubscribed !== undefined) {
+                localStorage.setItem('sub_status', JSON.stringify({
+                    value: subRes.data.isSubscribed,
+                    timestamp: Date.now()
+                }));
+            }
+
+            // Fetch subscription price with caching
             try {
+                // Check cache first (1 hour TTL)
+                const cachedPrice = localStorage.getItem('sub_price');
+                if (cachedPrice) {
+                    const { value, timestamp } = JSON.parse(cachedPrice);
+                    const age = Date.now() - timestamp;
+                    const ONE_HOUR = 60 * 60 * 1000;
+
+                    if (age < ONE_HOUR) {
+                        // Use cached value
+                        setSubPrice(value);
+                        // Revalidate in background if older than 30 minutes
+                        if (age > ONE_HOUR / 2) {
+                            api.get('/config/subscription_price').then(({ data: config }) => {
+                                if (config && config.value) {
+                                    setSubPrice(config.value);
+                                    localStorage.setItem('sub_price', JSON.stringify({
+                                        value: config.value,
+                                        timestamp: Date.now()
+                                    }));
+                                }
+                            }).catch(e => console.error(e));
+                        }
+                        return; // Skip fetch if cache is fresh
+                    }
+                }
+
+                // Cache miss or expired - fetch fresh data
                 const { data: config } = await api.get('/config/subscription_price');
-                if (config && config.value) setSubPrice(config.value);
+                if (config && config.value) {
+                    setSubPrice(config.value);
+                    localStorage.setItem('sub_price', JSON.stringify({
+                        value: config.value,
+                        timestamp: Date.now()
+                    }));
+                }
             } catch (e) { console.error(e) }
 
         } catch (error) {
@@ -152,7 +211,9 @@ export default function Home() {
                         )}
                     </div>
                 </div>
-                <Hero3D />
+                <Suspense fallback={<div className="h-64"></div>}>
+                    <Hero3D />
+                </Suspense>
             </div>
 
             {/* Leaderboard Ad - Below Hero (Non-Subscribers Only) */}
@@ -237,7 +298,7 @@ export default function Home() {
             </div>
 
             <h2 className="text-3xl font-bold text-gray-900 dark:text-white mb-8">
-                {notes.length} Notes Found
+                {totalNotes} Notes Found {totalPages > 1 && `(Page ${currentPage} of ${totalPages})`}
             </h2>
 
             {loading ? (
@@ -273,6 +334,55 @@ export default function Home() {
                             </div>
                         </div>
                     )}
+                </div>
+            )}
+
+            {/* Pagination Controls */}
+            {!loading && totalPages > 1 && (
+                <div className="mt-12 flex justify-center items-center gap-2">
+                    <button
+                        onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
+                        disabled={currentPage === 1}
+                        className="px-4 py-2 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-md text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                    >
+                        Previous
+                    </button>
+
+                    <div className="flex gap-1">
+                        {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
+                            let pageNum;
+                            if (totalPages <= 5) {
+                                pageNum = i + 1;
+                            } else if (currentPage <= 3) {
+                                pageNum = i + 1;
+                            } else if (currentPage >= totalPages - 2) {
+                                pageNum = totalPages - 4 + i;
+                            } else {
+                                pageNum = currentPage - 2 + i;
+                            }
+
+                            return (
+                                <button
+                                    key={pageNum}
+                                    onClick={() => setCurrentPage(pageNum)}
+                                    className={`px-4 py-2 rounded-md transition-colors ${currentPage === pageNum
+                                            ? 'bg-indigo-600 text-white'
+                                            : 'bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700'
+                                        }`}
+                                >
+                                    {pageNum}
+                                </button>
+                            );
+                        })}
+                    </div>
+
+                    <button
+                        onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))}
+                        disabled={currentPage === totalPages}
+                        className="px-4 py-2 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-md text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                    >
+                        Next
+                    </button>
                 </div>
             )}
         </div>

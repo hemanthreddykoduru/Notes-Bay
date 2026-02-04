@@ -6,11 +6,11 @@ const requireAuth = require('../middleware/auth');
 // GET /api/notes - List all active notes
 router.get('/', async (req, res) => {
   try {
-    const { search, minPrice, maxPrice, sort } = req.query;
+    const { search, minPrice, maxPrice, sort, page = 1, limit = 12 } = req.query;
 
     let query = supabase
       .from('notes')
-      .select('*, reviews(rating)') // Fetch ratings
+      .select('*, reviews(rating)', { count: 'exact' }) // Fetch ratings + total count
       .eq('is_active', true);
 
     // Search Filter
@@ -26,7 +26,7 @@ router.get('/', async (req, res) => {
       query = query.lte('price', maxPrice);
     }
 
-    const { data: notes, error } = await query;
+    const { data: notes, error, count } = await query;
 
     if (error) throw error;
 
@@ -59,7 +59,22 @@ router.get('/', async (req, res) => {
         sortedNotes.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
     }
 
-    res.json(sortedNotes);
+    // Pagination
+    const pageNum = parseInt(page);
+    const limitNum = parseInt(limit);
+    const startIndex = (pageNum - 1) * limitNum;
+    const endIndex = startIndex + limitNum;
+    const paginatedNotes = sortedNotes.slice(startIndex, endIndex);
+
+    res.json({
+      notes: paginatedNotes,
+      pagination: {
+        page: pageNum,
+        limit: limitNum,
+        total: count || sortedNotes.length,
+        totalPages: Math.ceil((count || sortedNotes.length) / limitNum)
+      }
+    });
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
