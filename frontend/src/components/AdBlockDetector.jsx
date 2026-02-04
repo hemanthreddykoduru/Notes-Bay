@@ -5,6 +5,18 @@ export default function AdBlockDetector() {
     const [adBlockDetected, setAdBlockDetected] = useState(false);
 
     useEffect(() => {
+        // TEMPORARILY DISABLED: Ad blocker detection causing false positives
+        // The ad network (highperformanceformat.com) is slow/unreliable and times out
+        // This triggers the detection even without an actual ad blocker
+
+        // TODO: Re-enable with better detection logic:
+        // - Increase timeout to 10+ seconds
+        // - Require multiple checks to fail (not just one)
+        // - Add whitelist for development/localhost
+
+        return; // Early return to disable detection
+
+        /* ORIGINAL DETECTION CODE (DISABLED)
         let isMounted = true;
         const baitClass = 'adsbygoogle ad-banner';
         const baitStyle = 'width: 1px !important; height: 1px !important; position: absolute !important; left: -10000px !important; top: -1000px !important;';
@@ -98,6 +110,7 @@ export default function AdBlockDetector() {
                 document.body.removeChild(bait);
             }
         };
+        */
     }, []);
 
     if (!adBlockDetected) return null;
