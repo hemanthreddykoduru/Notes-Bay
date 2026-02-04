@@ -32,6 +32,35 @@ export default function Home() {
     const [totalNotes, setTotalNotes] = useState(0);
     const NOTES_PER_PAGE = 12;
 
+    // Initialize cached values immediately on mount
+    useEffect(() => {
+        // Load cached subscription price instantly
+        const cachedPrice = localStorage.getItem('sub_price');
+        if (cachedPrice) {
+            try {
+                const { value } = JSON.parse(cachedPrice);
+                setSubPrice(value);
+            } catch (e) {
+                console.error('Error parsing cached price:', e);
+            }
+        }
+
+        // Load cached subscription status
+        const cachedStatus = localStorage.getItem('sub_status');
+        if (cachedStatus) {
+            try {
+                const { value, timestamp } = JSON.parse(cachedStatus);
+                const age = Date.now() - timestamp;
+                const FIVE_MINUTES = 5 * 60 * 1000;
+                if (age < FIVE_MINUTES) {
+                    setIsSubscribed(value);
+                }
+            } catch (e) {
+                console.error('Error parsing cached status:', e);
+            }
+        }
+    }, []);
+
     // Real-time Subscriptions
     useEffect(() => {
         const notesChannel = supabase
@@ -151,16 +180,28 @@ export default function Home() {
                         timestamp: Date.now()
                     }));
                 }
-            } catch (e) { console.error(e) }
+            } catch (e) {
+                console.error('Error fetching subscription price:', e);
+            }
 
         } catch (error) {
             console.error('Error fetching data:', error);
             // Fallback: try fetching notes only
             try {
                 const { data } = await api.get(`/notes?${params.toString()}`);
-                setNotes(data);
-            } catch (e) { console.error(e) }
+                // Handle both paginated and non-paginated responses
+                if (data.notes) {
+                    setNotes(data.notes);
+                    setTotalPages(data.pagination?.totalPages || 1);
+                    setTotalNotes(data.pagination?.total || 0);
+                } else {
+                    setNotes(data);
+                }
+            } catch (e) {
+                console.error('Error fetching notes:', e);
+            }
         } finally {
+            // ALWAYS set loading to false, even if errors occurred
             setLoading(false);
         }
     };
@@ -366,8 +407,8 @@ export default function Home() {
                                     key={pageNum}
                                     onClick={() => setCurrentPage(pageNum)}
                                     className={`px-4 py-2 rounded-md transition-colors ${currentPage === pageNum
-                                            ? 'bg-indigo-600 text-white'
-                                            : 'bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700'
+                                        ? 'bg-indigo-600 text-white'
+                                        : 'bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700'
                                         }`}
                                 >
                                     {pageNum}
