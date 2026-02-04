@@ -32,26 +32,34 @@ export default function AdBlockDetector() {
                 console.log('AdBlock detected via Bait Element');
             }
 
-            // Check B: Script Injection
+            // Check B: Script Injection with Timeout
             if (!detected) {
                 try {
-                    // Check 1: Google Ads
-                    await new Promise((resolve, reject) => {
-                        const script = document.createElement('script');
-                        script.src = 'https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js';
-                        script.onerror = () => reject(new Error('Blocked Google'));
-                        script.onload = () => { script.remove(); resolve(); };
-                        document.head.appendChild(script);
-                    });
+                    // Check 1: Google Ads (with 3s timeout)
+                    await Promise.race([
+                        new Promise((resolve, reject) => {
+                            const script = document.createElement('script');
+                            script.src = 'https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js';
+                            script.async = true; // Make async to not block page load
+                            script.onerror = () => reject(new Error('Blocked Google'));
+                            script.onload = () => { script.remove(); resolve(); };
+                            document.head.appendChild(script);
+                        }),
+                        new Promise((_, reject) => setTimeout(() => reject(new Error('Timeout Google')), 3000))
+                    ]);
 
-                    // Check 2: HighPerformanceFormat
-                    await new Promise((resolve, reject) => {
-                        const script = document.createElement('script');
-                        script.src = 'https://www.highperformanceformat.com/841b7e7d333e3d24d3fdbae0c58425ef/invoke.js';
-                        script.onerror = () => reject(new Error('Blocked AdNetwork'));
-                        script.onload = () => { script.remove(); resolve(); };
-                        document.head.appendChild(script);
-                    });
+                    // Check 2: HighPerformanceFormat (with 3s timeout)
+                    await Promise.race([
+                        new Promise((resolve, reject) => {
+                            const script = document.createElement('script');
+                            script.src = 'https://www.highperformanceformat.com/841b7e7d333e3d24d3fdbae0c58425ef/invoke.js';
+                            script.async = true; // Make async to not block page load
+                            script.onerror = () => reject(new Error('Blocked AdNetwork'));
+                            script.onload = () => { script.remove(); resolve(); };
+                            document.head.appendChild(script);
+                        }),
+                        new Promise((_, reject) => setTimeout(() => reject(new Error('Timeout AdNetwork')), 3000))
+                    ]);
                 } catch (e) {
                     detected = true;
                     console.log('AdBlock detected via Script Error:', e.message);
