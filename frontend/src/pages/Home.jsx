@@ -7,6 +7,7 @@ const Hero3D = lazy(() => import('../components/Hero3D'));
 import NativeAd from '../components/NativeAd';
 import LeaderboardAd from '../components/LeaderboardAd';
 import { Search, Filter, X, Sparkles, CheckCircle } from 'lucide-react';
+import HomeSkeleton from '../components/skeletons/HomeSkeleton';
 
 export default function Home() {
     const navigate = useNavigate();
@@ -343,9 +344,7 @@ export default function Home() {
             </h2>
 
             {loading ? (
-                <div className="text-center py-12">
-                    <div className="inline-block animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-indigo-500"></div>
-                </div>
+                <HomeSkeleton />
             ) : (
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
                     {notes.length > 0 ? (
@@ -376,56 +375,59 @@ export default function Home() {
                         </div>
                     )}
                 </div>
-            )}
+            )
+            }
 
             {/* Pagination Controls */}
-            {!loading && totalPages > 1 && (
-                <div className="mt-12 flex justify-center items-center gap-2">
-                    <button
-                        onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
-                        disabled={currentPage === 1}
-                        className="px-4 py-2 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-md text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-                    >
-                        Previous
-                    </button>
+            {
+                !loading && totalPages > 1 && (
+                    <div className="mt-12 flex justify-center items-center gap-2">
+                        <button
+                            onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
+                            disabled={currentPage === 1}
+                            className="px-4 py-2 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-md text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                        >
+                            Previous
+                        </button>
 
-                    <div className="flex gap-1">
-                        {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
-                            let pageNum;
-                            if (totalPages <= 5) {
-                                pageNum = i + 1;
-                            } else if (currentPage <= 3) {
-                                pageNum = i + 1;
-                            } else if (currentPage >= totalPages - 2) {
-                                pageNum = totalPages - 4 + i;
-                            } else {
-                                pageNum = currentPage - 2 + i;
-                            }
+                        <div className="flex gap-1">
+                            {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
+                                let pageNum;
+                                if (totalPages <= 5) {
+                                    pageNum = i + 1;
+                                } else if (currentPage <= 3) {
+                                    pageNum = i + 1;
+                                } else if (currentPage >= totalPages - 2) {
+                                    pageNum = totalPages - 4 + i;
+                                } else {
+                                    pageNum = currentPage - 2 + i;
+                                }
 
-                            return (
-                                <button
-                                    key={pageNum}
-                                    onClick={() => setCurrentPage(pageNum)}
-                                    className={`px-4 py-2 rounded-md transition-colors ${currentPage === pageNum
-                                        ? 'bg-indigo-600 text-white'
-                                        : 'bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700'
-                                        }`}
-                                >
-                                    {pageNum}
-                                </button>
-                            );
-                        })}
+                                return (
+                                    <button
+                                        key={pageNum}
+                                        onClick={() => setCurrentPage(pageNum)}
+                                        className={`px-4 py-2 rounded-md transition-colors ${currentPage === pageNum
+                                            ? 'bg-indigo-600 text-white'
+                                            : 'bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700'
+                                            }`}
+                                    >
+                                        {pageNum}
+                                    </button>
+                                );
+                            })}
+                        </div>
+
+                        <button
+                            onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))}
+                            disabled={currentPage === totalPages}
+                            className="px-4 py-2 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-md text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                        >
+                            Next
+                        </button>
                     </div>
-
-                    <button
-                        onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))}
-                        disabled={currentPage === totalPages}
-                        className="px-4 py-2 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-md text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-                    >
-                        Next
-                    </button>
-                </div>
-            )}
-        </div>
+                )
+            }
+        </div >
     );
 }

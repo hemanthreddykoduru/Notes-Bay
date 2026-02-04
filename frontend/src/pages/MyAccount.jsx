@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { supabase } from '../lib/supabase';
 import { User, Phone, Mail, Save, Loader, Lock, X } from 'lucide-react';
 import Toast from '../components/Toast';
+import MyAccountSkeleton from '../components/skeletons/MyAccountSkeleton';
 
 export default function MyAccount() {
     const [loading, setLoading] = useState(true);
@@ -131,11 +132,7 @@ export default function MyAccount() {
     };
 
     if (loading) {
-        return (
-            <div className="flex justify-center items-center min-h-[50vh]">
-                <Loader className="h-8 w-8 animate-spin text-indigo-600" />
-            </div>
-        );
+        return <MyAccountSkeleton />;
     }
 
     return (
