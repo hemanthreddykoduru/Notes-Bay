@@ -216,11 +216,11 @@ export default function Subscription() {
                 {hasSubscription ? (
                     // Active Subscription Card
                     <div className="relative transform hover:scale-[1.01] transition-all duration-300 ease-out">
-                        <div className={`absolute -inset-0.5 ${subscriptionDetails?.is_trial ? 'bg-gradient-to-r from-cyan-500 to-blue-500' : 'bg-gradient-to-r from-green-500 to-emerald-500'} rounded-2xl blur opacity-75`}></div>
+                        <div className={`absolute -inset-0.5 ${subscriptionDetails?.is_trial ? 'bg-gradient-to-r from-indigo-500 to-purple-500' : 'bg-gradient-to-r from-green-500 to-emerald-500'} rounded-2xl blur opacity-75`}></div>
                         <div className="relative bg-white dark:bg-gray-800 rounded-2xl shadow-xl p-12 text-center">
-                            <div className={`w-20 h-20 mx-auto mb-6 rounded-full ${subscriptionDetails?.is_trial ? 'bg-cyan-100 dark:bg-cyan-900/30' : 'bg-green-100 dark:bg-green-900/30'} flex items-center justify-center`}>
+                            <div className={`w-20 h-20 mx-auto mb-6 rounded-full ${subscriptionDetails?.is_trial ? 'bg-indigo-100 dark:bg-indigo-900/30' : 'bg-green-100 dark:bg-green-900/30'} flex items-center justify-center`}>
                                 {subscriptionDetails?.is_trial ? (
-                                    <Zap className="w-10 h-10 text-cyan-600 dark:text-cyan-400" />
+                                    <Zap className="w-10 h-10 text-indigo-600 dark:text-indigo-400" />
                                 ) : (
                                     <Check className="w-10 h-10 text-green-600 dark:text-green-400" />
                                 )}
@@ -237,7 +237,7 @@ export default function Subscription() {
                                     {/* Countdown Timer */}
                                     <div className="flex justify-center gap-4 mb-8">
                                         <div className="flex flex-col items-center">
-                                            <div className="w-20 h-20 rounded-xl bg-gradient-to-br from-cyan-500 to-blue-500 flex items-center justify-center shadow-lg">
+                                            <div className="w-20 h-20 rounded-xl bg-gradient-to-br from-indigo-600 to-purple-600 flex items-center justify-center shadow-lg">
                                                 <span className="text-3xl font-bold text-white">{String(timeRemaining.hours).padStart(2, '0')}</span>
                                             </div>
                                             <span className="text-xs text-gray-500 dark:text-gray-400 mt-2 font-medium">Hours</span>
@@ -246,7 +246,7 @@ export default function Subscription() {
                                             <span className="text-3xl font-bold text-gray-400 dark:text-gray-500">:</span>
                                         </div>
                                         <div className="flex flex-col items-center">
-                                            <div className="w-20 h-20 rounded-xl bg-gradient-to-br from-cyan-500 to-blue-500 flex items-center justify-center shadow-lg">
+                                            <div className="w-20 h-20 rounded-xl bg-gradient-to-br from-indigo-600 to-purple-600 flex items-center justify-center shadow-lg">
                                                 <span className="text-3xl font-bold text-white">{String(timeRemaining.minutes).padStart(2, '0')}</span>
                                             </div>
                                             <span className="text-xs text-gray-500 dark:text-gray-400 mt-2 font-medium">Minutes</span>
@@ -255,7 +255,7 @@ export default function Subscription() {
                                             <span className="text-3xl font-bold text-gray-400 dark:text-gray-500">:</span>
                                         </div>
                                         <div className="flex flex-col items-center">
-                                            <div className="w-20 h-20 rounded-xl bg-gradient-to-br from-cyan-500 to-blue-500 flex items-center justify-center shadow-lg">
+                                            <div className="w-20 h-20 rounded-xl bg-gradient-to-br from-indigo-600 to-purple-600 flex items-center justify-center shadow-lg">
                                                 <span className="text-3xl font-bold text-white">{String(timeRemaining.seconds).padStart(2, '0')}</span>
                                             </div>
                                             <span className="text-xs text-gray-500 dark:text-gray-400 mt-2 font-medium">Seconds</span>
