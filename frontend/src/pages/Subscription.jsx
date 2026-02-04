@@ -189,7 +189,7 @@ export default function Subscription() {
     };
 
     return (
-        <div className="min-h-screen bg-gray-50 dark:bg-gray-900 py-20 px-4 sm:px-6 lg:px-8 relative overflow-hidden transition-colors duration-200">
+        <div className="min-h-screen bg-gray-50 dark:bg-gray-900 py-12 sm:py-20 px-4 sm:px-6 lg:px-8 relative overflow-hidden transition-colors duration-200">
             {/* Background Decorative Blobs */}
             <div className="absolute top-0 left-0 w-full h-full overflow-hidden z-0 pointer-events-none">
                 <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-indigo-500/10 dark:bg-indigo-500/20 rounded-full blur-[100px]"></div>
@@ -197,15 +197,15 @@ export default function Subscription() {
             </div>
 
             <div className="max-w-4xl mx-auto relative z-10">
-                <div className="text-center mb-16">
+                <div className="text-center mb-8 sm:mb-12 md:mb-16">
                     <span className="inline-flex items-center px-4 py-1.5 rounded-full bg-indigo-100 dark:bg-indigo-900/30 text-indigo-700 dark:text-indigo-300 text-sm font-semibold tracking-wide uppercase mb-4 shadow-sm border border-indigo-200 dark:border-indigo-800">
                         <Star className="w-4 h-4 mr-2 text-indigo-500" />
                         Premium Access
                     </span>
-                    <h2 className="text-4xl md:text-5xl font-extrabold text-gray-900 dark:text-white tracking-tight mb-4">
+                    <h2 className="text-3xl sm:text-4xl md:text-5xl font-extrabold text-gray-900 dark:text-white tracking-tight mb-3 sm:mb-4">
                         {hasSubscription ? 'You are a Pro Member!' : 'Choose Your Plan'}
                     </h2>
-                    <p className="mt-4 text-xl text-gray-600 dark:text-gray-300 max-w-2xl mx-auto">
+                    <p className="mt-3 sm:mt-4 text-base sm:text-lg md:text-xl text-gray-600 dark:text-gray-300 max-w-2xl mx-auto px-2">
                         {hasSubscription
                             ? 'You have unlimited access to every note. Keep learning and growing!'
                             : 'Start with a free trial or go premium for unlimited access.'
@@ -217,16 +217,16 @@ export default function Subscription() {
                 {hasSubscription ? (
                     subscriptionDetails?.is_trial ? (
                         // Trial User: Show Trial Card + Pro Pass Card Side by Side
-                        <div className="grid md:grid-cols-2 gap-8 max-w-5xl mx-auto">
+                        <div className="grid md:grid-cols-2 gap-4 sm:gap-6 md:gap-8 max-w-5xl mx-auto">
                             {/* Trial Countdown Card */}
                             <div className="relative transform hover:scale-[1.01] transition-all duration-300 ease-out">
                                 <div className="absolute -inset-0.5 bg-gradient-to-r from-indigo-500 to-purple-500 rounded-2xl blur opacity-75"></div>
-                                <div className="relative bg-white dark:bg-gray-800 rounded-2xl shadow-xl p-8 text-center h-full flex flex-col">
+                                <div className="relative bg-white dark:bg-gray-800 rounded-2xl shadow-xl p-6 sm:p-8 text-center h-full flex flex-col">
                                     <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-indigo-100 dark:bg-indigo-900/30 flex items-center justify-center">
                                         <Zap className="w-8 h-8 text-indigo-600 dark:text-indigo-400" />
                                     </div>
 
-                                    <h3 className="text-2xl font-bold text-gray-900 dark:text-white mb-3">
+                                    <h3 className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-white mb-2 sm:mb-3">
                                         Free Trial Active
                                     </h3>
 
@@ -235,15 +235,15 @@ export default function Subscription() {
                                             <p className="text-gray-600 dark:text-gray-300 mb-4 text-sm">Trial expires in:</p>
 
                                             {/* Countdown Timer */}
-                                            <div className="flex justify-center gap-3 mb-6">
+                                            <div className="flex justify-center gap-2 sm:gap-3 mb-4 sm:mb-6">
                                                 <div className="flex flex-col items-center">
-                                                    <div className="w-16 h-16 rounded-xl bg-gradient-to-br from-indigo-600 to-purple-600 flex items-center justify-center shadow-lg">
-                                                        <span className="text-2xl font-bold text-white">{String(timeRemaining.hours).padStart(2, '0')}</span>
+                                                    <div className="w-14 h-14 sm:w-16 sm:h-16 rounded-lg sm:rounded-xl bg-gradient-to-br from-indigo-600 to-purple-600 flex items-center justify-center shadow-lg">
+                                                        <span className="text-xl sm:text-2xl font-bold text-white">{String(timeRemaining.hours).padStart(2, '0')}</span>
                                                     </div>
                                                     <span className="text-xs text-gray-500 dark:text-gray-400 mt-1 font-medium">Hours</span>
                                                 </div>
                                                 <div className="flex items-center">
-                                                    <span className="text-2xl font-bold text-gray-400 dark:text-gray-500">:</span>
+                                                    <span className="text-xl sm:text-2xl font-bold text-gray-400 dark:text-gray-500">:</span>
                                                 </div>
                                                 <div className="flex flex-col items-center">
                                                     <div className="w-16 h-16 rounded-xl bg-gradient-to-br from-indigo-600 to-purple-600 flex items-center justify-center shadow-lg">
@@ -290,19 +290,19 @@ export default function Subscription() {
                                         UPGRADE
                                     </div>
 
-                                    <div className="p-8 flex-grow">
+                                    <div className="p-6 sm:p-8 flex-grow">
                                         <div className="text-center mb-6">
-                                            <h3 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">Pro Pass</h3>
+                                            <h3 className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-white mb-2">Pro Pass</h3>
                                             <div className="flex justify-center items-baseline my-4">
-                                                <span className="text-5xl font-extrabold text-gray-900 dark:text-white">₹{price}</span>
-                                                <span className="text-xl text-gray-500 dark:text-gray-400 ml-2">/year</span>
+                                                <span className="text-4xl sm:text-5xl font-extrabold text-gray-900 dark:text-white">₹{price}</span>
+                                                <span className="text-lg sm:text-xl text-gray-500 dark:text-gray-400 ml-2">/year</span>
                                             </div>
                                             <p className="text-sm text-gray-600 dark:text-gray-400">
                                                 Billed annually. Best value!
                                             </p>
                                         </div>
 
-                                        <ul className="space-y-3 mb-6">
+                                        <ul className="space-y-2 sm:space-y-3 mb-4 sm:mb-6">
                                             {[
                                                 { icon: BookOpen, text: "Access to entire library" },
                                                 { icon: Zap, text: "Priority access to new uploads" },
@@ -317,7 +317,7 @@ export default function Subscription() {
                                         </ul>
                                     </div>
 
-                                    <div className="p-8 pt-0">
+                                    <div className="p-6 sm:p-8 pt-0">
                                         <button
                                             onClick={handleSubscribe}
                                             disabled={loading}
@@ -350,12 +350,12 @@ export default function Subscription() {
                         // Regular Paid Subscription Card
                         <div className="relative transform hover:scale-[1.01] transition-all duration-300 ease-out">
                             <div className="absolute -inset-0.5 bg-gradient-to-r from-green-500 to-emerald-500 rounded-2xl blur opacity-75"></div>
-                            <div className="relative bg-white dark:bg-gray-800 rounded-2xl shadow-xl p-12 text-center">
+                            <div className="relative bg-white dark:bg-gray-800 rounded-2xl shadow-xl p-8 sm:p-12 text-center">
                                 <div className="w-20 h-20 mx-auto mb-6 rounded-full bg-green-100 dark:bg-green-900/30 flex items-center justify-center">
                                     <Check className="w-10 h-10 text-green-600 dark:text-green-400" />
                                 </div>
-                                <h3 className="text-3xl font-bold text-gray-900 dark:text-white mb-4">Active Subscription</h3>
-                                <p className="text-gray-600 dark:text-gray-300 mb-8">You have unlimited access to all premium features!</p>
+                                <h3 className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-white mb-3 sm:mb-4">Active Subscription</h3>
+                                <p className="text-gray-600 dark:text-gray-300 mb-6 sm:mb-8">You have unlimited access to all premium features!</p>
                                 <button
                                     onClick={() => navigate('/')}
                                     className="px-8 py-3 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-xl transition-colors"
@@ -367,17 +367,17 @@ export default function Subscription() {
                     )
                 ) : (
                     // Two Pricing Cards
-                    <div className="grid md:grid-cols-2 gap-8 max-w-5xl mx-auto">
+                    <div className="grid md:grid-cols-2 gap-4 sm:gap-6 md:gap-8 max-w-5xl mx-auto">
                         {/* Free Trial Card */}
                         {canUseTrial && (
                             <div className="relative group">
                                 <div className="absolute -inset-0.5 bg-gradient-to-r from-cyan-500 to-blue-500 rounded-2xl blur opacity-60 group-hover:opacity-100 transition duration-300"></div>
                                 <div className="relative bg-white dark:bg-gray-800 rounded-2xl shadow-xl overflow-hidden h-full flex flex-col">
-                                    <div className="p-8 flex-grow">
+                                    <div className="p-6 sm:p-8 flex-grow">
                                         <div className="text-center mb-6">
-                                            <h3 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">Free Trial</h3>
+                                            <h3 className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-white mb-2">Free Trial</h3>
                                             <div className="flex justify-center items-baseline my-4">
-                                                <span className="text-5xl font-extrabold text-gray-900 dark:text-white">₹0</span>
+                                                <span className="text-4xl sm:text-5xl font-extrabold text-gray-900 dark:text-white">₹0</span>
                                                 <span className="text-xl text-gray-500 dark:text-gray-400 ml-2">/2 hours</span>
                                             </div>
                                             <p className="text-sm text-gray-600 dark:text-gray-400">
