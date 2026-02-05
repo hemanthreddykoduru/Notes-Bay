@@ -221,7 +221,7 @@ export default function Subscription() {
                                 Premium Access
                             </span>
                             <h2 className="text-3xl sm:text-4xl md:text-5xl font-extrabold text-gray-900 dark:text-white tracking-tight mb-3 sm:mb-4">
-                                {hasSubscription ? 'You are a Pro Member!' : 'Choose Your Plan (v4.1)'}
+                                {hasSubscription ? 'You are a Pro Member!' : 'Choose Your Plan'}
                             </h2>
                             <p className="mt-3 sm:mt-4 text-base sm:text-lg md:text-xl text-gray-600 dark:text-gray-300 max-w-2xl mx-auto px-2">
                                 {hasSubscription
@@ -384,7 +384,7 @@ export default function Subscription() {
                                 </div>
                             )
                         ) : (
-                            // Two Pricing Cards - FORCE DEPLOY V4
+                            // Two Pricing Cards
                             <div className="grid md:grid-cols-2 gap-4 sm:gap-6 md:gap-8 max-w-5xl mx-auto relative z-20">
                                 {/* Free Trial Card */}
                                 <div className="relative group flex flex-col h-full">
