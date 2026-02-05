@@ -384,17 +384,17 @@ export default function Subscription() {
                                 </div>
                             )
                         ) : (
-                            // Two Pricing Cards
-                            <div className="grid md:grid-cols-2 gap-4 sm:gap-6 md:gap-8 max-w-5xl mx-auto">
+                            // Two Pricing Cards - FORCE DEPLOY V4
+                            <div className="grid md:grid-cols-2 gap-4 sm:gap-6 md:gap-8 max-w-5xl mx-auto relative z-20">
                                 {/* Free Trial Card */}
-                                <div className="relative group">
+                                <div className="relative group flex flex-col h-full">
                                     {!canUseTrial && (
-                                        <div className="absolute top-4 right-4 bg-gray-500 text-white text-xs font-bold px-3 py-1 rounded-full z-10">
+                                        <div className="absolute top-4 right-4 bg-gray-500 text-white text-xs font-bold px-3 py-1 rounded-full z-10 shadow-sm">
                                             USED
                                         </div>
                                     )}
                                     <div className={`absolute -inset-0.5 bg-gradient-to-r from-cyan-500 to-blue-500 rounded-2xl blur opacity-60 transition duration-300 ${canUseTrial ? 'group-hover:opacity-100' : 'opacity-0'}`}></div>
-                                    <div className={`relative bg-white dark:bg-gray-800 rounded-2xl shadow-xl overflow-hidden h-full flex flex-col ${!canUseTrial ? 'opacity-75 grayscale-[0.5]' : ''}`}>
+                                    <div className={`relative bg-white dark:bg-gray-800 rounded-2xl shadow-xl overflow-hidden h-full flex flex-col ${!canUseTrial ? 'opacity-75 grayscale' : ''}`}>
                                         <div className="p-6 sm:p-8 flex-grow">
                                             <div className="text-center mb-6">
                                                 <h3 className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-white mb-2">Free Trial</h3>
@@ -422,7 +422,7 @@ export default function Subscription() {
                                             </ul>
                                         </div>
 
-                                        <div className="p-8 pt-0">
+                                        <div className="p-8 pt-0 mt-auto">
                                             <button
                                                 onClick={handleFreeTrial}
                                                 disabled={trialLoading || !canUseTrial}
@@ -458,7 +458,7 @@ export default function Subscription() {
 
 
                                 {/* Pro Pass Card */}
-                                <div className="relative group">
+                                <div className="relative group flex flex-col h-full">
                                     <div className="absolute -inset-0.5 bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 rounded-2xl blur opacity-75 group-hover:opacity-100 transition duration-300 animate-pulse"></div>
                                     <div className="relative bg-white dark:bg-gray-800 rounded-2xl shadow-xl overflow-hidden h-full flex flex-col">
                                         {/* Popular Badge */}
