@@ -1,117 +1,29 @@
 # NotesBay
 
-NotesBay is a premium note-sharing platform that connects students, allowing them to buy and sell high-quality study materials. It simplifies the academic journey by providing a centralized marketplace for verified notes.
+**NotesBay** is a premium note-sharing platform designed to help students excel in their academic journey. It serves as a centralized marketplace where students can find, buy, and sell high-quality, verified study materials.
 
-## 🚀 Features
+## 🌟 Why NotesBay?
 
--   **User Authentication**: Secure login and signup powered by Supabase.
--   **Note Marketplace**: Browse, buy, and sell notes with ease.
--   **Subscription Model**: 
-    -   **Free Trial**: 2-hour access to all premium features.
-    -   **Pro Pass**: Yearly subscription for unlimited access.
--   **Payments**: Integrated Razorpay for secure transactions.
--   **Responsive Design**: Optimized for mobile, tablet, and desktop.
--   **Admin Dashboard**: Manage users, notes, and platform settings.
--   **Interactive UI**: Smooth animations, skeleton loaders, and modern aesthetics.
+We bridge the gap between students who create excellent notes and those who need them. Whether you're looking to boost your grades or earn money from your hard work, NotesBay is the platform for you.
 
-## 🛠️ Tech Stack
+## ✨ Key Features
 
-### Frontend
--   **React**: UI Library
--   **Vite**: Build Tool
--   **Tailwind CSS**: Styling
--   **Framer Motion**: Animations
--   **Lucide React**: Icons
--   **React Router**: Navigation
--   **Zustand/Context**: State Management
+### 📚 For Students (Buyers)
+-   **Centralized Library**: Access a vast collection of notes across various subjects and streams.
+-   **Instant Access**: Pay safely via Razorpay and get immediate access to high-quality PDFs.
+-   **Wishlist**: Save notes for later and build your personal study collection.
+-   **Verified Content**: All notes are reviewed to ensure quality and relevance.
 
-### Backend
--   **Node.js**: Runtime
--   **Express**: Web Framework
--   **Supabase**: Database & Auth
--   **Razorpay**: Payment Gateway
--   **Google Gemini API**: Artificial Intelligence features
+### ✍️ For Creators (Sellers)
+-   **Monetize Your Work**: Turn your handwritten or digital notes into improved passive income.
+-   **Simple Upload**: Easy-to-use interface for uploading and managing your note collections.
+-   **Reach More Students**: Share your knowledge with a wider community.
 
-## 📂 Project Structure
+### 💎 Flexible Access Plans
+-   **Free Trial**: Experience the full power of NotesBay with a **2-hour free trial** – no credit card required!
+-   **Pro Pass**: Upgrade to our annual Pro Pass for **unlimited access** to the entire library for a whole year.
+-   **Individual Purchase**: Buy only the specific notes you need.
 
-```
-NotesBay/
-├── frontend/           # React frontend application
-│   ├── src/
-│   │   ├── components/ # Reusable UI components
-│   │   ├── pages/      # Application route pages
-│   │   ├── lib/        # Utilities (API, Supabase client)
-│   │   └── context/    # Global context providers
-│   └── public/         # Static assets
-│
-└── backend/            # Express backend server
-    ├── routes/         # API route handlers
-    ├── config/         # Configuration files
-    └── middleware/     # Custom middleware (auth, etc.)
-```
+## � Experience It Now
+Visit the live website to start exploring: **[NotesBay Live](https://www.notesbay.in)**
 
-## 🏁 Getting Started
-
-### Prerequisites
--   Node.js (v18+ recommended)
--   npm or yarn
--   Supabase project
--   Razorpay account
-
-### Installation
-
-1.  **Clone the repository**
-    ```bash
-    git clone https://github.com/hemanthreddykoduru/Notes-Bay.git
-    cd Notes-Bay
-    ```
-
-2.  **Setup Backend**
-    ```bash
-    cd backend
-    npm install
-    cp .env.example .env # Configure your environment variables
-    npm run dev
-    ```
-
-3.  **Setup Frontend**
-    ```bash
-    cd ../frontend
-    npm install
-    cp .env.example .env # Configure your frontend variables
-    npm run dev
-    ```
-
-4.  **Visit the App**
-    Open [http://localhost:5173](http://localhost:5173) to view it in the browser.
-
-## 🔑 Environment Variables
-
-### Backend (`.env`)
-```env
-PORT=5000
-SUPABASE_URL=your_supabase_url
-SUPABASE_KEY=your_supabase_anon_key
-RAZORPAY_KEY_ID=your_razorpay_key_id
-RAZORPAY_KEY_SECRET=your_razorpay_key_secret
-```
-
-### Frontend (`.env`)
-```env
-VITE_API_URL=http://localhost:5000/api
-VITE_SUPABASE_URL=your_supabase_url
-VITE_SUPABASE_ANON_KEY=your_supabase_anon_key
-VITE_RAZORPAY_KEY_ID=your_razorpay_key_id
-```
-
-## 🤝 Contributing
-
-1.  Fork the repository
-2.  Create your feature branch (`git checkout -b feature/AmazingFeature`)
-3.  Commit your changes (`git commit -m 'Add some AmazingFeature'`)
-4.  Push to the branch (`git push origin feature/AmazingFeature`)
-5.  Open a Pull Request
-
-## 📄 License
-
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
