@@ -77,7 +77,6 @@ export default function Subscription() {
                 .from('subscriptions')
                 .select('*')
                 .eq('user_id', session.user.id)
-                .eq('is_trial', true)
                 .limit(1);
 
             if (previousTrial && previousTrial.length > 0) {
@@ -522,6 +521,7 @@ export default function Subscription() {
                                     </div>
                                 </div>
                             </div>
+                        )}
                     </>
                 )}
             </div >
