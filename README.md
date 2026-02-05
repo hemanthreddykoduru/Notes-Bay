@@ -16,10 +16,6 @@ We bridge the gap between students who create excellent notes and those who need
 -   **Wishlist**: Save notes for later and build your personal study collection.
 -   **Verified Content**: All notes are reviewed to ensure quality and relevance.
 
-### ✍️ For Creators (Sellers)
--   **Monetize Your Work**: Turn your handwritten or digital notes into improved passive income.
--   **Simple Upload**: Easy-to-use interface for uploading and managing your note collections.
--   **Reach More Students**: Share your knowledge with a wider community.
 
 ### 💎 Flexible Access Plans
 -   **Free Trial**: Experience the full power of NotesBay with a **2-hour free trial** – no credit card required!
