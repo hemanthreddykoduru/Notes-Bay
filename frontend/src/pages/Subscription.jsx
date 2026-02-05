@@ -387,65 +387,73 @@ export default function Subscription() {
                             // Two Pricing Cards
                             <div className="grid md:grid-cols-2 gap-4 sm:gap-6 md:gap-8 max-w-5xl mx-auto">
                                 {/* Free Trial Card */}
-                                {canUseTrial && (
-                                    <div className="relative group">
-                                        <div className="absolute -inset-0.5 bg-gradient-to-r from-cyan-500 to-blue-500 rounded-2xl blur opacity-60 group-hover:opacity-100 transition duration-300"></div>
-                                        <div className="relative bg-white dark:bg-gray-800 rounded-2xl shadow-xl overflow-hidden h-full flex flex-col">
-                                            <div className="p-6 sm:p-8 flex-grow">
-                                                <div className="text-center mb-6">
-                                                    <h3 className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-white mb-2">Free Trial</h3>
-                                                    <div className="flex justify-center items-baseline my-4">
-                                                        <span className="text-4xl sm:text-5xl font-extrabold text-gray-900 dark:text-white">₹0</span>
-                                                        <span className="text-xl text-gray-500 dark:text-gray-400 ml-2">/2 hours</span>
-                                                    </div>
-                                                    <p className="text-sm text-gray-600 dark:text-gray-400">
-                                                        Try all premium features free
-                                                    </p>
+                                <div className="relative group">
+                                    <div className={`absolute -inset-0.5 bg-gradient-to-r from-cyan-500 to-blue-500 rounded-2xl blur opacity-60 transition duration-300 ${canUseTrial ? 'group-hover:opacity-100' : 'opacity-0'}`}></div>
+                                    <div className={`relative bg-white dark:bg-gray-800 rounded-2xl shadow-xl overflow-hidden h-full flex flex-col ${!canUseTrial ? 'opacity-75 grayscale-[0.5]' : ''}`}>
+                                        <div className="p-6 sm:p-8 flex-grow">
+                                            <div className="text-center mb-6">
+                                                <h3 className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-white mb-2">Free Trial</h3>
+                                                <div className="flex justify-center items-baseline my-4">
+                                                    <span className="text-4xl sm:text-5xl font-extrabold text-gray-900 dark:text-white">₹0</span>
+                                                    <span className="text-xl text-gray-500 dark:text-gray-400 ml-2">/2 hours</span>
                                                 </div>
-
-                                                <ul className="space-y-4 mb-8">
-                                                    {[
-                                                        "Full access to all notes",
-                                                        "No credit card required",
-                                                        "Cancel anytime",
-                                                        "2 hours of premium features"
-                                                    ].map((feature, index) => (
-                                                        <li key={index} className="flex items-center text-gray-700 dark:text-gray-300">
-                                                            <Check className="w-5 h-5 mr-3 text-cyan-500 flex-shrink-0" />
-                                                            <span className="text-sm">{feature}</span>
-                                                        </li>
-                                                    ))}
-                                                </ul>
+                                                <p className="text-sm text-gray-600 dark:text-gray-400">
+                                                    {canUseTrial ? 'Try all premium features free' : 'Limit one trial per user'}
+                                                </p>
                                             </div>
 
-                                            <div className="p-8 pt-0">
-                                                <button
-                                                    onClick={handleFreeTrial}
-                                                    disabled={trialLoading}
-                                                    className="w-full py-4 px-6 rounded-xl bg-gradient-to-r from-cyan-500 to-blue-500 text-white font-bold text-lg hover:from-cyan-600 hover:to-blue-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-cyan-500 transition-all shadow-lg flex items-center justify-center"
-                                                >
-                                                    {trialLoading ? (
-                                                        <span className="flex items-center">
-                                                            <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                                                                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                                                                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                                                            </svg>
-                                                            Activating...
-                                                        </span>
-                                                    ) : (
-                                                        <>
-                                                            <Zap className="w-5 h-5 mr-2" />
-                                                            Start Free Trial
-                                                        </>
-                                                    )}
-                                                </button>
-                                            </div>
+                                            <ul className="space-y-4 mb-8">
+                                                {[
+                                                    "Full access to all notes",
+                                                    "No credit card required",
+                                                    "Cancel anytime",
+                                                    "2 hours of premium features"
+                                                ].map((feature, index) => (
+                                                    <li key={index} className="flex items-center text-gray-700 dark:text-gray-300">
+                                                        <Check className={`w-5 h-5 mr-3 flex-shrink-0 ${canUseTrial ? 'text-cyan-500' : 'text-gray-400'}`} />
+                                                        <span className="text-sm">{feature}</span>
+                                                    </li>
+                                                ))}
+                                            </ul>
+                                        </div>
+
+                                        <div className="p-8 pt-0">
+                                            <button
+                                                onClick={handleFreeTrial}
+                                                disabled={trialLoading || !canUseTrial}
+                                                className={`w-full py-4 px-6 rounded-xl font-bold text-lg transition-all shadow-lg flex items-center justify-center ${canUseTrial
+                                                    ? 'bg-gradient-to-r from-cyan-500 to-blue-500 text-white hover:from-cyan-600 hover:to-blue-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-cyan-500'
+                                                    : 'bg-gray-200 dark:bg-gray-700 text-gray-400 cursor-not-allowed'
+                                                    }`}
+                                            >
+                                                {trialLoading ? (
+                                                    <span className="flex items-center">
+                                                        <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                                            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                                                            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                                        </svg>
+                                                        Activating...
+                                                    </span>
+                                                ) : (
+                                                    <>
+                                                        {canUseTrial ? (
+                                                            <>
+                                                                <Zap className="w-5 h-5 mr-2" />
+                                                                Start Free Trial
+                                                            </>
+                                                        ) : (
+                                                            "Trial Already Used"
+                                                        )}
+                                                    </>
+                                                )}
+                                            </button>
                                         </div>
                                     </div>
-                                )}
+                                </div>
+
 
                                 {/* Pro Pass Card */}
-                                <div className={`relative group ${!canUseTrial ? 'md:col-span-2 max-w-md mx-auto' : ''}`}>
+                                <div className="relative group">
                                     <div className="absolute -inset-0.5 bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 rounded-2xl blur opacity-75 group-hover:opacity-100 transition duration-300 animate-pulse"></div>
                                     <div className="relative bg-white dark:bg-gray-800 rounded-2xl shadow-xl overflow-hidden h-full flex flex-col">
                                         {/* Popular Badge */}
@@ -511,62 +519,65 @@ export default function Subscription() {
                             </div>
                         )}
                     </>
-                )}
-            </div>
+                )
+                }
+            </div >
 
             {/* Success Modal */}
-            {showSuccessModal && (
-                <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm animate-in fade-in duration-200">
-                    <div className="relative bg-white dark:bg-gray-800 rounded-2xl shadow-2xl max-w-md w-full p-8 animate-in zoom-in duration-300">
-                        {/* Decorative gradient border */}
-                        <div className="absolute -inset-0.5 bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 rounded-2xl blur opacity-30 animate-pulse"></div>
+            {
+                showSuccessModal && (
+                    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm animate-in fade-in duration-200">
+                        <div className="relative bg-white dark:bg-gray-800 rounded-2xl shadow-2xl max-w-md w-full p-8 animate-in zoom-in duration-300">
+                            {/* Decorative gradient border */}
+                            <div className="absolute -inset-0.5 bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 rounded-2xl blur opacity-30 animate-pulse"></div>
 
-                        <div className="relative">
-                            {/* Success Icon */}
-                            <div className="w-20 h-20 mx-auto mb-6 rounded-full bg-gradient-to-r from-indigo-500 to-purple-500 flex items-center justify-center animate-in zoom-in duration-500">
-                                <Sparkles className="w-10 h-10 text-white" />
+                            <div className="relative">
+                                {/* Success Icon */}
+                                <div className="w-20 h-20 mx-auto mb-6 rounded-full bg-gradient-to-r from-indigo-500 to-purple-500 flex items-center justify-center animate-in zoom-in duration-500">
+                                    <Sparkles className="w-10 h-10 text-white" />
+                                </div>
+
+                                {/* Title */}
+                                <h3 className="text-3xl font-bold text-center text-gray-900 dark:text-white mb-3">
+                                    🎉 Free Trial Activated!
+                                </h3>
+
+                                {/* Message */}
+                                <p className="text-center text-gray-600 dark:text-gray-300 mb-8 text-lg">
+                                    Enjoy <span className="font-bold text-indigo-600 dark:text-indigo-400">2 hours</span> of premium access to all notes!
+                                </p>
+
+                                {/* Features List */}
+                                <div className="bg-gray-50 dark:bg-gray-700/50 rounded-xl p-4 mb-6">
+                                    <ul className="space-y-2">
+                                        {[
+                                            "Unlimited note access",
+                                            "Ad-free experience",
+                                            "Premium quality PDFs"
+                                        ].map((feature, index) => (
+                                            <li key={index} className="flex items-center text-sm text-gray-700 dark:text-gray-300">
+                                                <Check className="w-4 h-4 mr-2 text-indigo-500 flex-shrink-0" />
+                                                {feature}
+                                            </li>
+                                        ))}
+                                    </ul>
+                                </div>
+
+                                {/* Action Button */}
+                                <button
+                                    onClick={() => {
+                                        setShowSuccessModal(false);
+                                        navigate('/');
+                                    }}
+                                    className="w-full py-4 px-6 rounded-xl bg-gradient-to-r from-indigo-600 to-purple-600 text-white font-bold text-lg hover:from-indigo-700 hover:to-purple-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-all shadow-lg"
+                                >
+                                    Start Exploring Notes
+                                </button>
                             </div>
-
-                            {/* Title */}
-                            <h3 className="text-3xl font-bold text-center text-gray-900 dark:text-white mb-3">
-                                🎉 Free Trial Activated!
-                            </h3>
-
-                            {/* Message */}
-                            <p className="text-center text-gray-600 dark:text-gray-300 mb-8 text-lg">
-                                Enjoy <span className="font-bold text-indigo-600 dark:text-indigo-400">2 hours</span> of premium access to all notes!
-                            </p>
-
-                            {/* Features List */}
-                            <div className="bg-gray-50 dark:bg-gray-700/50 rounded-xl p-4 mb-6">
-                                <ul className="space-y-2">
-                                    {[
-                                        "Unlimited note access",
-                                        "Ad-free experience",
-                                        "Premium quality PDFs"
-                                    ].map((feature, index) => (
-                                        <li key={index} className="flex items-center text-sm text-gray-700 dark:text-gray-300">
-                                            <Check className="w-4 h-4 mr-2 text-indigo-500 flex-shrink-0" />
-                                            {feature}
-                                        </li>
-                                    ))}
-                                </ul>
-                            </div>
-
-                            {/* Action Button */}
-                            <button
-                                onClick={() => {
-                                    setShowSuccessModal(false);
-                                    navigate('/');
-                                }}
-                                className="w-full py-4 px-6 rounded-xl bg-gradient-to-r from-indigo-600 to-purple-600 text-white font-bold text-lg hover:from-indigo-700 hover:to-purple-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-all shadow-lg"
-                            >
-                                Start Exploring Notes
-                            </button>
                         </div>
                     </div>
-                </div>
-            )}
-        </div>
+                )
+            }
+        </div >
     );
 }
