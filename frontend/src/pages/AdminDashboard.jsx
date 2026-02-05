@@ -5,7 +5,7 @@ import { Plus, Trash2, Pencil, X, TrendingUp, Users, FileText, DollarSign, Messa
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import AdminDashboardSkeleton from '../components/skeletons/AdminDashboardSkeleton'; // Import Skeleton
 
-import Toast from '../components/Toast';
+import Toast from '../components/common/Toast';
 
 export default function AdminDashboard() {
     const [deleteConfirmation, setDeleteConfirmation] = useState({

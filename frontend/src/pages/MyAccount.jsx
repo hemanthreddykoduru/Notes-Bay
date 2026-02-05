@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '../lib/supabase';
 import { User, Phone, Mail, Save, Loader, Lock, X } from 'lucide-react';
-import Toast from '../components/Toast';
+import Toast from '../components/common/Toast';
 import MyAccountSkeleton from '../components/skeletons/MyAccountSkeleton';
 
 export default function MyAccount() {
