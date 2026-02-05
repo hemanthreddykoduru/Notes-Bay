@@ -388,6 +388,11 @@ export default function Subscription() {
                             <div className="grid md:grid-cols-2 gap-4 sm:gap-6 md:gap-8 max-w-5xl mx-auto">
                                 {/* Free Trial Card */}
                                 <div className="relative group">
+                                    {!canUseTrial && (
+                                        <div className="absolute top-4 right-4 bg-gray-500 text-white text-xs font-bold px-3 py-1 rounded-full z-10">
+                                            USED
+                                        </div>
+                                    )}
                                     <div className={`absolute -inset-0.5 bg-gradient-to-r from-cyan-500 to-blue-500 rounded-2xl blur opacity-60 transition duration-300 ${canUseTrial ? 'group-hover:opacity-100' : 'opacity-0'}`}></div>
                                     <div className={`relative bg-white dark:bg-gray-800 rounded-2xl shadow-xl overflow-hidden h-full flex flex-col ${!canUseTrial ? 'opacity-75 grayscale-[0.5]' : ''}`}>
                                         <div className="p-6 sm:p-8 flex-grow">
@@ -517,10 +522,8 @@ export default function Subscription() {
                                     </div>
                                 </div>
                             </div>
-                        )}
                     </>
-                )
-                }
+                )}
             </div >
 
             {/* Success Modal */}
