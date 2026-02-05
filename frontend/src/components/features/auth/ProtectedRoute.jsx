@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '../../../lib/supabase';
-import GenericPageSkeleton from './skeletons/GenericPageSkeleton';
+import GenericPageSkeleton from '../../skeletons/GenericPageSkeleton';
 
 export default function ProtectedRoute({ children }) {
     const navigate = useNavigate();
