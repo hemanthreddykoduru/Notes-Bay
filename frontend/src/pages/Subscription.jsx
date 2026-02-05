@@ -5,6 +5,7 @@ import { supabase } from '../lib/supabase';
 import { Sparkles, Check, Shield, Zap, BookOpen, Star } from 'lucide-react';
 import SubscriptionSkeleton from '../components/skeletons/SubscriptionSkeleton';
 
+// Refined Trial Logic - Force Deploy v3
 export default function Subscription() {
     const [loading, setLoading] = useState(false);
     const [trialLoading, setTrialLoading] = useState(false);
