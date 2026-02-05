@@ -1,4 +1,6 @@
 # NotesBay
+## � Experience It Now
+Visit the live website to start exploring: **[NotesBay Live](https://www.notesbay.in)**
 
 **NotesBay** is a premium note-sharing platform designed to help students excel in their academic journey. It serves as a centralized marketplace where students can find, buy, and sell high-quality, verified study materials.
 
@@ -14,16 +16,9 @@ We bridge the gap between students who create excellent notes and those who need
 -   **Wishlist**: Save notes for later and build your personal study collection.
 -   **Verified Content**: All notes are reviewed to ensure quality and relevance.
 
-### ✍️ For Creators (Sellers)
--   **Monetize Your Work**: Turn your handwritten or digital notes into improved passive income.
--   **Simple Upload**: Easy-to-use interface for uploading and managing your note collections.
--   **Reach More Students**: Share your knowledge with a wider community.
 
 ### 💎 Flexible Access Plans
 -   **Free Trial**: Experience the full power of NotesBay with a **2-hour free trial** – no credit card required!
 -   **Pro Pass**: Upgrade to our annual Pro Pass for **unlimited access** to the entire library for a whole year.
 -   **Individual Purchase**: Buy only the specific notes you need.
-
-## � Experience It Now
-Visit the live website to start exploring: **[NotesBay Live](https://www.notesbay.in)**
 
