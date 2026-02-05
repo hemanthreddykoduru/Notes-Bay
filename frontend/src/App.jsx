@@ -1,13 +1,13 @@
 import { lazy, Suspense } from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
-import Navbar from './components/Navbar';
-import AuthHandler from './components/AuthHandler';
-import GoogleAdSenseLoader from './components/GoogleAdSenseLoader';
-import AdBlockDetector from './components/AdBlockDetector';
+import Navbar from './components/layout/Navbar';
+import AuthHandler from './components/features/auth/AuthHandler';
+import GoogleAdSenseLoader from './components/features/ads/GoogleAdSenseLoader';
+import AdBlockDetector from './components/features/ads/AdBlockDetector';
 import { AdProvider } from './context/AdContext';
 import { ThemeProvider } from './context/ThemeContext';
-import Footer from './components/Footer';
-import ProtectedRoute from './components/ProtectedRoute';
+import Footer from './components/layout/Footer';
+import ProtectedRoute from './components/features/auth/ProtectedRoute';
 
 // Skeletons
 import HomeSkeleton from './components/skeletons/HomeSkeleton';
@@ -15,11 +15,11 @@ import AuthSkeleton from './components/skeletons/AuthSkeleton';
 import SubscriptionSkeleton from './components/skeletons/SubscriptionSkeleton';
 import MyAccountSkeleton from './components/skeletons/MyAccountSkeleton';
 import MyPurchasesSkeleton from './components/skeletons/MyPurchasesSkeleton';
-import NoteDetailSkeleton from './components/NoteDetailSkeleton';
+import NoteDetailSkeleton from './components/skeletons/NoteDetailSkeleton';
 import GenericPageSkeleton from './components/skeletons/GenericPageSkeleton';
 
 // Lazy load heavy components
-const ChatAssistant = lazy(() => import('./components/ChatAssistant'));
+const ChatAssistant = lazy(() => import('./components/features/chat/ChatAssistant'));
 
 // Lazy load all route pages for code splitting
 const Home = lazy(() => import('./pages/Home'));

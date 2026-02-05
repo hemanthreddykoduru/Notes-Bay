@@ -1,9 +1,9 @@
 import { Link, useNavigate } from 'react-router-dom';
-import { supabase } from '../lib/supabase';
+import { supabase } from '../../lib/supabase';
 import { useEffect, useState } from 'react';
 import { LogOut, User, Menu, X, ShoppingBag, Heart, BookOpen } from 'lucide-react';
 import ThemeToggle from './ThemeToggle';
-import { useTheme } from '../context/ThemeContext';
+import { useTheme } from '../../context/ThemeContext';
 
 export default function Navbar() {
     const [user, setUser] = useState(null);

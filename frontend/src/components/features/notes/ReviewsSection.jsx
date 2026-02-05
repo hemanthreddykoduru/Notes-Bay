@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
-import api from '../lib/api';
-import { supabase } from '../lib/supabase';
+import api from '../../../lib/api';
+import { supabase } from '../../../lib/supabase';
 import { Star, User } from 'lucide-react';
 
 export default function ReviewsSection({ noteId }) {

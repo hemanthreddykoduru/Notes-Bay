@@ -3,7 +3,7 @@ import api from '../lib/api';
 import { supabase } from '../lib/supabase';
 import { Plus, Trash2, Pencil, X, TrendingUp, Users, FileText, DollarSign, MessageSquare } from 'lucide-react';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
-import AdminDashboardSkeleton from '../components/AdminDashboardSkeleton'; // Import Skeleton
+import AdminDashboardSkeleton from '../components/skeletons/AdminDashboardSkeleton'; // Import Skeleton
 
 import Toast from '../components/Toast';
 

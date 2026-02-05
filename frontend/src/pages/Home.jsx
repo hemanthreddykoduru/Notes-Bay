@@ -2,10 +2,12 @@ import { useEffect, useState, useCallback, lazy, Suspense } from 'react';
 import { useNavigate } from 'react-router-dom';
 import api from '../lib/api';
 import { supabase } from '../lib/supabase';
-import NoteCard from '../components/NoteCard';
-const Hero3D = lazy(() => import('../components/Hero3D'));
-import NativeAd from '../components/NativeAd';
-import LeaderboardAd from '../components/LeaderboardAd';
+import NoteCard from '../components/features/notes/NoteCard';
+const Hero3D = lazy(() => import('../components/hero/Hero3D'));
+import NativeAd from '../components/features/ads/NativeAd';
+import LeaderboardAd from '../components/features/ads/LeaderboardAd';
+import SkyscraperAd from '../components/features/ads/SkyscraperAd';
+import AdBlockDetector from '../components/features/ads/AdBlockDetector';
 import { Search, Filter, X, Sparkles, CheckCircle } from 'lucide-react';
 import HomeSkeleton from '../components/skeletons/HomeSkeleton';
 

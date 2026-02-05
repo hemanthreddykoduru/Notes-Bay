@@ -3,15 +3,15 @@ import { useParams, useNavigate } from 'react-router-dom';
 import api from '../lib/api';
 import { supabase } from '../lib/supabase';
 import { FileText, Lock, BookOpen } from 'lucide-react';
-import ReviewsSection from '../components/ReviewsSection';
-import Breadcrumbs from '../components/Breadcrumbs';
-import SocialShare from '../components/SocialShare';
-import RelatedNotes from '../components/RelatedNotes';
-import NoteDetailSkeleton from '../components/NoteDetailSkeleton';
-import SecurePDFViewer from '../components/SecurePDFViewer';
+import ReviewsSection from '../components/features/notes/ReviewsSection';
+import Breadcrumbs from '../components/layout/Breadcrumbs';
+import SocialShare from '../components/common/SocialShare';
+import RelatedNotes from '../components/features/notes/RelatedNotes';
+import NoteDetailSkeleton from '../components/skeletons/NoteDetailSkeleton';
+import SecurePDFViewer from '../components/features/notes/SecurePDFViewer';
 
-import SkyscraperAd from '../components/SkyscraperAd';
-import LeaderboardAd from '../components/LeaderboardAd';
+import SkyscraperAd from '../components/features/ads/SkyscraperAd';
+import LeaderboardAd from '../components/features/ads/LeaderboardAd';
 
 export default function NoteDetails() {
     const { id } = useParams();

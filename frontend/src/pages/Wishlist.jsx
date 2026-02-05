@@ -1,9 +1,9 @@
 import { useEffect, useState } from 'react';
 import api from '../lib/api';
-import NoteCard from '../components/NoteCard';
+import NoteCard from '../components/features/notes/NoteCard';
 import { Heart } from 'lucide-react';
 
-import WishlistSkeleton from '../components/WishlistSkeleton';
+import WishlistSkeleton from '../components/skeletons/WishlistSkeleton';
 
 export default function Wishlist() {
     const [wishlist, setWishlist] = useState([]);

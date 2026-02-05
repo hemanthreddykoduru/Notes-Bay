@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { supabase } from '../lib/supabase';
 import { useNavigate } from 'react-router-dom';
-import LoginScene from '../components/LoginScene';
+import LoginScene from '../components/features/auth/LoginScene';
 
 export default function Login() {
     const [isSignUp, setIsSignUp] = useState(false);

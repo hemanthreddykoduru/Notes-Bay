@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { FileText, ArrowRight, Star, Heart, Sparkles } from 'lucide-react';
-import api from '../lib/api';
+import api from '../../../lib/api';
 
 export default function NoteCard({ note, isWishlisted, isSubscribed, subPrice = 100 }) {
     const navigate = useNavigate();

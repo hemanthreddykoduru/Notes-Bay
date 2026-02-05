@@ -1,5 +1,5 @@
 import { useEffect, useRef } from 'react';
-import { useAdContext } from '../context/AdContext';
+import { useAdContext } from '../../../context/AdContext';
 import { useNavigate } from 'react-router-dom';
 
 export default function SkyscraperAd() {
