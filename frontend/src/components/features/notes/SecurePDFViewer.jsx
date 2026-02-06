@@ -60,17 +60,23 @@ export default function SecurePDFViewer({ fileUrl, onClose, title, userEmail }) 
 
     // ... existing code ...
 
-    // Anti-Screenshot: Blur when window loses focus
+    // Anti-Screenshot: Blur when window loses focus OR mouse leaves (Snipping Tool protection)
     useEffect(() => {
         const handleFocus = () => setIsBlurred(false);
         const handleBlur = () => setIsBlurred(true);
+        const handleMouseLeave = () => setIsBlurred(true);
+        const handleMouseEnter = () => setIsBlurred(false);
 
         window.addEventListener('focus', handleFocus);
         window.addEventListener('blur', handleBlur);
+        document.addEventListener('mouseleave', handleMouseLeave);
+        document.addEventListener('mouseenter', handleMouseEnter);
 
         return () => {
             window.removeEventListener('focus', handleFocus);
             window.removeEventListener('blur', handleBlur);
+            document.removeEventListener('mouseleave', handleMouseLeave);
+            document.removeEventListener('mouseenter', handleMouseEnter);
         };
     }, []);
 
@@ -205,15 +211,15 @@ export default function SecurePDFViewer({ fileUrl, onClose, title, userEmail }) 
                                     className="bg-white"
                                     loading=""
                                 />
-                                {/* Watermark Overlay */}
-                                <div className="absolute inset-0 z-10 overflow-hidden pointer-events-none select-none flex flex-wrap content-center justify-center opacity-[0.15]">
+                                {/* Watermark Overlay - Stronger Visibility */}
+                                <div className="absolute inset-0 z-10 overflow-hidden pointer-events-none select-none flex flex-wrap content-center justify-center opacity-30">
                                     {Array.from({ length: 12 }).map((_, i) => (
                                         <div
                                             key={i}
                                             className="w-1/3 h-1/4 flex items-center justify-center -rotate-45 transform"
                                         >
-                                            <span className="text-gray-900 text-lg sm:text-2xl font-bold whitespace-nowrap">
-                                                {userEmail || 'NotesBay User'}
+                                            <span className="text-gray-700 text-xl sm:text-3xl font-extrabold whitespace-nowrap">
+                                                {userEmail || 'NotesBay Safe'}
                                             </span>
                                         </div>
                                     ))}
