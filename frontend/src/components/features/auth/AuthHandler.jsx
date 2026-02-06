@@ -41,7 +41,23 @@ const AuthHandler = () => {
                     });
                 } else if (event === 'INITIAL_SESSION') {
                     // Page reload -> Use existing token from localStorage
-                    sessionTokenRef.current = localStorage.getItem('notesbay_session_token');
+                    // BUT: We must also check if this token is still valid in the DB!
+                    const currentToken = localStorage.getItem('notesbay_session_token');
+                    sessionTokenRef.current = currentToken;
+
+                    const { data: profile } = await supabase
+                        .from('profiles')
+                        .select('active_session_id')
+                        .eq('id', session.user.id)
+                        .single();
+
+                    if (profile && profile.active_session_id && profile.active_session_id !== currentToken) {
+                        await supabase.auth.signOut();
+                        localStorage.removeItem('notesbay_session_token');
+                        alert("You have been logged out because this account was logged in on another device.");
+                        window.location.href = '/login';
+                        return;
+                    }
                 }
 
                 // C. Subscribe to Profile Changes (Realtime Lockout)
