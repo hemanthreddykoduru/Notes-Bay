@@ -1,11 +1,10 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '../../../lib/supabase';
 import { LogOut } from 'lucide-react';
 
 const AuthHandler = () => {
     const navigate = useNavigate();
-    const sessionTokenRef = useRef(localStorage.getItem('notesbay_session_token'));
     const [showLogoutModal, setShowLogoutModal] = useState(false);
     const [logoutReason, setLogoutReason] = useState('');
 
@@ -28,73 +27,6 @@ const AuthHandler = () => {
                     setShowLogoutModal(true);
                     return;
                 }
-
-                // B. Single Session Enforcement (Last Login Wins)
-                let currentToken = localStorage.getItem('notesbay_session_token');
-
-                if (event === 'SIGNED_IN' || (event === 'INITIAL_SESSION' && !currentToken)) {
-                    // Start of a FRESH login OR a persisted session without a device token
-                    // We generate a new token to "claim" this device as the active one
-                    const newToken = crypto.randomUUID();
-                    localStorage.setItem('notesbay_session_token', newToken);
-                    sessionTokenRef.current = newToken;
-                    currentToken = newToken;
-
-                    // Update DB with this new token
-                    await supabase.from('profiles').update({
-                        active_session_id: newToken
-                    }).eq('id', session.user.id);
-                } else if (event === 'INITIAL_SESSION' && currentToken) {
-                    // Page reload with an existing token -> Verify it hasn't been superseded
-                    const { data: profile } = await supabase
-                        .from('profiles')
-                        .select('active_session_id')
-                        .eq('id', session.user.id)
-                        .maybeSingle();
-
-                    if (profile?.active_session_id && profile.active_session_id !== currentToken) {
-                        // Immediate UI update
-                        localStorage.removeItem('notesbay_session_token');
-                        setLogoutReason("You have been logged out because this account was logged in on another device.");
-                        setShowLogoutModal(true);
-
-                        // Background cleanup
-                        supabase.auth.signOut().catch(console.error);
-                        return;
-                    }
-                }
-
-                // C. Subscribe to Profile Changes (Realtime Lockout)
-                const channel = supabase
-                    .channel(`public:profiles:${session.user.id}`)
-                    .on('postgres_changes',
-                        {
-                            event: 'UPDATE',
-                            schema: 'public',
-                            table: 'profiles',
-                            filter: `id=eq.${session.user.id}`
-                        },
-                        async (payload) => {
-                            const newActiveSessionId = payload.new.active_session_id;
-                            const mySessionToken = localStorage.getItem('notesbay_session_token');
-
-                            // If DB says a DIFFERENT session is active, logout this one
-                            if (newActiveSessionId && newActiveSessionId !== mySessionToken) {
-                                // Immediate UI update
-                                localStorage.removeItem('notesbay_session_token'); // Clear my token
-                                setLogoutReason("You have been logged out because this account was logged in on another device.");
-                                setShowLogoutModal(true);
-
-                                // Background cleanup
-                                supabase.auth.signOut().catch(console.error);
-                            }
-                        }
-                    )
-                    .subscribe();
-
-                return () => {
-                    supabase.removeChannel(channel);
-                };
             }
         });
 
@@ -112,7 +44,7 @@ const AuthHandler = () => {
                             <LogOut className="h-8 w-8 text-indigo-600 dark:text-indigo-400" />
                         </div>
                         <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-2 tracking-tight">
-                            Session Expired
+                            {logoutReason.includes('Restricted') ? 'Access Restricted' : 'Session Expired'}
                         </h3>
                         <p className="text-base text-gray-500 dark:text-gray-400 mb-8 leading-relaxed">
                             {logoutReason}
