@@ -18,45 +18,76 @@ export default function NoteDetails() {
     const navigate = useNavigate();
     const [note, setNote] = useState(null);
     const [loading, setLoading] = useState(true);
+    const [error, setError] = useState(null);
     const [purchased, setPurchased] = useState(false);
     const [processing, setProcessing] = useState(false);
-    // removed duplicate
     const [showReader, setShowReader] = useState(false);
     const [subPrice, setSubPrice] = useState(100);
-
     const [userEmail, setUserEmail] = useState(null);
 
     useEffect(() => {
-        fetchNoteDetails();
-        fetchConfig();
-        window.scrollTo(0, 0); // Scroll to top when note ID changes
-        // Fetch User Email for Watermark
-        const getUser = async () => {
-            const { data: { user } } = await supabase.auth.getUser();
-            if (user) setUserEmail(user.email);
+        let mounted = true;
+        setLoading(true);
+        setError(null);
+        window.scrollTo(0, 0);
+
+        // Failsafe: Force stop loading after 8 seconds
+        const safetyTimer = setTimeout(() => {
+            if (mounted) {
+                setLoading((prev) => {
+                    if (prev) {
+                        console.warn("Note details fetch timed out safely.");
+                        setError("Connection is slow. Please try reloading.");
+                        return false;
+                    }
+                    return prev;
+                });
+            }
+        }, 8000);
+
+        const loadData = async () => {
+            try {
+                // Background price fetch
+                fetchConfig();
+
+                // Get User for watermark
+                supabase.auth.getUser().then(({ data }) => {
+                    if (data?.user && mounted) setUserEmail(data.user.email);
+                });
+
+                // Fetch Note
+                const { data } = await api.get(`/notes/${id}`);
+                if (mounted) {
+                    setNote(data);
+                    if (data.hasAccess) setPurchased(true);
+                }
+            } catch (err) {
+                console.error('Error fetching note details:', err);
+                if (mounted) setError("Unable to load note. It may have been removed.");
+            } finally {
+                if (mounted) {
+                    clearTimeout(safetyTimer);
+                    setLoading(false);
+                }
+            }
         };
-        getUser();
+
+        loadData();
+
+        return () => {
+            mounted = false;
+            clearTimeout(safetyTimer);
+        };
     }, [id]);
 
-    const fetchConfig = async () => {
-        try {
-            const { data } = await api.get('/config/subscription_price');
-            if (data && data.value) setSubPrice(data.value);
-        } catch (error) {
-            console.error('Error fetching config:', error);
-        }
-    };
-
     const fetchNoteDetails = async () => {
+        setLoading(true); // Manually triggered (e.g. after purchase)
         try {
-            setLoading(true); // Reset loading when id changes
             const { data } = await api.get(`/notes/${id}`);
             setNote(data);
-            if (data.hasAccess) {
-                setPurchased(true);
-            }
-        } catch (error) {
-            console.error('Error fetching note:', error);
+            if (data.hasAccess) setPurchased(true);
+        } catch (err) {
+            console.error(err);
         } finally {
             setLoading(false);
         }
@@ -124,7 +155,23 @@ export default function NoteDetails() {
     };
 
     if (loading) return <NoteDetailSkeleton />;
-    if (!note) return <div>Note not found</div>;
+
+    if (error || !note) {
+        return (
+            <div className="flex flex-col items-center justify-center min-h-[60vh] text-center px-4">
+                <FileText className="w-16 h-16 text-gray-400 mb-4" />
+                <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">
+                    {error || "Note not found"}
+                </h2>
+                <button
+                    onClick={() => window.location.reload()}
+                    className="mt-4 px-6 py-2 bg-indigo-600 text-white rounded-lg font-medium hover:bg-indigo-700"
+                >
+                    Reload Page
+                </button>
+            </div>
+        );
+    }
 
     const breadcrumbItems = [
         { label: note.subject, link: `/?search=${encodeURIComponent(note.subject)}` },

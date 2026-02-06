@@ -35,7 +35,22 @@ export default function AdminDashboard() {
     });
 
     useEffect(() => {
+        let mounted = true;
         fetchData();
+
+        // Failsafe: Force stop loading after 10 seconds
+        const safetyTimer = setTimeout(() => {
+            if (mounted) {
+                setLoading((prev) => {
+                    if (prev) {
+                        console.warn("Admin dashboard fetch timed out safely.");
+                        setToast({ message: 'Dashboard is taking unusually long to load. Some data may be missing.', type: 'error' });
+                        return false;
+                    }
+                    return prev;
+                });
+            }
+        }, 10000);
 
         // Realtime subscriptions
         const notesChannel = supabase
@@ -64,6 +79,8 @@ export default function AdminDashboard() {
             .subscribe();
 
         return () => {
+            mounted = false;
+            clearTimeout(safetyTimer);
             supabase.removeChannel(notesChannel);
             supabase.removeChannel(messagesChannel);
         };
@@ -72,10 +89,16 @@ export default function AdminDashboard() {
     const fetchData = async () => {
         setLoading(true);
         try {
-            await Promise.all([fetchNotes(), fetchStats(), fetchConfig(), fetchSupportMessages()]);
+            // Note: Individual fetches handle their own errors/sets
+            await Promise.all([
+                fetchNotes().catch(e => console.error(e)),
+                fetchStats().catch(e => console.error(e)),
+                fetchConfig().catch(e => console.error(e)),
+                fetchSupportMessages().catch(e => console.error(e))
+            ]);
         } catch (error) {
-            console.error('Error fetching data:', error);
-            setToast({ message: 'Failed to load dashboard data', type: 'error' });
+            console.error('Error in batch fetchData:', error);
+            setToast({ message: 'Error loading dashboard components', type: 'error' });
         } finally {
             setLoading(false);
         }

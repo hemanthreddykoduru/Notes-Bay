@@ -317,9 +317,11 @@ export default function Home() {
                 )}
             </div>
 
-            <h2 className="text-3xl font-bold text-gray-900 dark:text-white mb-8">
-                {totalNotes} Notes Found {totalPages > 1 && `(Page ${currentPage} of ${totalPages})`}
-            </h2>
+            {!error && notes.length > 0 && (
+                <h2 className="text-3xl font-bold text-gray-900 dark:text-white mb-8">
+                    {totalNotes} Notes Found {totalPages > 1 && `(Page ${currentPage} of ${totalPages})`}
+                </h2>
+            )}
 
             {loading ? (
                 <HomeSkeleton onlyGrid={true} />
