@@ -24,10 +24,18 @@ export default function NoteDetails() {
     const [showReader, setShowReader] = useState(false);
     const [subPrice, setSubPrice] = useState(100);
 
+    const [userEmail, setUserEmail] = useState(null);
+
     useEffect(() => {
         fetchNoteDetails();
         fetchConfig();
         window.scrollTo(0, 0); // Scroll to top when note ID changes
+        // Fetch User Email for Watermark
+        const getUser = async () => {
+            const { data: { user } } = await supabase.auth.getUser();
+            if (user) setUserEmail(user.email);
+        };
+        getUser();
     }, [id]);
 
     const fetchConfig = async () => {
@@ -268,11 +276,6 @@ export default function NoteDetails() {
                 )
             }
 
-            {/* Reviews Section */}
-            <div className="mt-8 px-4 sm:px-6">
-                <ReviewsSection noteId={id} />
-            </div>
-
             {/* Secure Reader Modal */}
             {
                 showReader && purchased && note.file_url && (
@@ -280,6 +283,7 @@ export default function NoteDetails() {
                         fileUrl={note.file_url}
                         title={note.title}
                         onClose={() => setShowReader(false)}
+                        userEmail={userEmail}
                     />
                 )
             }

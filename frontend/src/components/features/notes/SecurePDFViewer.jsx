@@ -8,7 +8,7 @@ pdfjs.GlobalWorkerOptions.workerSrc = `//unpkg.com/pdfjs-dist@${pdfjs.version}/b
 
 // configured below
 
-export default function SecurePDFViewer({ fileUrl, onClose, title }) {
+export default function SecurePDFViewer({ fileUrl, onClose, title, userEmail }) {
     const [numPages, setNumPages] = useState(null);
     const [pageNumber, setPageNumber] = useState(1);
     const [scale, setScale] = useState(1.0);
@@ -132,15 +132,30 @@ export default function SecurePDFViewer({ fileUrl, onClose, title }) {
                     >
                         {/* Only render page if we have a width to base it on */}
                         {containerWidth && (
-                            <Page
-                                pageNumber={pageNumber}
-                                scale={scale}
-                                width={Math.min(containerWidth - 16, 800)} // Responsive width: Container minus padding (16px), max 800px
-                                renderTextLayer={false}
-                                renderAnnotationLayer={false}
-                                className="bg-white"
-                                loading=""
-                            />
+                            <div className="relative">
+                                <Page
+                                    pageNumber={pageNumber}
+                                    scale={scale}
+                                    width={Math.min(containerWidth - 16, 800)} // Responsive width: Container minus padding (16px), max 800px
+                                    renderTextLayer={false}
+                                    renderAnnotationLayer={false}
+                                    className="bg-white"
+                                    loading=""
+                                />
+                                {/* Watermark Overlay */}
+                                <div className="absolute inset-0 z-10 overflow-hidden pointer-events-none select-none flex flex-wrap content-center justify-center opacity-[0.15]">
+                                    {Array.from({ length: 12 }).map((_, i) => (
+                                        <div
+                                            key={i}
+                                            className="w-1/3 h-1/4 flex items-center justify-center -rotate-45 transform"
+                                        >
+                                            <span className="text-gray-900 text-lg sm:text-2xl font-bold whitespace-nowrap">
+                                                {userEmail || 'NotesBay User'}
+                                            </span>
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
                         )}
                     </Document>
                 </div>
