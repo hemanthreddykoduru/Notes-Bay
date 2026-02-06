@@ -34,7 +34,8 @@ export default function Navbar() {
 
     const handleLogout = async () => {
         await supabase.auth.signOut();
-        navigate('/login');
+        localStorage.removeItem('notesbay_session_token');
+        window.location.href = '/login';
     };
 
     return (
