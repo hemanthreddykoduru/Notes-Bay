@@ -112,20 +112,20 @@ export default function Home() {
         let mounted = true;
         fetchData();
 
-        // Failsafe: Aggressive timeout for angry users (3 seconds - increased from 2)
+        // Failsafe: Timeout for slow networks/cold starts (10 seconds)
         const safetyTimer = setTimeout(() => {
             if (mounted) {
                 setLoading((prev) => {
                     if (prev) {
                         console.warn("Forcing loading false due to timeout.");
                         // CRITICAL FIX: Set error so we don't show "0 Notes Found"
-                        setError("Loading took too long. Please try reloading.");
+                        setError("Connection is slow. Please reload.");
                         return false;
                     }
                     return prev;
                 });
             }
-        }, 3000); // 3 seconds gives api a bit more breathing room than 2
+        }, 10000);
 
         return () => {
             mounted = false;
