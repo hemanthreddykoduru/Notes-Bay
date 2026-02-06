@@ -17,6 +17,16 @@ export default function Login() {
         setLoading(true);
         setMessage('');
 
+        // Email Domain Validation
+        const allowedDomains = ['gmail.com', 'gitam.in'];
+        const emailDomain = email.split('@')[1];
+
+        if (isSignUp && !allowedDomains.includes(emailDomain)) {
+            setMessage('Only @gmail.com and @gitam.in email addresses are allowed.');
+            setLoading(false);
+            return;
+        }
+
         try {
             if (isSignUp) {
                 const { error } = await supabase.auth.signUp({
