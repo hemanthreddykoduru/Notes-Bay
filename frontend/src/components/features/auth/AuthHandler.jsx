@@ -56,10 +56,13 @@ const AuthHandler = () => {
                             .single();
 
                         if (profile && profile.active_session_id && profile.active_session_id !== currentToken) {
-                            await supabase.auth.signOut();
+                            // Immediate UI update
                             localStorage.removeItem('notesbay_session_token');
                             setLogoutReason("You have been logged out because this account was logged in on another device.");
                             setShowLogoutModal(true);
+
+                            // Background cleanup
+                            supabase.auth.signOut().catch(console.error);
                             return;
                         }
                     }
@@ -81,10 +84,13 @@ const AuthHandler = () => {
 
                             // If DB says a DIFFERENT session is active, logout this one
                             if (newActiveSessionId && newActiveSessionId !== mySessionToken) {
-                                await supabase.auth.signOut();
+                                // Immediate UI update
                                 localStorage.removeItem('notesbay_session_token'); // Clear my token
                                 setLogoutReason("You have been logged out because this account was logged in on another device.");
                                 setShowLogoutModal(true);
+
+                                // Background cleanup
+                                supabase.auth.signOut().catch(console.error);
                             }
                         }
                     )
