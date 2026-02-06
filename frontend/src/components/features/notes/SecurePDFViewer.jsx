@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Document, Page, pdfjs } from 'react-pdf';
-import { X, ChevronLeft, ChevronRight, ZoomIn, ZoomOut } from 'lucide-react';
+import { X, ChevronLeft, ChevronRight, ZoomIn, ZoomOut, Lock } from 'lucide-react';
 
 // Configure PDF Worker
 // Use unpkg CDN for the worker to avoid Vite build issues with the local file
@@ -56,11 +56,74 @@ export default function SecurePDFViewer({ fileUrl, onClose, title, userEmail }) 
         return () => window.removeEventListener('resize', handleResize);
     }, []);
 
+    const [isBlurred, setIsBlurred] = useState(false);
+
+    // ... existing code ...
+
+    // Anti-Screenshot: Blur when window loses focus
+    useEffect(() => {
+        const handleFocus = () => setIsBlurred(false);
+        const handleBlur = () => setIsBlurred(true);
+
+        window.addEventListener('focus', handleFocus);
+        window.addEventListener('blur', handleBlur);
+
+        return () => {
+            window.removeEventListener('focus', handleFocus);
+            window.removeEventListener('blur', handleBlur);
+        };
+    }, []);
+
+    // Anti-Screenshot: Block keyboard shortcuts
+    useEffect(() => {
+        const handleKeyDown = (e) => {
+            // macOS: Cmd+Shift+3, Cmd+Shift+4, Cmd+Shift+5
+            if (e.metaKey && e.shiftKey && (e.key === '3' || e.key === '4' || e.key === '5')) {
+                e.preventDefault();
+                alert("Screenshots are disabled for privacy.");
+                setIsBlurred(true);
+            }
+            // Windows: PrtScn (Print Screen)
+            if (e.key === 'PrintScreen') {
+                e.preventDefault();
+                alert("Screenshots are disabled for privacy.");
+                setIsBlurred(true);
+            }
+            // Ctrl+P (Print)
+            if ((e.ctrlKey || e.metaKey) && e.key === 'p') {
+                e.preventDefault();
+                alert("Printing is disabled.");
+            }
+        };
+
+        window.addEventListener('keydown', handleKeyDown);
+        return () => window.removeEventListener('keydown', handleKeyDown);
+    }, []);
+
     return (
         <div
             className="fixed inset-0 z-50 bg-gray-900 flex flex-col h-screen w-screen overflow-hidden select-none"
             onContextMenu={handleContextMenu}
         >
+            {/* Blur Overlay */}
+            {isBlurred && (
+                <div className="absolute inset-0 z-[100] bg-gray-900/95 backdrop-blur-xl flex flex-col items-center justify-center text-center p-4">
+                    <div className="bg-white/10 p-8 rounded-full mb-6">
+                        <Lock className="w-16 h-16 text-white" />
+                    </div>
+                    <h2 className="text-3xl font-bold text-white mb-4">Content Hidden</h2>
+                    <p className="text-gray-300 text-lg max-w-md">
+                        The secure viewer is blurred when the window loses focus to protect content privacy.
+                    </p>
+                    <button
+                        onClick={() => setIsBlurred(false)}
+                        className="mt-8 px-8 py-3 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg font-semibold transition-colors"
+                    >
+                        Resume Reading
+                    </button>
+                </div>
+            )}
+
             {/* Header / Toolbar */}
             <div className="bg-white dark:bg-gray-800 shadow-md p-4 flex justify-between items-center z-10 shrink-0">
                 <div className="flex items-center space-x-2 sm:space-x-4">
