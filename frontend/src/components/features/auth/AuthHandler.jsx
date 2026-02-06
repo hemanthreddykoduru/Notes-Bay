@@ -30,41 +30,37 @@ const AuthHandler = () => {
                 }
 
                 // B. Single Session Enforcement (Last Login Wins)
-                if (event === 'SIGNED_IN') {
-                    // Start of a FRESH login (not a reload) -> Generate new token
+                let currentToken = localStorage.getItem('notesbay_session_token');
+
+                if (event === 'SIGNED_IN' || (event === 'INITIAL_SESSION' && !currentToken)) {
+                    // Start of a FRESH login OR a persisted session without a device token
+                    // We generate a new token to "claim" this device as the active one
                     const newToken = crypto.randomUUID();
                     localStorage.setItem('notesbay_session_token', newToken);
                     sessionTokenRef.current = newToken;
+                    currentToken = newToken;
 
                     // Update DB with this new token
-                    await supabase.from('profiles').upsert({
-                        id: session.user.id,
-                        email: session.user.email,
+                    await supabase.from('profiles').update({
                         active_session_id: newToken
-                    });
-                } else if (event === 'INITIAL_SESSION') {
-                    // Page reload -> Use existing token from localStorage
-                    // BUT: We must also check if this token is still valid in the DB!
-                    const currentToken = localStorage.getItem('notesbay_session_token');
-                    sessionTokenRef.current = currentToken;
+                    }).eq('id', session.user.id);
+                } else if (event === 'INITIAL_SESSION' && currentToken) {
+                    // Page reload with an existing token -> Verify it hasn't been superseded
+                    const { data: profile } = await supabase
+                        .from('profiles')
+                        .select('active_session_id')
+                        .eq('id', session.user.id)
+                        .maybeSingle();
 
-                    if (session.user.id) {
-                        const { data: profile } = await supabase
-                            .from('profiles')
-                            .select('active_session_id')
-                            .eq('id', session.user.id)
-                            .single();
+                    if (profile?.active_session_id && profile.active_session_id !== currentToken) {
+                        // Immediate UI update
+                        localStorage.removeItem('notesbay_session_token');
+                        setLogoutReason("You have been logged out because this account was logged in on another device.");
+                        setShowLogoutModal(true);
 
-                        if (profile && profile.active_session_id && profile.active_session_id !== currentToken) {
-                            // Immediate UI update
-                            localStorage.removeItem('notesbay_session_token');
-                            setLogoutReason("You have been logged out because this account was logged in on another device.");
-                            setShowLogoutModal(true);
-
-                            // Background cleanup
-                            supabase.auth.signOut().catch(console.error);
-                            return;
-                        }
+                        // Background cleanup
+                        supabase.auth.signOut().catch(console.error);
+                        return;
                     }
                 }
 
