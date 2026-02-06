@@ -112,9 +112,16 @@ exports.getNoteDetails = async (req, res) => {
             .from('notes')
             .select('*')
             .eq('id', id)
-            .single();
+            .maybeSingle();
 
-        if (error) throw error;
+        if (error) {
+            console.error('Database error fetching note:', error);
+            return res.status(500).json({ error: 'Database error' });
+        }
+
+        if (!note) {
+            return res.status(404).json({ error: 'Note not found' });
+        }
 
         // If no user (Guest), return basic info only
         if (!userId) {

@@ -63,7 +63,15 @@ export default function NoteDetails() {
                 }
             } catch (err) {
                 console.error('Error fetching note details:', err);
-                if (mounted) setError("Unable to load note. It may have been removed.");
+                if (mounted) {
+                    if (err.response?.status === 404) {
+                        setError("Note not found. It may have been removed.");
+                    } else if (err.code === 'ECONNABORTED' || err.message.includes('timeout')) {
+                        setError("Connection is slow. Please try reloading.");
+                    } else {
+                        setError("Failed to load note details. Please try again.");
+                    }
+                }
             } finally {
                 if (mounted) {
                     clearTimeout(safetyTimer);
