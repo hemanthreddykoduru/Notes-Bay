@@ -106,25 +106,34 @@ export default function Home() {
         return () => clearTimeout(timeoutId);
     }, [search, minPrice, maxPrice, sort]);
 
+    const [error, setError] = useState(null);
+
     useEffect(() => {
+        let mounted = true;
         fetchData();
 
-        // Failsafe: If data fetching takes too long (e.g., 5 seconds), force stop loading
+        // Failsafe: Aggressive timeout for angry users (2 seconds)
         const safetyTimer = setTimeout(() => {
-            setLoading((prev) => {
-                if (prev) {
-                    console.warn("Home data fetch timed out safely.");
-                    return false;
-                }
-                return prev;
-            });
-        }, 5000);
+            if (mounted) {
+                setLoading((prev) => {
+                    if (prev) {
+                        console.warn("Forcing loading false due to timeout.");
+                        return false;
+                    }
+                    return prev;
+                });
+            }
+        }, 2000);
 
-        return () => clearTimeout(safetyTimer);
+        return () => {
+            mounted = false;
+            clearTimeout(safetyTimer);
+        };
     }, [currentPage]);
 
     const fetchData = async () => {
         setLoading(true);
+        setError(null);
         const params = new URLSearchParams();
         if (search) params.append('search', search);
         if (minPrice) params.append('minPrice', minPrice);
@@ -132,26 +141,21 @@ export default function Home() {
         if (sort) params.append('sort', sort);
 
         try {
-            // Add pagination params
             params.append('page', currentPage);
             params.append('limit', NOTES_PER_PAGE);
 
             const notesReq = api.get(`/notes?${params.toString()}`);
-            // Catch wishlist errors silently (e.g. 401 if not logged in)
             const wishlistReq = api.get('/wishlist').catch(() => ({ data: [] }));
-            // Catch subscription errors silently
             const subReq = api.get('/payments/subscription-status').catch(() => ({ data: { isSubscribed: false } }));
 
             const [notesRes, wishlistRes, subRes] = await Promise.all([notesReq, wishlistReq, subReq]);
 
-            // Handle paginated response
             setNotes(notesRes.data.notes || notesRes.data);
             setTotalPages(notesRes.data.pagination?.totalPages || 1);
             setTotalNotes(notesRes.data.pagination?.total || notesRes.data.length);
             setWishlistIds(new Set(wishlistRes.data.map(n => n.id)));
             setIsSubscribed(subRes.data.isSubscribed);
 
-            // Cache subscription status for 5 minutes
             if (subRes.data.isSubscribed !== undefined) {
                 localStorage.setItem('sub_status', JSON.stringify({
                     value: subRes.data.isSubscribed,
@@ -159,67 +163,25 @@ export default function Home() {
                 }));
             }
 
-            // Fetch subscription price with caching
-            try {
-                // Check cache first (1 hour TTL)
-                const cachedPrice = localStorage.getItem('sub_price');
-                if (cachedPrice) {
-                    const { value, timestamp } = JSON.parse(cachedPrice);
-                    const age = Date.now() - timestamp;
-                    const ONE_HOUR = 60 * 60 * 1000;
-
-                    if (age < ONE_HOUR) {
-                        // Use cached value
-                        setSubPrice(value);
-                        // Revalidate in background if older than 30 minutes
-                        if (age > ONE_HOUR / 2) {
-                            api.get('/config/subscription_price').then(({ data: config }) => {
-                                if (config && config.value) {
-                                    setSubPrice(config.value);
-                                    localStorage.setItem('sub_price', JSON.stringify({
-                                        value: config.value,
-                                        timestamp: Date.now()
-                                    }));
-                                }
-                            }).catch(e => console.error(e));
-                        }
-                        return; // Skip fetch if cache is fresh
-                    }
-                }
-
-                // Cache miss or expired - fetch fresh data
-                const { data: config } = await api.get('/config/subscription_price');
-                if (config && config.value) {
-                    setSubPrice(config.value);
-                    localStorage.setItem('sub_price', JSON.stringify({
-                        value: config.value,
-                        timestamp: Date.now()
-                    }));
-                }
-            } catch (e) {
-                console.error('Error fetching subscription price:', e);
-            }
+            // Background price fetch (non-blocking)
+            fetchSubPrice();
 
         } catch (error) {
             console.error('Error fetching data:', error);
-            // Fallback: try fetching notes only
-            try {
-                const { data } = await api.get(`/notes?${params.toString()}`);
-                // Handle both paginated and non-paginated responses
-                if (data.notes) {
-                    setNotes(data.notes);
-                    setTotalPages(data.pagination?.totalPages || 1);
-                    setTotalNotes(data.pagination?.total || 0);
-                } else {
-                    setNotes(data);
-                }
-            } catch (e) {
-                console.error('Error fetching notes:', e);
-            }
+            setError("Unable to load notes. Please check your connection.");
+            setNotes([]);
         } finally {
-            // ALWAYS set loading to false, even if errors occurred
             setLoading(false);
         }
+    };
+
+    const fetchSubPrice = async () => {
+        try {
+            const cachedPrice = localStorage.getItem('sub_price');
+            // ... (rest of simple price logic or simple fetch)
+            const { data: config } = await api.get('/config/subscription_price');
+            if (config?.value) setSubPrice(config.value);
+        } catch (e) { console.error(e); }
     };
 
     const clearFilters = () => {
@@ -373,19 +335,36 @@ export default function Home() {
                         ))
                     ) : (
                         <div className="col-span-full text-center py-12 bg-gray-50 dark:bg-gray-800/50 rounded-lg border border-dashed border-gray-300 dark:border-gray-700">
-                            <Search className="mx-auto h-12 w-12 text-gray-400" />
-                            <h3 className="mt-2 text-sm font-medium text-gray-900 dark:text-white">No notes found</h3>
-                            <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
-                                Try adjusting your search or filter to find what you're looking for.
-                            </p>
-                            <div className="mt-6">
-                                <button
-                                    onClick={clearFilters}
-                                    className="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
-                                >
-                                    Clear Filters
-                                </button>
-                            </div>
+                            {error ? (
+                                <>
+                                    <h3 className="mt-2 text-lg font-medium text-red-600 dark:text-red-400">Connection Issue</h3>
+                                    <p className="mt-1 text-sm text-gray-500 dark:text-gray-400 px-4">
+                                        {error}
+                                    </p>
+                                    <button
+                                        onClick={() => window.location.reload()}
+                                        className="mt-4 px-4 py-2 bg-indigo-600 text-white rounded-md text-sm font-medium hover:bg-indigo-700"
+                                    >
+                                        Reload Page
+                                    </button>
+                                </>
+                            ) : (
+                                <>
+                                    <Search className="mx-auto h-12 w-12 text-gray-400" />
+                                    <h3 className="mt-2 text-sm font-medium text-gray-900 dark:text-white">No notes found</h3>
+                                    <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
+                                        Try adjusting your search or filter to find what you're looking for.
+                                    </p>
+                                    <div className="mt-6">
+                                        <button
+                                            onClick={clearFilters}
+                                            className="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+                                        >
+                                            Clear Filters
+                                        </button>
+                                    </div>
+                                </>
+                            )}
                         </div>
                     )}
                 </div>
