@@ -25,7 +25,6 @@ export default function NoteCard({ note, isWishlisted, isSubscribed, subPrice = 
     };
 
     return (
-    return (
         <div
             className="group relative flex flex-col h-full bg-white/70 dark:bg-gray-800/60 backdrop-blur-xl border border-white/20 dark:border-gray-700/50 rounded-3xl shadow-xl hover:shadow-2xl hover:-translate-y-2 transition-all duration-500 overflow-hidden cursor-pointer"
             onClick={() => navigate(`/notes/${note.id}`)}
@@ -102,5 +101,5 @@ export default function NoteCard({ note, isWishlisted, isSubscribed, subPrice = 
             </div>
         </div>
     );
-    );
+
 }
