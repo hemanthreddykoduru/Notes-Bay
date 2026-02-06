@@ -1,10 +1,13 @@
 import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '../../../lib/supabase';
 
 const AuthHandler = () => {
     const navigate = useNavigate();
     const sessionTokenRef = useRef(localStorage.getItem('notesbay_session_token'));
+    const [showLogoutModal, setShowLogoutModal] = useState(false);
+    const [logoutReason, setLogoutReason] = useState('');
 
     useEffect(() => {
         // 1. Auth State Listener
@@ -21,8 +24,8 @@ const AuthHandler = () => {
 
                 if (domain && !allowedDomains.includes(domain)) {
                     await supabase.auth.signOut();
-                    alert("Access Restricted: Only @gmail.com, @gitam.in, @yahoo.com, and @outlook.com email addresses are allowed.");
-                    window.location.href = '/login';
+                    setLogoutReason("Access Restricted: Only @gmail.com, @gitam.in, @yahoo.com, and @outlook.com email addresses are allowed.");
+                    setShowLogoutModal(true);
                     return;
                 }
 
@@ -45,18 +48,20 @@ const AuthHandler = () => {
                     const currentToken = localStorage.getItem('notesbay_session_token');
                     sessionTokenRef.current = currentToken;
 
-                    const { data: profile } = await supabase
-                        .from('profiles')
-                        .select('active_session_id')
-                        .eq('id', session.user.id)
-                        .single();
+                    if (session.user.id) {
+                        const { data: profile } = await supabase
+                            .from('profiles')
+                            .select('active_session_id')
+                            .eq('id', session.user.id)
+                            .single();
 
-                    if (profile && profile.active_session_id && profile.active_session_id !== currentToken) {
-                        await supabase.auth.signOut();
-                        localStorage.removeItem('notesbay_session_token');
-                        alert("You have been logged out because this account was logged in on another device.");
-                        window.location.href = '/login';
-                        return;
+                        if (profile && profile.active_session_id && profile.active_session_id !== currentToken) {
+                            await supabase.auth.signOut();
+                            localStorage.removeItem('notesbay_session_token');
+                            setLogoutReason("You have been logged out because this account was logged in on another device.");
+                            setShowLogoutModal(true);
+                            return;
+                        }
                     }
                 }
 
@@ -78,8 +83,8 @@ const AuthHandler = () => {
                             if (newActiveSessionId && newActiveSessionId !== mySessionToken) {
                                 await supabase.auth.signOut();
                                 localStorage.removeItem('notesbay_session_token'); // Clear my token
-                                alert("You have been logged out because this account was logged in on another device.");
-                                window.location.href = '/login'; // Force hard reload to clear skeletons/state
+                                setLogoutReason("You have been logged out because this account was logged in on another device.");
+                                setShowLogoutModal(true);
                             }
                         }
                     )
@@ -96,7 +101,33 @@ const AuthHandler = () => {
         };
     }, [navigate]);
 
-    return null;
+    return (
+        <>
+            {showLogoutModal && (
+                <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm animate-in fade-in duration-200">
+                    <div className="bg-white dark:bg-gray-800 rounded-lg shadow-xl max-w-md w-full p-6 text-center transform scale-100 animate-in zoom-in-95 duration-200 border border-gray-100 dark:border-gray-700">
+                        <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-red-100 dark:bg-red-900/30 mb-4">
+                            <svg className="h-6 w-6 text-red-600 dark:text-red-400" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor">
+                                <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z" />
+                            </svg>
+                        </div>
+                        <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">
+                            Session Expired
+                        </h3>
+                        <p className="text-sm text-gray-500 dark:text-gray-400 mb-6">
+                            {logoutReason}
+                        </p>
+                        <button
+                            onClick={() => window.location.href = '/login'}
+                            className="w-full inline-flex justify-center rounded-md bg-indigo-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600 transition-colors"
+                        >
+                            Log in Again
+                        </button>
+                    </div>
+                </div>
+            )}
+        </>
+    );
 };
 
 export default AuthHandler;
