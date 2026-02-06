@@ -218,7 +218,10 @@ export default function SecurePDFViewer({ fileUrl, onClose, title, userEmail }) 
                                             key={i}
                                             className="w-1/3 h-1/4 flex items-center justify-center -rotate-45 transform"
                                         >
-                                            <span className="text-gray-700 text-xl sm:text-3xl font-extrabold whitespace-nowrap">
+                                            <span
+                                                className="text-gray-700 font-extrabold whitespace-nowrap"
+                                                style={{ fontSize: `${24 * scale}px` }}
+                                            >
                                                 {userEmail || 'NotesBay Safe'}
                                             </span>
                                         </div>
