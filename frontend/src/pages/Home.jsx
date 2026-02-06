@@ -108,6 +108,19 @@ export default function Home() {
 
     useEffect(() => {
         fetchData();
+
+        // Failsafe: If data fetching takes too long (e.g., 5 seconds), force stop loading
+        const safetyTimer = setTimeout(() => {
+            setLoading((prev) => {
+                if (prev) {
+                    console.warn("Home data fetch timed out safely.");
+                    return false;
+                }
+                return prev;
+            });
+        }, 5000);
+
+        return () => clearTimeout(safetyTimer);
     }, [currentPage]);
 
     const fetchData = async () => {
