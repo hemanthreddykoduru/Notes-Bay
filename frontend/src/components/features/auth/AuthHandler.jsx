@@ -13,11 +13,11 @@ const AuthHandler = () => {
                 // Enforce Email Domain Restriction
                 const email = session.user.email;
                 const domain = email.split('@')[1]?.toLowerCase();
-                const allowedDomains = ['gmail.com', 'gitam.in'];
+                const allowedDomains = ['gmail.com', 'gitam.in', 'yahoo.com', 'outlook.com'];
 
                 if (domain && !allowedDomains.includes(domain)) {
                     await supabase.auth.signOut();
-                    alert("Access Restricted: Only @gmail.com and @gitam.in email addresses are allowed.");
+                    alert("Access Restricted: Only @gmail.com, @gitam.in, @yahoo.com, and @outlook.com email addresses are allowed.");
                     navigate('/login');
                 }
             }
