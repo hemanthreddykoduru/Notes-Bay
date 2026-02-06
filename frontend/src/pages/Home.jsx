@@ -112,20 +112,19 @@ export default function Home() {
         let mounted = true;
         fetchData();
 
-        // Failsafe: Timeout for slow networks/cold starts (10 seconds)
+        // Failsafe: Timeout for slow networks/cold starts (25 seconds)
         const safetyTimer = setTimeout(() => {
             if (mounted) {
                 setLoading((prev) => {
                     if (prev) {
                         console.warn("Forcing loading false due to timeout.");
-                        // CRITICAL FIX: Set error so we don't show "0 Notes Found"
-                        setError("Connection is slow. Please reload.");
+                        setError("Server is waking up. Please wait a few seconds and try reloading.");
                         return false;
                     }
                     return prev;
                 });
             }
-        }, 10000);
+        }, 25000);
 
         return () => {
             mounted = false;
@@ -317,7 +316,7 @@ export default function Home() {
                 )}
             </div>
 
-            {!error && notes.length > 0 && (
+            {!loading && !error && notes.length > 0 && (
                 <h2 className="text-3xl font-bold text-gray-900 dark:text-white mb-8">
                     {totalNotes} Notes Found {totalPages > 1 && `(Page ${currentPage} of ${totalPages})`}
                 </h2>
