@@ -19,16 +19,48 @@ export default function Subscription() {
     const navigate = useNavigate();
 
     useEffect(() => {
+        let mounted = true;
+
         const loadInitialData = async () => {
             setPageLoading(true);
-            await Promise.all([
-                checkSubscriptionStatus(),
-                checkTrialEligibility(),
-                fetchPrice()
-            ]);
-            setPageLoading(false);
+
+            // Failsafe: Force stop loading after 3 seconds
+            const safetyTimer = setTimeout(() => {
+                if (mounted) {
+                    setPageLoading((prev) => {
+                        if (prev) {
+                            console.warn("Subscription page data fetch timed out safely.");
+                            return false;
+                        }
+                        return prev;
+                    });
+                }
+            }, 3000);
+
+            try {
+                // Use Promise.race to enforce timeout on the data fetching itself
+                // but since we have individual catch blocks, we just await them.
+                // The safetyTimer handles the UI unblocking.
+                await Promise.all([
+                    checkSubscriptionStatus(),
+                    checkTrialEligibility(),
+                    fetchPrice()
+                ]);
+            } catch (error) {
+                console.error("Critical error loading subscription data:", error);
+            } finally {
+                if (mounted) {
+                    clearTimeout(safetyTimer);
+                    setPageLoading(false);
+                }
+            }
         };
+
         loadInitialData();
+
+        return () => {
+            mounted = false;
+        };
     }, []);
 
     const fetchPrice = async () => {
