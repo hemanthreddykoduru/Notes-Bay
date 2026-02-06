@@ -28,6 +28,8 @@ export default function Home() {
 
     const [isSubscribed, setIsSubscribed] = useState(false);
     const [subPrice, setSubPrice] = useState(100);
+    const [error, setError] = useState(null);
+    const [loadingStatus, setLoadingStatus] = useState('');
 
     // Pagination State
     const [currentPage, setCurrentPage] = useState(1);
@@ -97,28 +99,30 @@ export default function Home() {
         };
     }, []);
 
+    // Reset to page 1 when filters change
     useEffect(() => {
-        const timeoutId = setTimeout(() => {
-            setCurrentPage(1); // Reset to page 1 when filters change
-            fetchData();
-        }, 500);
-
-        return () => clearTimeout(timeoutId);
+        setCurrentPage(1);
     }, [search, minPrice, maxPrice, sort]);
-
-    const [error, setError] = useState(null);
 
     useEffect(() => {
         let mounted = true;
-        fetchData();
 
-        // Failsafe: Timeout for slow networks/cold starts (25 seconds)
+        // Debounce fetching to handle rapid typing and consolidated mount
+        const timeoutId = setTimeout(() => {
+            fetchData();
+        }, 500);
+
+        // Failsafe & Status Hints
+        const statusTimer = setTimeout(() => {
+            if (mounted && loading) setLoadingStatus('Server is waking up...');
+        }, 5000);
+
         const safetyTimer = setTimeout(() => {
             if (mounted) {
                 setLoading((prev) => {
                     if (prev) {
-                        console.warn("Forcing loading false due to timeout.");
-                        setError("Server is waking up. Please wait a few seconds and try reloading.");
+                        console.warn("Home fetch timed out.");
+                        setError("Server is taking longer than expected. Please try reloading.");
                         return false;
                     }
                     return prev;
@@ -128,9 +132,12 @@ export default function Home() {
 
         return () => {
             mounted = false;
+            clearTimeout(timeoutId);
+            clearTimeout(statusTimer);
             clearTimeout(safetyTimer);
+            setLoadingStatus('');
         };
-    }, [currentPage]);
+    }, [search, minPrice, maxPrice, sort, currentPage]);
 
     const fetchData = async () => {
         setLoading(true);
@@ -323,7 +330,15 @@ export default function Home() {
             )}
 
             {loading ? (
-                <HomeSkeleton onlyGrid={true} />
+                <div className="flex flex-col items-center">
+                    <HomeSkeleton onlyGrid={true} />
+                    {loadingStatus && (
+                        <p className="mt-8 text-indigo-600 dark:text-indigo-400 font-medium animate-pulse flex items-center gap-2">
+                            <span className="flex h-2 w-2 rounded-full bg-indigo-600 dark:bg-indigo-400 animate-ping"></span>
+                            {loadingStatus}
+                        </p>
+                    )}
+                </div>
             ) : (
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
                     {notes.length > 0 ? (
