@@ -107,6 +107,12 @@ exports.getNoteDetails = async (req, res) => {
         const { id } = req.params;
         const userId = req.user ? req.user.id : null;
 
+        // Validation for UUID format to prevent database crash
+        const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+        if (!uuidRegex.test(id)) {
+            return res.status(400).json({ error: 'Invalid note ID format' });
+        }
+
         // 1. Fetch Note Details
         const { data: note, error } = await supabase
             .from('notes')

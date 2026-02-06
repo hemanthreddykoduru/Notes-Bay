@@ -101,6 +101,15 @@ export default function NoteDetails() {
         }
     };
 
+    const fetchConfig = async () => {
+        try {
+            const { data } = await api.get('/config/subscription_price');
+            if (data && data.value) setSubPrice(data.value);
+        } catch (error) {
+            console.error('Error fetching config:', error);
+        }
+    };
+
     const handleBuy = async () => {
         const { data: { session } } = await supabase.auth.getSession();
         if (!session) {
