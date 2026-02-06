@@ -91,6 +91,27 @@ create trigger on_auth_user_created
   after insert on auth.users
   for each row execute procedure public.handle_new_user();
 
+-- SECURITY: Prevent self-promotion to admin
+create or replace function public.prevent_role_escalation()
+returns trigger as $$
+begin
+  if (old.role = 'user' and new.role = 'admin') then
+    -- Only allow the service_role or an existing admin to promote someone
+    -- In Supabase, the trigger runs as the current user's role unless specified.
+    -- We can check the auth.jwt() claims or simply block it from the standard API.
+    if (current_setting('role') = 'authenticated') then
+      return old; -- Ignore the role change if coming from a standard user session
+    end if;
+  end if;
+  return new;
+end;
+$$ language plpgsql security definer;
+
+create trigger on_profile_update_security
+  before update on public.profiles
+  for each row execute procedure public.prevent_role_escalation();
+
+
 -- SUBSCRIPTIONS TABLE
 create table subscriptions (
   id uuid default uuid_generate_v4() primary key,

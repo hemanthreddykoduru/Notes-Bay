@@ -213,22 +213,31 @@ export default function NoteDetails() {
                     </div>
                     <div className="border-t border-gray-200 dark:border-gray-700">
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-8 p-6">
-                            <div className="h-96 bg-gray-100 dark:bg-gray-900 flex items-center justify-center border border-gray-200 dark:border-gray-700 rounded overflow-hidden relative">
+                            <div className="h-96 bg-gray-100 dark:bg-gray-900 flex items-center justify-center border border-gray-200 dark:border-gray-700 rounded overflow-hidden relative group">
                                 {note.preview_url ? (
-                                    note.preview_url.match(/\.(jpeg|jpg|gif|png)$/i) ? (
-                                        <img
-                                            src={note.preview_url}
-                                            alt={note.title}
-                                            className="w-full h-full object-contain"
-                                        />
-                                    ) : (
-                                        <iframe
-                                            src={`${note.preview_url}#toolbar=0&navpanes=0&scrollbar=0`}
-                                            className="w-full h-full overflow-hidden"
-                                            title="Preview"
-                                            scrolling="no"
-                                        />
-                                    )
+                                    <>
+                                        {note.preview_url.match(/\.(jpeg|jpg|gif|png)$/i) ? (
+                                            <img
+                                                src={note.preview_url}
+                                                alt={note.title}
+                                                className={`w-full h-full object-contain ${!purchased ? 'blur-[2px]' : ''}`}
+                                            />
+                                        ) : (
+                                            <iframe
+                                                src={`${note.preview_url}#toolbar=0&navpanes=0&scrollbar=0`}
+                                                className={`w-full h-full overflow-hidden ${!purchased ? 'pointer-events-none select-none' : ''}`}
+                                                title="Preview"
+                                                scrolling="no"
+                                            />
+                                        )}
+                                        {!purchased && (
+                                            <div className="absolute inset-0 bg-white/10 backdrop-blur-[1px] flex items-center justify-center">
+                                                <div className="bg-white/90 dark:bg-gray-800/90 px-4 py-2 rounded-full shadow-lg border border-indigo-100 dark:border-indigo-900 text-indigo-600 dark:text-indigo-400 font-bold text-sm tracking-wider uppercase">
+                                                    Limited Preview
+                                                </div>
+                                            </div>
+                                        )}
+                                    </>
                                 ) : (
                                     <FileText className="h-24 w-24 text-gray-400 dark:text-gray-600" />
                                 )}
