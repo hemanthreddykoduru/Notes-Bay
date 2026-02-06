@@ -36,7 +36,7 @@ export default function Navbar() {
         // Immediate UI feedback
         localStorage.removeItem('notesbay_session_token');
         setUser(null);
-        window.location.href = '/login';
+        navigate('/login');
 
         // App cleanup
         try {
