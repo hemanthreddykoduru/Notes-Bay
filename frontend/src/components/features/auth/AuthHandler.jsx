@@ -22,7 +22,7 @@ const AuthHandler = () => {
                 if (domain && !allowedDomains.includes(domain)) {
                     await supabase.auth.signOut();
                     alert("Access Restricted: Only @gmail.com, @gitam.in, @yahoo.com, and @outlook.com email addresses are allowed.");
-                    navigate('/login');
+                    window.location.href = '/login';
                     return;
                 }
 
@@ -54,15 +54,16 @@ const AuthHandler = () => {
                             table: 'profiles',
                             filter: `id=eq.${session.user.id}`
                         },
-                        (payload) => {
+                        async (payload) => {
                             const newActiveSessionId = payload.new.active_session_id;
                             const mySessionToken = localStorage.getItem('notesbay_session_token');
 
                             // If DB says a DIFFERENT session is active, logout this one
                             if (newActiveSessionId && newActiveSessionId !== mySessionToken) {
-                                supabase.auth.signOut();
+                                await supabase.auth.signOut();
+                                localStorage.removeItem('notesbay_session_token'); // Clear my token
                                 alert("You have been logged out because this account was logged in on another device.");
-                                navigate('/login');
+                                window.location.href = '/login'; // Force hard reload to clear skeletons/state
                             }
                         }
                     )
