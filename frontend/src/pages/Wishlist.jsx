@@ -11,29 +11,53 @@ export default function Wishlist() {
     const [subPrice, setSubPrice] = useState(100);
 
     useEffect(() => {
-        fetchWishlist();
-        fetchConfig();
+        let mounted = true;
+        setLoading(true);
+
+        // Failsafe: Force stop loading after 3 seconds
+        const safetyTimer = setTimeout(() => {
+            if (mounted) {
+                setLoading((prev) => {
+                    if (prev) {
+                        console.warn("Wishlist fetch timed out safely.");
+                        return false;
+                    }
+                    return prev;
+                });
+            }
+        }, 3000);
+
+        const loadData = async () => {
+            try {
+                // Parallel fetch
+                const wishlistPromise = api.get('/wishlist');
+                const configPromise = api.get('/config/subscription_price').catch(() => ({ data: { value: 100 } }));
+
+                const [wishlistRes, configRes] = await Promise.all([wishlistPromise, configPromise]);
+
+                if (mounted) {
+                    setWishlist(wishlistRes.data);
+                    if (configRes.data && configRes.data.value) {
+                        setSubPrice(configRes.data.value);
+                    }
+                }
+            } catch (error) {
+                console.error('Error fetching wishlist data:', error);
+            } finally {
+                if (mounted) {
+                    clearTimeout(safetyTimer);
+                    setLoading(false);
+                }
+            }
+        };
+
+        loadData();
+
+        return () => {
+            mounted = false;
+            clearTimeout(safetyTimer);
+        };
     }, []);
-
-    const fetchConfig = async () => {
-        try {
-            const { data } = await api.get('/config/subscription_price');
-            if (data && data.value) setSubPrice(data.value);
-        } catch (error) {
-            console.error('Error fetching config:', error);
-        }
-    };
-
-    const fetchWishlist = async () => {
-        try {
-            const { data } = await api.get('/wishlist');
-            setWishlist(data);
-        } catch (error) {
-            console.error('Error fetching wishlist:', error);
-        } finally {
-            setLoading(false);
-        }
-    };
 
     const removeFromWishlist = (noteId) => {
         setWishlist(prev => prev.filter(note => note.id !== noteId));

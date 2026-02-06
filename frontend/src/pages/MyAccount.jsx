@@ -23,10 +23,25 @@ export default function MyAccount() {
     const [showPasswordModal, setShowPasswordModal] = useState(false);
 
     useEffect(() => {
+        let mounted = true;
+
+        // Failsafe: Force stop loading after 3 seconds
+        const safetyTimer = setTimeout(() => {
+            if (mounted) {
+                setLoading((prev) => {
+                    if (prev) {
+                        console.warn("My Account profile fetch timed out safely.");
+                        return false;
+                    }
+                    return prev;
+                });
+            }
+        }, 3000);
+
         const getProfile = async () => {
             try {
                 const { data: { user } } = await supabase.auth.getUser();
-                setUser(user);
+                if (mounted) setUser(user);
 
                 if (user) {
                     const { data, error } = await supabase
@@ -39,7 +54,7 @@ export default function MyAccount() {
                         throw error;
                     }
 
-                    if (data) {
+                    if (data && mounted) {
                         setProfile({
                             full_name: data.full_name || '',
                             mobile_number: data.mobile_number || '',
@@ -49,11 +64,19 @@ export default function MyAccount() {
             } catch (error) {
                 console.error('Error loading profile:', error.message);
             } finally {
-                setLoading(false);
+                if (mounted) {
+                    clearTimeout(safetyTimer);
+                    setLoading(false);
+                }
             }
         };
 
         getProfile();
+
+        return () => {
+            mounted = false;
+            clearTimeout(safetyTimer);
+        };
     }, []);
 
     const handleChange = (e) => {

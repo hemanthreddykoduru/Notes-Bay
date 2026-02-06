@@ -10,42 +10,60 @@ export default function MyPurchases() {
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
+        let mounted = true;
+        setLoading(true);
+
+        // Failsafe: Force stop loading after 3 seconds
+        const safetyTimer = setTimeout(() => {
+            if (mounted) {
+                setLoading((prev) => {
+                    if (prev) {
+                        console.warn("MyPurchases fetch timed out safely.");
+                        return false;
+                    }
+                    return prev;
+                });
+            }
+        }, 3000);
+
+        const fetchPurchases = async () => {
+            try {
+                const { data: { session } } = await supabase.auth.getSession();
+                if (!session) return; // Protected route usually handles this, but good to be safe.
+
+                const { data, error } = await supabase
+                    .from('purchases')
+                    .select(`
+                *,
+                notes (
+                    id,
+                    title,
+                    subject,
+                    file_url
+                )
+            `)
+                    .eq('user_id', session.user.id)
+                    .order('created_at', { ascending: false });
+
+                if (error) throw error;
+                if (mounted) setPurchases(data);
+            } catch (error) {
+                console.error('Error fetching purchases:', error);
+            } finally {
+                if (mounted) {
+                    clearTimeout(safetyTimer);
+                    setLoading(false);
+                }
+            }
+        };
+
         fetchPurchases();
+
+        return () => {
+            mounted = false;
+            clearTimeout(safetyTimer);
+        };
     }, []);
-
-    const fetchPurchases = async () => {
-        try {
-            const { data: { session } } = await supabase.auth.getSession();
-            if (!session) return;
-
-            // We need an endpoint to get user's purchases with note details
-            // Since we didn't create a specific relation in the backend API yet for "purchases expanded"
-            // We can either create a new endpoint or use Supabase client directly if RLS allows.
-            // Let's use Supabase client directly for reading purchases as we set up RLS.
-            // But we need to join with notes.
-
-            const { data, error } = await supabase
-                .from('purchases')
-                .select(`
-            *,
-            notes (
-                id,
-                title,
-                subject,
-                file_url
-            )
-        `)
-                .eq('user_id', session.user.id)
-                .order('created_at', { ascending: false });
-
-            if (error) throw error;
-            setPurchases(data);
-        } catch (error) {
-            console.error('Error fetching purchases:', error);
-        } finally {
-            setLoading(false);
-        }
-    };
 
     if (loading) return <MyPurchasesSkeleton />;
 
