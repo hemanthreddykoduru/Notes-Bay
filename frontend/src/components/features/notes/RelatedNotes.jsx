@@ -14,11 +14,12 @@ const RelatedNotes = ({ currentNoteId, subject }) => {
                 setLoading(true);
                 // Fetch notes with the same subject
                 const { data } = await api.get(`/notes?search=${encodeURIComponent(subject)}`);
+                const notesArray = data.notes || data;
 
                 // Filter out the current note and limit to 3 items
-                const filtered = data
-                    .filter(note => note.id !== currentNoteId)
-                    .slice(0, 3);
+                const filtered = Array.isArray(notesArray)
+                    ? notesArray.filter(note => note.id !== currentNoteId).slice(0, 3)
+                    : [];
 
                 setRelatedNotes(filtered);
             } catch (error) {
