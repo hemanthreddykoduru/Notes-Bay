@@ -25,82 +25,73 @@ export default function NoteCard({ note, isWishlisted, isSubscribed, subPrice = 
     };
 
     return (
-    return (
         <div
-            className="group relative flex flex-col h-full bg-white/70 dark:bg-gray-800/60 backdrop-blur-xl border border-white/20 dark:border-gray-700/50 rounded-3xl shadow-xl hover:shadow-2xl hover:-translate-y-2 transition-all duration-500 overflow-hidden cursor-pointer"
-            onClick={() => navigate(`/notes/${note.id}`)}
+            className="bg-white dark:bg-gray-800 rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow duration-300 border border-gray-100 dark:border-gray-700 relative group"
+            onClick={() => navigate(`/notes/${note.id}`)} // Re-added navigation to the whole card
         >
             {/* Wishlist Button */}
             <button
                 onClick={toggleWishlist}
-                className="absolute top-4 right-4 p-2.5 rounded-full bg-white/90 dark:bg-gray-900/90 shadow-lg backdrop-blur-sm transition-transform hover:scale-110 active:scale-95 z-10 group/heart"
+                className="absolute top-3 right-3 p-2 rounded-full bg-white/80 dark:bg-gray-800/80 hover:bg-white dark:hover:bg-gray-700 shadow-sm transition-all z-10"
             >
                 <Heart
-                    className={`w-5 h-5 transition-colors ${inWishlist ? 'fill-red-500 text-red-500' : 'text-gray-400 group-hover/heart:text-red-400'}`}
+                    className={`w-5 h-5 transition-colors ${inWishlist ? 'fill-red-500 text-red-500' : 'text-gray-400 hover:text-red-400'}`}
                 />
             </button>
 
-            {/* Note Preview Image */}
-            <div className="relative aspect-[4/3] overflow-hidden">
-                <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 z-10" />
-                <img
-                    src={note.preview_url || "https://images.unsplash.com/photo-1544716278-ca5e3f4abd8c?auto=format&fit=crop&q=80&w=1000"}
-                    alt={note.title}
-                    loading="lazy"
-                    className="w-full h-full object-cover transform transition-transform duration-700 group-hover:scale-110"
-                />
-
-                {/* Subject Badge (Floating) */}
-                <span className="absolute bottom-4 left-4 z-20 inline-flex items-center px-3 py-1 rounded-full text-xs font-bold bg-white/90 dark:bg-gray-900/90 text-gray-900 dark:text-white shadow-lg backdrop-blur-md">
-                    {note.subject}
-                </span>
-            </div>
-
-            {/* Content Body */}
-            <div className="flex flex-col flex-1 p-6">
-                <div className="flex items-center gap-1 mb-2">
-                    <Star className="w-4 h-4 fill-yellow-400 text-yellow-400" />
-                    <span className="text-sm font-bold text-gray-700 dark:text-gray-200">
-                        {note.average_rating ? Number(note.average_rating).toFixed(1) : 'New'}
+            <img
+                src={note.preview_url || "https://images.unsplash.com/photo-1544716278-ca5e3f4abd8c?auto=format&fit=crop&q=80&w=1000"} // Better placeholder
+                alt={note.title}
+                loading="lazy"
+                className="w-full h-48 object-cover"
+            />
+            <div className="p-4">
+                <div className="flex justify-between items-start mb-2">
+                    <span className="inline-block bg-indigo-100 dark:bg-indigo-900/30 text-indigo-800 dark:text-indigo-300 text-xs px-2 py-1 rounded-full font-semibold uppercase tracking-wide">
+                        {note.subject}
                     </span>
-                    <span className="text-xs text-gray-400 ml-1">({note.review_count || 0} reviews)</span>
+                    <div className="flex items-center text-yellow-400">
+                        <Star className="w-4 h-4 fill-current" />
+                        <span className="ml-1 text-sm font-medium text-gray-700 dark:text-gray-300">
+                            {note.average_rating ? Number(note.average_rating).toFixed(1) : 'New'}
+                        </span>
+                        <span className="ml-1 text-xs text-gray-400">({note.review_count || 0})</span>
+                    </div>
                 </div>
-
-                <h3 className="text-xl font-extrabold text-gray-900 dark:text-white mb-2 line-clamp-2 leading-tight">
-                    {note.title}
-                </h3>
-
-                <div className="mt-auto pt-4 flex items-center justify-between">
+                <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-2 line-clamp-1">{note.title}</h3>
+                <div className="flex justify-between items-center mt-4">
                     {isSubscribed ? (
-                        <div className="w-full py-2.5 bg-green-500/10 text-green-600 dark:text-green-400 rounded-xl text-center text-sm font-bold border border-green-500/20">
-                            Unlocked via Pro
-                        </div>
+                        <span className="text-sm font-bold text-green-600 dark:text-green-400">
+                            You have full access to this note
+                        </span>
                     ) : (
-                        <div className="flex flex-col w-full gap-3">
-                            <div className="flex items-center justify-between w-full">
-                                <span className="text-2xl font-black text-gray-900 dark:text-white tracking-tight">
-                                    ₹{note.price}
-                                </span>
-                                <span className="text-indigo-500 dark:text-indigo-400 text-sm font-bold flex items-center gap-1 group-hover:translate-x-1 transition-transform">
-                                    Details <ArrowRight className="w-4 h-4" />
-                                </span>
-                            </div>
-
+                        <div className="flex flex-col items-start gap-1">
+                            <span className="text-2xl font-bold text-gray-900 dark:text-white">₹{note.price}</span>
                             <button
                                 onClick={(e) => {
                                     e.stopPropagation();
                                     navigate('/pricing');
                                 }}
-                                className="w-full py-2.5 rounded-full bg-gradient-to-r from-indigo-600 to-purple-600 text-white text-xs font-bold shadow-lg shadow-indigo-500/20 hover:shadow-indigo-500/40 hover:scale-[1.02] active:scale-[0.98] transition-all flex items-center justify-center gap-2"
+                                className="group/btn flex items-center gap-1.5 text-xs font-bold text-white bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 pl-2 pr-3 py-1 rounded-full hover:shadow-md hover:scale-105 transition-all duration-300"
                             >
-                                <Sparkles className="w-3.5 h-3.5 text-yellow-200 animate-pulse" />
-                                Get All for ₹{subPrice}
+                                <Sparkles className="w-3 h-3 text-yellow-200 animate-pulse" />
+                                <span>or pay ₹{subPrice} for all notes</span>
                             </button>
                         </div>
+                    )}
+
+                    {!isSubscribed && (
+                        <span className="text-indigo-600 dark:text-indigo-400 text-sm font-medium hover:underline">
+                            View Details →
+                        </span>
+                    )}
+                    {isSubscribed && (
+                        <span className="text-indigo-600 dark:text-indigo-400 text-sm font-medium hover:underline">
+                            View →
+                        </span>
                     )}
                 </div>
             </div>
         </div>
-    );
     );
 }
