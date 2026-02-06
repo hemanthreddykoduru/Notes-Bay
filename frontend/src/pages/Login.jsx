@@ -19,7 +19,9 @@ export default function Login() {
 
         // Email Domain Validation
         const allowedDomains = ['gmail.com', 'gitam.in', 'yahoo.com', 'outlook.com'];
-        const emailDomain = email.split('@')[1];
+        // Safe check for domain
+        const emailParts = email.split('@');
+        const emailDomain = emailParts.length > 1 ? emailParts[1].toLowerCase() : '';
 
         if (isSignUp && !allowedDomains.includes(emailDomain)) {
             setMessage('Only @gmail.com, @gitam.in, @yahoo.com, and @outlook.com email addresses are allowed.');
@@ -27,24 +29,35 @@ export default function Login() {
             return;
         }
 
+        // Timeout Promise (10 seconds)
+        const timeoutPromise = new Promise((_, reject) =>
+            setTimeout(() => reject(new Error('Request timed out. Please check your connection.')), 10000)
+        );
+
         try {
             if (isSignUp) {
-                const { error } = await supabase.auth.signUp({
+                const signUpPromise = supabase.auth.signUp({
                     email,
                     password,
                 });
+
+                const { error } = await Promise.race([signUpPromise, timeoutPromise]);
+
                 if (error) throw error;
                 setMessage('Account created! Please check your email to confirm.');
             } else {
-                const { error } = await supabase.auth.signInWithPassword({
+                const signInPromise = supabase.auth.signInWithPassword({
                     email,
                     password,
                 });
+
+                const { error } = await Promise.race([signInPromise, timeoutPromise]);
+
                 if (error) throw error;
                 navigate('/');
             }
         } catch (error) {
-            setMessage(error.message);
+            setMessage(error.message || "An unexpected error occurred");
         } finally {
             setLoading(false);
         }
