@@ -33,9 +33,14 @@ export default function Navbar() {
     };
 
     const handleLogout = async () => {
-        await supabase.auth.signOut();
-        localStorage.removeItem('notesbay_session_token');
-        window.location.href = '/login';
+        try {
+            await supabase.auth.signOut();
+        } catch (error) {
+            console.error("Logout error:", error);
+        } finally {
+            localStorage.removeItem('notesbay_session_token');
+            window.location.href = '/login';
+        }
     };
 
     return (
