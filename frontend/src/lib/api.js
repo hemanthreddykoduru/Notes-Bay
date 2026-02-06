@@ -3,6 +3,7 @@ import { supabase } from './supabase';
 
 const api = axios.create({
   baseURL: import.meta.env.VITE_API_URL || 'http://localhost:5000/api',
+  timeout: 15000, // 15 seconds timeout
 });
 
 api.interceptors.request.use(async (config) => {
