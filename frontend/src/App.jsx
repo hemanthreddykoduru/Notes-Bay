@@ -1,5 +1,5 @@
 import { lazy, Suspense } from 'react';
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import Navbar from './components/layout/Navbar';
 import AuthHandler from './components/features/auth/AuthHandler';
 import GoogleAdSenseLoader from './components/features/ads/GoogleAdSenseLoader';
@@ -51,8 +51,11 @@ function App() {
             <Navbar />
             <div className="flex-grow">
               <Routes>
+                {/* Redirect root to /home */}
+                <Route path="/" element={<Navigate to="/home" replace />} />
+
                 {/* Home */}
-                <Route path="/" element={
+                <Route path="/home" element={
                   <Suspense fallback={<HomeSkeleton />}>
                     <Home />
                   </Suspense>
