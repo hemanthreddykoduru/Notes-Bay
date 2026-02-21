@@ -195,7 +195,7 @@ export default function Subscription() {
                 key: import.meta.env.VITE_RAZORPAY_KEY_ID,
                 amount: order.amount,
                 currency: order.currency,
-                name: "Notes-Market Pro",
+                name: "NotesBay",
                 description: "1 Year Premium Subscription",
                 order_id: order.id,
                 handler: async function (response) {
