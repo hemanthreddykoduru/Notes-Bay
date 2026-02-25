@@ -8,7 +8,7 @@ const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
 
 const CourseDetails = () => {
     const { id } = useParams();
-    const { user, token } = useAuth();
+    const { user, token, loading: authLoading } = useAuth();
     const navigate = useNavigate();
 
     const [course, setCourse] = useState(null);
@@ -19,10 +19,10 @@ const CourseDetails = () => {
 
     useEffect(() => {
         fetchCourseDetails();
-        if (user && token) {
+        if (!authLoading && user && token) {
             checkEnrollment();
         }
-    }, [id, user, token]);
+    }, [id, user, token, authLoading]);
 
     const fetchCourseDetails = async () => {
         try {
