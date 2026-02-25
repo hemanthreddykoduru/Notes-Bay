@@ -19,10 +19,10 @@ const CourseDetails = () => {
 
     useEffect(() => {
         fetchCourseDetails();
-        if (user) {
+        if (user && token) {
             checkEnrollment();
         }
-    }, [id, user]);
+    }, [id, user, token]);
 
     const fetchCourseDetails = async () => {
         try {
