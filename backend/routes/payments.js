@@ -9,6 +9,12 @@ router.post('/create-order', requireAuth, paymentsController.createOrder);
 // POST /api/payments/verify
 router.post('/verify', requireAuth, paymentsController.verifyPayment);
 
+// POST /api/payments/create-course-order
+router.post('/create-course-order', requireAuth, paymentsController.createCourseOrder);
+
+// POST /api/payments/verify-course
+router.post('/verify-course', requireAuth, paymentsController.verifyCoursePayment);
+
 // POST /api/payments/create-subscription-order
 router.post('/create-subscription-order', requireAuth, paymentsController.createSubscriptionOrder);
 

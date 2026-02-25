@@ -4,6 +4,7 @@ import { supabase } from '../lib/supabase';
 import { Plus, Trash2, Pencil, X, TrendingUp, Users, FileText, DollarSign, MessageSquare } from 'lucide-react';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import AdminDashboardSkeleton from '../components/skeletons/AdminDashboardSkeleton'; // Import Skeleton
+import AdminCourses from '../components/admin/AdminCourses';
 
 import Toast from '../components/common/Toast';
 
@@ -651,6 +652,8 @@ export default function AdminDashboard() {
                     )}
                 </ul>
             </div>
+
+            <AdminCourses setToast={setToast} />
         </div >
     );
 }

@@ -20,9 +20,11 @@ app.get('/', (req, res) => {
 const authRoutes = require('./routes/auth');
 const noteRoutes = require('./routes/notes');
 const paymentRoutes = require('./routes/payments');
+const courseRoutes = require('./routes/courses');
 
 app.use('/api/auth', authRoutes);
 app.use('/api/notes', noteRoutes);
+app.use('/api/courses', courseRoutes);
 app.use('/api/payments', paymentRoutes);
 app.use('/api/reviews', require('./routes/reviews'));
 app.use('/api/analytics', require('./routes/analytics'));
@@ -34,7 +36,7 @@ app.use('/api/chat', require('./routes/chat'));
 if (require.main === module) {
   app.listen(PORT, () => {
     console.log(`Server running on port ${PORT}`);
-    console.log('Routes loaded: /api/auth, /api/notes, /api/payments, /api/reviews');
+    console.log('Routes loaded: /api/auth, /api/notes, /api/courses, /api/payments, /api/reviews');
   });
 }
 

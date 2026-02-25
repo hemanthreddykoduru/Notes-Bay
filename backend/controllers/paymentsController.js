@@ -240,6 +240,30 @@ exports.handleWebhook = async (req, res) => {
             console.log(`Webhook: Note purchase verified for order ${orderId}`);
         }
       }
+      
+      // Type 3: Course Enrollment
+      else if (notes.courseId) {
+        const courseId = notes.courseId;
+        const { data: existing } = await supabase
+            .from('course_enrollments')
+            .select('id')
+            .eq('order_id', orderId)
+            .single();
+
+        if (!existing) {
+            const { error } = await supabase
+            .from('course_enrollments')
+            .insert([{
+                user_id: userId,
+                course_id: courseId,
+                payment_id: paymentId,
+                order_id: orderId
+            }]);
+            
+            if (error) throw error;
+            console.log(`Webhook: Course enrollment verified for order ${orderId}`);
+        }
+      }
     }
 
     res.json({ status: 'ok' });
@@ -357,5 +381,80 @@ exports.activateFreeTrial = async (req, res) => {
   } catch (error) {
     console.error('Error activating free trial:', error);
     res.status(500).json({ error: 'Error activating free trial' });
+  }
+};
+
+// POST /create-course-order
+exports.createCourseOrder = async (req, res) => {
+  try {
+    const { courseId } = req.body;
+    
+    const { data: course, error: courseError } = await supabase
+      .from('courses')
+      .select('price')
+      .eq('id', courseId)
+      .single();
+
+    if (courseError || !course) {
+      return res.status(404).json({ error: 'Course not found' });
+    }
+
+    if (course.price <= 0) {
+        return res.status(400).json({ error: 'Free courses bypass payment gateway' });
+    }
+
+    const options = {
+      amount: course.price * 100, // amount in paisa
+      currency: 'INR',
+      receipt: `course_${Date.now()}`,
+      notes: { courseId, userId: req.user.id }
+    };
+
+    const order = await razorpay.orders.create(options);
+    res.json(order);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: 'Error creating course order' });
+  }
+};
+
+// POST /verify-course
+exports.verifyCoursePayment = async (req, res) => {
+  try {
+    const {
+      razorpay_order_id,
+      razorpay_payment_id,
+      razorpay_signature,
+      courseId
+    } = req.body;
+
+    const body = razorpay_order_id + '|' + razorpay_payment_id;
+    const expectedSignature = crypto
+      .createHmac('sha256', process.env.RAZORPAY_KEY_SECRET)
+      .update(body.toString())
+      .digest('hex');
+
+    if (expectedSignature === razorpay_signature) {
+      // Fetch course to get price
+      const { data: course } = await supabase.from('courses').select('price').eq('id', courseId).single();
+
+      const { data, error } = await supabase
+        .from('course_enrollments')
+        .insert([{
+          user_id: req.user.id,
+          course_id: courseId,
+          payment_id: razorpay_payment_id,
+          order_id: razorpay_order_id
+        }]);
+
+      if (error && error.code !== '23505') throw error; // ignore duplicate enrollments in case webhook hit first
+
+      res.json({ success: true, message: 'Payment verified and enrollment recorded' });
+    } else {
+      res.status(400).json({ success: false, error: 'Invalid signature' });
+    }
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: 'Error verifying course payment' });
   }
 };

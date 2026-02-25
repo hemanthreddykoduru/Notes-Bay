@@ -29,12 +29,16 @@ const MyPurchases = lazy(() => import('./pages/MyPurchases'));
 const Subscription = lazy(() => import('./pages/Subscription'));
 const UpdatePassword = lazy(() => import('./pages/UpdatePassword'));
 const AdminDashboard = lazy(() => import('./pages/AdminDashboard'));
+const Courses = lazy(() => import('./pages/Courses'));
+const CourseDetails = lazy(() => import('./pages/CourseDetails'));
+const LearningDashboard = lazy(() => import('./pages/LearningDashboard'));
 const MyAccount = lazy(() => import('./pages/MyAccount'));
 const Wishlist = lazy(() => import('./pages/Wishlist'));
 const Support = lazy(() => import('./pages/Support'));
 const TermsOfService = lazy(() => import('./pages/TermsOfService'));
 const PrivacyPolicy = lazy(() => import('./pages/PrivacyPolicy'));
 const CancellationRefund = lazy(() => import('./pages/CancellationRefund'));
+const MyLearning = lazy(() => import('./pages/MyLearning'));
 
 function App() {
   return (
@@ -80,6 +84,25 @@ function App() {
                   </Suspense>
                 } />
 
+                {/* E-Learning Routes */}
+                <Route path="/courses" element={
+                  <Suspense fallback={<GenericPageSkeleton />}>
+                    <Courses />
+                  </Suspense>
+                } />
+                <Route path="/courses/:id" element={
+                  <Suspense fallback={<GenericPageSkeleton />}>
+                    <CourseDetails />
+                  </Suspense>
+                } />
+                <Route path="/learn/:id" element={
+                  <Suspense fallback={<GenericPageSkeleton />}>
+                    <ProtectedRoute>
+                      <LearningDashboard />
+                    </ProtectedRoute>
+                  </Suspense>
+                } />
+
                 {/* Specific Functional Pages */}
                 <Route path="/pricing" element={
                   <Suspense fallback={<SubscriptionSkeleton />}>
@@ -118,6 +141,16 @@ function App() {
                     <Suspense fallback={<MyAccountSkeleton />}>
                       <ProtectedRoute>
                         <MyAccount />
+                      </ProtectedRoute>
+                    </Suspense>
+                  }
+                />
+                <Route
+                  path="/my-learning"
+                  element={
+                    <Suspense fallback={<GenericPageSkeleton />}>
+                      <ProtectedRoute>
+                        <MyLearning />
                       </ProtectedRoute>
                     </Suspense>
                   }
