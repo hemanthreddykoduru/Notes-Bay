@@ -2,8 +2,9 @@ import React, { useState, useEffect, useRef } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import ReactPlayer from 'react-player';
 import axios from 'axios';
-import { PlayCircle, CheckCircle, ChevronLeft, Menu, X, Loader, HelpCircle, FileText, MessageCircle, User, Download, Lock } from 'lucide-react';
+import { PlayCircle, CheckCircle, ChevronLeft, Menu, X, Loader, HelpCircle, FileText, MessageCircle, User, Download, Lock, Send, Reply } from 'lucide-react';
 import { useAuth } from '../hooks/useAuth';
+import { supabase } from '../lib/supabase';
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
 
@@ -20,6 +21,15 @@ const LearningDashboard = () => {
     const [quizState, setQuizState] = useState('intro'); // intro, playing, results
     const [quizScore, setQuizScore] = useState(0);
     const [completedItems, setCompletedItems] = useState([]); // Track completed IDs
+
+    // Q&A State
+    const [questions, setQuestions] = useState([]);
+    const [newQuestionText, setNewQuestionText] = useState('');
+    const [replyText, setReplyText] = useState('');
+    const [replyingToId, setReplyingToId] = useState(null);
+    const [loadingQA, setLoadingQA] = useState(false);
+    const [showQuestionForm, setShowQuestionForm] = useState(false);
+    const [isAdmin, setIsAdmin] = useState(false);
 
     const videoRef = useRef(null);
 
@@ -96,6 +106,73 @@ const LearningDashboard = () => {
             console.error('Error fetching learning data:', error);
         } finally {
             setLoading(false);
+        }
+    };
+
+    useEffect(() => {
+        const checkRole = async () => {
+            if (user) {
+                const { data } = await supabase.from('profiles').select('role').eq('id', user.id).single();
+                if (data?.role === 'admin') setIsAdmin(true);
+            }
+        };
+        checkRole();
+    }, [user]);
+
+    useEffect(() => {
+        if (activeTab === 'qa' && id) fetchQA();
+    }, [activeTab, id]);
+
+    const fetchQA = async () => {
+        setLoadingQA(true);
+        try {
+            const { data } = await axios.get(`${API_URL}/qa/course/${id}`, {
+                headers: { Authorization: `Bearer ${token}` }
+            });
+            setQuestions(data);
+        } catch (error) {
+            console.error('Failed to load QA', error);
+        } finally {
+            setLoadingQA(false);
+        }
+    };
+
+    const handlePostQuestion = async (e) => {
+        e.preventDefault();
+        if (!newQuestionText.trim()) return;
+        try {
+            const { data } = await axios.post(`${API_URL}/qa/course/${id}`, {
+                content: newQuestionText,
+                lesson_id: activeItem?.id
+            }, { headers: { Authorization: `Bearer ${token}` } });
+            setQuestions([data, ...questions]);
+            setNewQuestionText('');
+            setShowQuestionForm(false);
+        } catch (error) {
+            console.error('Failed to post question', error);
+            alert('Failed to post question');
+        }
+    };
+
+    const handlePostReply = async (e, questionId) => {
+        e.preventDefault();
+        if (!replyText.trim()) return;
+        try {
+            const { data } = await axios.post(`${API_URL}/qa/reply/${questionId}`, {
+                content: replyText
+            }, { headers: { Authorization: `Bearer ${token}` } });
+
+            setQuestions(questions.map(q => {
+                if (q.id === questionId) {
+                    return { ...q, course_answers: [...(q.course_answers || []), data] };
+                }
+                return q;
+            }));
+            setReplyText('');
+            setReplyingToId(null);
+        } catch (error) {
+            console.error('Failed to post reply', error);
+            alert('Failed to post reply');
         }
     };
 
@@ -345,21 +422,119 @@ const LearningDashboard = () => {
                                     <div className="flex items-center justify-between mb-6">
                                         <h3 className="text-lg font-bold text-gray-900 dark:text-white">Questions & Answers</h3>
                                         <button
-                                            disabled
-                                            className="text-sm font-semibold border border-gray-300 dark:border-gray-700 px-4 py-2 rounded-md bg-gray-50 dark:bg-gray-800 opacity-50 cursor-not-allowed transition-colors"
-                                            title="Q&A feature coming soon"
+                                            onClick={() => setShowQuestionForm(!showQuestionForm)}
+                                            className="text-sm font-semibold border border-gray-300 dark:border-gray-700 px-4 py-2 rounded-md hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
                                         >
-                                            Ask a Question
+                                            {showQuestionForm ? 'Cancel' : 'Ask a Question'}
                                         </button>
                                     </div>
 
-                                    {/* Empty Q&A State */}
-                                    <div className="text-center py-12 bg-gray-50 dark:bg-gray-800/50 rounded-lg border border-dashed border-gray-300 dark:border-gray-700">
-                                        <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-2">No questions yet</h3>
-                                        <p className="text-gray-500 dark:text-gray-400 max-w-sm mx-auto">
-                                            Q&A feature is currently under development. Soon you'll be able to ask the instructor questions here!
-                                        </p>
-                                    </div>
+                                    {showQuestionForm && (
+                                        <form onSubmit={handlePostQuestion} className="mb-8 bg-gray-50 dark:bg-gray-900/50 p-4 rounded-lg border border-gray-200 dark:border-gray-800">
+                                            <textarea
+                                                className="w-full bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-md p-3 text-gray-900 dark:text-white focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 resize-none"
+                                                rows="3"
+                                                placeholder="What do you want to ask?"
+                                                value={newQuestionText}
+                                                onChange={(e) => setNewQuestionText(e.target.value)}
+                                            ></textarea>
+                                            <div className="flex justify-end mt-2">
+                                                <button
+                                                    type="submit"
+                                                    disabled={!newQuestionText.trim()}
+                                                    className="flex items-center bg-indigo-600 hover:bg-indigo-700 disabled:opacity-50 text-white px-4 py-2 rounded-md text-sm font-medium transition-colors"
+                                                >
+                                                    <Send className="w-4 h-4 mr-2" />
+                                                    Post Question
+                                                </button>
+                                            </div>
+                                        </form>
+                                    )}
+
+                                    {loadingQA ? (
+                                        <div className="flex justify-center py-12"><Loader className="w-8 h-8 text-indigo-500 animate-spin" /></div>
+                                    ) : questions.length > 0 ? (
+                                        <div className="space-y-6">
+                                            {questions.map((q) => (
+                                                <div key={q.id} className="flex gap-4">
+                                                    {q.profiles?.avatar_url ? (
+                                                        <img src={q.profiles.avatar_url} alt="User" className="w-10 h-10 rounded-full shrink-0" />
+                                                    ) : (
+                                                        <div className="w-10 h-10 bg-gray-200 dark:bg-gray-800 rounded-full shrink-0 flex items-center justify-center font-bold text-gray-500">
+                                                            {q.profiles?.full_name?.[0]?.toUpperCase() || 'U'}
+                                                        </div>
+                                                    )}
+                                                    <div className="flex-1">
+                                                        <h4 className="font-bold text-sm text-gray-900 dark:text-white">
+                                                            {q.profiles?.full_name || 'Student'}
+                                                            <span className="text-xs text-gray-500 font-normal ml-2">
+                                                                {new Date(q.created_at).toLocaleDateString()}
+                                                            </span>
+                                                        </h4>
+                                                        <p className="text-sm text-gray-700 dark:text-gray-300 mt-1 mb-2 whitespace-pre-wrap">{q.content}</p>
+
+                                                        {/* Answers */}
+                                                        {q.course_answers?.map(a => (
+                                                            <div key={a.id} className="flex gap-4 mt-4 bg-gray-50 dark:bg-gray-900/50 p-4 rounded-lg border border-gray-200 dark:border-gray-800">
+                                                                {a.profiles?.avatar_url ? (
+                                                                    <img src={a.profiles.avatar_url} alt="Instructor" className="w-8 h-8 rounded-full shrink-0" />
+                                                                ) : (
+                                                                    <div className="w-8 h-8 bg-indigo-100 dark:bg-indigo-900/50 rounded-full shrink-0 flex items-center justify-center font-bold text-indigo-600 dark:text-indigo-400 text-xs border border-indigo-200 dark:border-indigo-800">
+                                                                        {a.profiles?.full_name?.[0]?.toUpperCase() || 'IN'}
+                                                                    </div>
+                                                                )}
+                                                                <div>
+                                                                    <h4 className="font-bold text-sm text-indigo-600 dark:text-indigo-400">
+                                                                        {a.profiles?.full_name || 'Instructor'}
+                                                                        {a.is_instructor_reply && <span className="bg-indigo-100 dark:bg-indigo-900/50 text-indigo-700 dark:text-indigo-300 text-[10px] px-2 py-0.5 rounded ml-2">Instructor</span>}
+                                                                        <span className="text-xs text-gray-500 font-normal ml-2">{new Date(a.created_at).toLocaleDateString()}</span>
+                                                                    </h4>
+                                                                    <p className="text-sm text-gray-700 dark:text-gray-300 mt-1 whitespace-pre-wrap">{a.content}</p>
+                                                                </div>
+                                                            </div>
+                                                        ))}
+
+                                                        {/* Reply Form Trigger (Admins only) */}
+                                                        {isAdmin && replyingToId !== q.id && (
+                                                            <button
+                                                                onClick={() => setReplyingToId(q.id)}
+                                                                className="mt-2 text-xs font-semibold text-indigo-600 dark:text-indigo-400 hover:text-indigo-700 flex items-center"
+                                                            >
+                                                                <Reply className="w-3 h-3 mr-1" /> Reply
+                                                            </button>
+                                                        )}
+
+                                                        {/* Reply Form */}
+                                                        {replyingToId === q.id && (
+                                                            <form onSubmit={(e) => handlePostReply(e, q.id)} className="mt-4 flex gap-2">
+                                                                <input
+                                                                    type="text"
+                                                                    className="flex-1 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-md px-3 py-2 text-sm text-gray-900 dark:text-white focus:outline-none focus:ring-1 focus:ring-indigo-500"
+                                                                    placeholder="Type your reply..."
+                                                                    value={replyText}
+                                                                    onChange={(e) => setReplyText(e.target.value)}
+                                                                    autoFocus
+                                                                />
+                                                                <button type="submit" disabled={!replyText.trim()} className="bg-indigo-600 hover:bg-indigo-700 disabled:opacity-50 text-white px-3 py-2 rounded-md text-sm font-medium">
+                                                                    Send
+                                                                </button>
+                                                                <button type="button" onClick={() => setReplyingToId(null)} className="bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 text-gray-800 dark:text-white px-3 py-2 rounded-md text-sm font-medium">
+                                                                    Cancel
+                                                                </button>
+                                                            </form>
+                                                        )}
+                                                    </div>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    ) : (
+                                        <div className="text-center py-12 bg-gray-50 dark:bg-gray-800/50 rounded-lg border border-dashed border-gray-300 dark:border-gray-700">
+                                            <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-2">No questions yet</h3>
+                                            <p className="text-gray-500 dark:text-gray-400 max-w-sm mx-auto">
+                                                Be the first to ask a question! Your instructor and peers will be able to answer it.
+                                            </p>
+                                        </div>
+                                    )}
                                 </div>
                             )}
 
