@@ -13,7 +13,7 @@ export default function Subscription() {
     const [hasSubscription, setHasSubscription] = useState(false);
     const [canUseTrial, setCanUseTrial] = useState(true);
     const [price, setPrice] = useState(100);
-    const [showSuccessModal, setShowSuccessModal] = useState(false);
+    const [successModalType, setSuccessModalType] = useState(null);
     const [subscriptionDetails, setSubscriptionDetails] = useState(null);
     const [timeRemaining, setTimeRemaining] = useState(null);
     const navigate = useNavigate();
@@ -131,7 +131,7 @@ export default function Subscription() {
             }
 
             const { data } = await api.post('/payments/activate-free-trial');
-            setShowSuccessModal(true);
+            setSuccessModalType('trial');
             setHasSubscription(true);
             setCanUseTrial(false);
         } catch (error) {
@@ -206,9 +206,8 @@ export default function Subscription() {
                             razorpay_payment_id: response.razorpay_payment_id,
                             razorpay_signature: response.razorpay_signature
                         });
-                        alert('Welcome to Pro! You now have access to all notes.');
+                        setSuccessModalType('pro');
                         setHasSubscription(true);
-                        navigate('/');
                     } catch (error) {
                         alert('Subscription verification failed');
                     }
@@ -561,7 +560,7 @@ export default function Subscription() {
 
             {/* Success Modal */}
             {
-                showSuccessModal && (
+                successModalType && (
                     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm animate-in fade-in duration-200">
                         <div className="relative bg-white dark:bg-gray-800 rounded-2xl shadow-2xl max-w-md w-full p-8 animate-in zoom-in duration-300">
                             {/* Decorative gradient border */}
@@ -575,12 +574,16 @@ export default function Subscription() {
 
                                 {/* Title */}
                                 <h3 className="text-3xl font-bold text-center text-gray-900 dark:text-white mb-3">
-                                    🎉 Free Trial Activated!
+                                    {successModalType === 'trial' ? '🎉 Free Trial Activated!' : '🎉 Welcome to Pro!'}
                                 </h3>
 
                                 {/* Message */}
                                 <p className="text-center text-gray-600 dark:text-gray-300 mb-8 text-lg">
-                                    Enjoy <span className="font-bold text-indigo-600 dark:text-indigo-400">2 hours</span> of premium access to all notes!
+                                    {successModalType === 'trial' ? (
+                                        <>Enjoy <span className="font-bold text-indigo-600 dark:text-indigo-400">2 hours</span> of premium access to all notes!</>
+                                    ) : (
+                                        <>You now have <span className="font-bold text-indigo-600 dark:text-indigo-400">unlimited</span> access to all premium features!</>
+                                    )}
                                 </p>
 
                                 {/* Features List */}
@@ -602,7 +605,7 @@ export default function Subscription() {
                                 {/* Action Button */}
                                 <button
                                     onClick={() => {
-                                        setShowSuccessModal(false);
+                                        setSuccessModalType(null);
                                         navigate('/');
                                     }}
                                     className="w-full py-4 px-6 rounded-xl bg-gradient-to-r from-indigo-600 to-purple-600 text-white font-bold text-lg hover:from-indigo-700 hover:to-purple-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-all shadow-lg"
