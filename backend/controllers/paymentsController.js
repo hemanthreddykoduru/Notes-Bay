@@ -156,11 +156,16 @@ exports.verifySubscription = async (req, res) => {
           end_date: endDate.toISOString(),
           payment_id: razorpay_payment_id,
         })
-        .eq('order_id', razorpay_order_id);
+        .eq('order_id', razorpay_order_id)
+        .select();
 
       if (error) throw error;
+      
+      if (!data || data.length === 0) {
+          return res.status(404).json({ success: false, error: 'Subscription order not found in database.' });
+      }
 
-      res.json({ success: true, message: 'Subscription activated successfully' });
+      res.json({ success: true, message: 'Subscription activated successfully', subscription: data[0] });
     } else {
       res.status(400).json({ success: false, error: 'Invalid signature' });
     }
