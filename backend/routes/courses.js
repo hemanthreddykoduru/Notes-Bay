@@ -51,7 +51,7 @@ router.get('/my-learning', requireAuth, async (req, res) => {
     const { data: enrollments, error } = await supabase
       .from('course_enrollments')
       .select(`
-        enrolled_at,
+        created_at,
         courses (
           id, title, description, thumbnail_url, estimated_duration,
           profiles (full_name),
@@ -65,17 +65,22 @@ router.get('/my-learning', requireAuth, async (req, res) => {
 
     if (error) throw error;
     
-    const formatted = enrollments.map(e => {
+    // Safety check just in case the join returns null for courses
+    const validEnrollments = enrollments ? enrollments.filter(e => e.courses) : [];
+
+    const formatted = validEnrollments.map(e => {
         const c = e.courses;
         const totalLessons = c?.course_modules?.reduce((acc, m) => acc + (m.lessons?.length || 0), 0) || 0;
         return {
             ...c,
-            enrolled_at: e.enrolled_at,
+            enrolled_at: e.created_at,
             total_lessons: totalLessons,
             completed_lessons: 0, // Placeholder for actual progress calculation
             progress_percentage: 0
         };
     });
+
+    res.json(formatted);
 
     res.json(formatted);
   } catch (err) {
