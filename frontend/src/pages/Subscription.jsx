@@ -455,7 +455,7 @@ export default function Subscription() {
                                                                 Start Free Trial
                                                             </>
                                                         ) : (
-                                                            "Trial Already Used"
+                                                            (hasSubscription && !subscriptionDetails?.is_trial) ? "Pro Pass is active" : "Trial Already Used"
                                                         )}
                                                     </>
                                                 )}
