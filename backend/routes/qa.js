@@ -2,8 +2,20 @@ const express = require('express');
 const router = express.Router();
 const supabase = require('../config/supabase');
 const { requireAuth } = require('../middleware/auth');
-const checkAdmin = require('../utils/checkAdmin');
-
+// Helper to verify admin status
+const checkAdmin = async (userId) => {
+    try {
+        const { data, error } = await supabase
+            .from('profiles')
+            .select('role')
+            .eq('id', userId)
+            .single();
+        if (error) return false;
+        return data?.role === 'admin';
+    } catch {
+        return false;
+    }
+};
 // 1. GET all questions and their answers for a specific course
 router.get('/course/:courseId', requireAuth, async (req, res) => {
     try {
