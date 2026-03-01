@@ -508,7 +508,9 @@ export default function Subscription() {
                                                     className="w-full py-4 px-6 rounded-xl bg-gradient-to-r from-green-500 to-emerald-500 text-white font-bold text-lg hover:from-green-600 hover:to-emerald-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 transition-all shadow-lg flex items-center justify-center"
                                                 >
                                                     <Check className="w-5 h-5 mr-2" />
-                                                    Active Subscription - Browse Notes
+                                                    {subscriptionDetails?.end_date
+                                                        ? `Active until ${new Date(subscriptionDetails.end_date).toLocaleDateString('en-US', { day: 'numeric', month: 'short', year: 'numeric' })}`
+                                                        : 'Active Subscription'}
                                                 </button>
                                             ) : (
                                                 <>
