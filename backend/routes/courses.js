@@ -92,6 +92,11 @@ router.get('/my-learning', requireAuth, async (req, res) => {
 // Check if user is enrolled in a specific course
 router.get('/check-enrollment/:courseId', requireAuth, async (req, res) => {
     try {
+        const isAdmin = await checkAdmin(req.user.id);
+        if (isAdmin) {
+            return res.json({ isEnrolled: true });
+        }
+
         const { data, error } = await supabase
             .from('course_enrollments')
             .select('id')
