@@ -344,7 +344,11 @@ const LearningDashboard = () => {
                                 <div className="animate-in fade-in duration-300">
                                     <div className="flex items-center justify-between mb-6">
                                         <h3 className="text-lg font-bold text-gray-900 dark:text-white">Questions & Answers</h3>
-                                        <button className="text-sm font-semibold border border-gray-300 dark:border-gray-700 px-4 py-2 rounded-md hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors">
+                                        <button
+                                            disabled
+                                            className="text-sm font-semibold border border-gray-300 dark:border-gray-700 px-4 py-2 rounded-md bg-gray-50 dark:bg-gray-800 opacity-50 cursor-not-allowed transition-colors"
+                                            title="Q&A feature coming soon"
+                                        >
                                             Ask a Question
                                         </button>
                                     </div>
