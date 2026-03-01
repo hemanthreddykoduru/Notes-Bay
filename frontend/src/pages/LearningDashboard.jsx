@@ -264,7 +264,6 @@ const LearningDashboard = () => {
                                     <video
                                         key={`video-${activeItem.id}`}
                                         controls
-                                        autoPlay
                                         controlsList="nodownload"
                                         className="w-full h-full object-contain"
                                         src={activeItem.video_url.trim()}
