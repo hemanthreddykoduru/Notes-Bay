@@ -171,6 +171,55 @@ router.get('/:id', async (req, res) => {
   }
 });
 
+const { BlobServiceClient, generateBlobSASQueryParameters, StorageSharedKeyCredential, BlobSASPermissions } = require('@azure/storage-blob');
+
+function getSecureAzureVideoUrl(videoUrl) {
+    if (!videoUrl || !videoUrl.includes('blob.core.windows.net')) return videoUrl;
+
+    const connectionString = process.env.AZURE_STORAGE_CONNECTION_STRING;
+    if (!connectionString) {
+        console.warn("AZURE_STORAGE_CONNECTION_STRING missing, returning raw video URL");
+        return videoUrl;
+    }
+
+    try {
+        // Extract account name and key from connection string
+        const matches = connectionString.match(/AccountName=([^;]+);AccountKey=([^;]+)/);
+        if (!matches) return videoUrl;
+        
+        const accountName = matches[1];
+        const accountKey = matches[2];
+        const sharedKeyCredential = new StorageSharedKeyCredential(accountName, accountKey);
+
+        // Parse container and blob name from URL
+        // Example: https://hemanthvideo12345.blob.core.windows.net/videos/html-course.mp4
+        const urlObj = new URL(videoUrl);
+        const pathParts = urlObj.pathname.split('/').filter(p => p);
+        if (pathParts.length < 2) return videoUrl;
+
+        const containerName = pathParts[0];
+        const blobName = pathParts.slice(1).join('/');
+
+        // Generate SAS token valid for 3 hours
+        const startsOn = new Date();
+        const expiresOn = new Date(startsOn);
+        expiresOn.setHours(startsOn.getHours() + 3);
+
+        const sasToken = generateBlobSASQueryParameters({
+            containerName,
+            blobName,
+            permissions: BlobSASPermissions.parse("r"),
+            startsOn,
+            expiresOn
+        }, sharedKeyCredential).toString();
+
+        return `${videoUrl}?${sasToken}`;
+    } catch (e) {
+        console.error("Failed to generate Azure SAS URL:", e);
+        return videoUrl;
+    }
+}
+
 // SECURE: Get course details including VIDEO URLs (only for enrolled users or admins)
 router.get('/:id/learn', requireAuth, async (req, res) => {
   try {
@@ -220,11 +269,20 @@ router.get('/:id/learn', requireAuth, async (req, res) => {
 
     if (courseError) throw courseError;
     
-    // Sort modules and lessons
+    // Sort modules and lessons & SIGN VIDEO URLs
     if (course.course_modules) {
         course.course_modules.sort((a,b) => a.order_index - b.order_index);
         course.course_modules.forEach(m => {
-            if(m.lessons) m.lessons.sort((a,b) => a.order_index - b.order_index);
+            if(m.lessons) {
+                m.lessons.sort((a,b) => a.order_index - b.order_index);
+                // Secure video processing
+                m.lessons = m.lessons.map(lesson => {
+                    if (lesson.video_url) {
+                        lesson.video_url = getSecureAzureVideoUrl(lesson.video_url);
+                    }
+                    return lesson;
+                });
+            }
         });
     }
 
