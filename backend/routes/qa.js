@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const supabase = require('../config/supabase');
-const { requireAuth } = require('../middleware/auth');
+const requireAuth = require('../middleware/auth');
 // Helper to verify admin status
 const checkAdmin = async (userId) => {
     try {
