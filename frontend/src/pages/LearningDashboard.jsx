@@ -169,9 +169,9 @@ const LearningDashboard = () => {
             <main className={`flex-1 flex flex-col pt-16 h-full transition-all duration-300 overflow-y-auto ${sidebarOpen ? 'lg:pr-80' : ''}`}>
 
                 {/* Video Player / Quiz Container */}
-                <div className="bg-black w-full flex items-center justify-center">
+                <div className="bg-black w-full">
                     {activeItem?.type === 'lesson' ? (
-                        <div key={`video-container-${activeItem.id}`} className="w-full max-w-6xl aspect-video relative group flex items-center justify-center bg-black">
+                        <div key={`video-container-${activeItem.id}`} className="w-full max-w-6xl mx-auto aspect-video relative group bg-black">
                             {getYoutubeEmbedUrl(activeItem.video_url) ? (
                                 <iframe
                                     key={`iframe-${activeItem.id}`}
@@ -183,22 +183,19 @@ const LearningDashboard = () => {
                                     title={activeItem.title}
                                 ></iframe>
                             ) : activeItem.video_url ? (
-                                <>
-                                    {console.log("Attempting to render video with ReactPlayer:", activeItem.video_url)}
-                                    <ReactPlayer
-                                        key={`player-${activeItem.id}`}
-                                        url={activeItem.video_url.trim()}
-                                        width="100%"
-                                        height="100%"
-                                        controls={true}
+                                <div className="absolute inset-0 w-full h-full flex items-center justify-center bg-black">
+                                    <video
+                                        key={`video-${activeItem.id}`}
+                                        controls
+                                        autoPlay
+                                        controlsList="nodownload"
+                                        className="w-full h-full object-contain"
+                                        src={activeItem.video_url.trim()}
                                         onEnded={handleItemComplete}
-                                        fallback={<div className="text-white">Loading video player...</div>}
-                                        config={{
-                                            file: { attributes: { controlsList: 'nodownload' } }
-                                        }}
-                                        onError={(e) => console.error("ReactPlayer Error:", e)}
-                                    />
-                                </>
+                                    >
+                                        Your browser does not support the HTML5 video tag.
+                                    </video>
+                                </div>
                             ) : (
                                 <div className="absolute inset-0 flex flex-col items-center justify-center text-gray-400 bg-gray-900 border border-gray-800">
                                     <PlayCircle className="w-20 h-20 mb-4 opacity-50" />
@@ -208,7 +205,7 @@ const LearningDashboard = () => {
                             )}
                         </div>
                     ) : activeItem?.type === 'quiz' ? (
-                        <div className="w-full max-w-6xl py-16 md:py-24 px-4 md:px-8 flex items-center justify-center bg-gray-900 border-b border-gray-800 min-h-[500px]">
+                        <div className="w-full max-w-6xl mx-auto py-16 md:py-24 px-4 md:px-8 flex items-center justify-center bg-gray-900 border-b border-gray-800 min-h-[500px]">
                             {quizState === 'intro' && (
                                 <div className="text-center max-w-lg">
                                     <HelpCircle className="w-16 h-16 text-indigo-500 mx-auto mb-6" />
