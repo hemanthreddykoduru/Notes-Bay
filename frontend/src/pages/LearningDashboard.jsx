@@ -33,10 +33,6 @@ const LearningDashboard = () => {
     const [editingAnswerId, setEditingAnswerId] = useState(null);
     const [editAnswerText, setEditAnswerText] = useState('');
 
-    // Obfuscate video URL state
-    const [videoBlobUrl, setVideoBlobUrl] = useState(null);
-    const [isVideoLoading, setIsVideoLoading] = useState(false);
-
     const videoRef = useRef(null);
 
     // Helper to safely extract YouTube Embed URLs to bypass adblocker script blocking,
@@ -128,55 +124,6 @@ const LearningDashboard = () => {
     useEffect(() => {
         if (activeTab === 'qa' && id) fetchQA();
     }, [activeTab, id]);
-
-    // Fetch video as Blob to hide URL from Inspector
-    useEffect(() => {
-        if (!activeItem || activeItem.type !== 'lesson' || !activeItem.video_url) {
-            setVideoBlobUrl(null);
-            return;
-        }
-
-        const url = activeItem.video_url.trim();
-
-        // Don't blob Youtube embeds
-        if (getYoutubeEmbedUrl(url)) {
-            setVideoBlobUrl(null);
-            return;
-        }
-
-        let isMounted = true;
-        const fetchVideoBlob = async () => {
-            setIsVideoLoading(true);
-            try {
-                // Fetch the video data (Warning: downloads entire file into RAM)
-                const response = await fetch(url);
-                if (!response.ok) throw new Error('Network response was not ok');
-                const blob = await response.blob();
-
-                if (isMounted) {
-                    const objectUrl = URL.createObjectURL(blob);
-                    setVideoBlobUrl(objectUrl);
-                }
-            } catch (error) {
-                console.error("Failed to fetch video blob:", error);
-                // Fallback to raw URL if fetch fails (e.g. CORS)
-                if (isMounted) setVideoBlobUrl(url);
-            } finally {
-                if (isMounted) setIsVideoLoading(false);
-            }
-        };
-
-        // Clean up previous blob to prevent memory leaks
-        if (videoBlobUrl && videoBlobUrl.startsWith('blob:')) {
-            URL.revokeObjectURL(videoBlobUrl);
-        }
-
-        fetchVideoBlob();
-
-        return () => {
-            isMounted = false;
-        };
-    }, [activeItem]);
 
     const fetchQA = async () => {
         setLoadingQA(true);
@@ -364,25 +311,17 @@ const LearningDashboard = () => {
                                     title={activeItem.title}
                                 ></iframe>
                             ) : activeItem.video_url ? (
-                                <div className="absolute inset-0 w-full h-full flex items-center justify-center bg-black" onContextMenu={(e) => e.preventDefault()}>
-                                    {isVideoLoading ? (
-                                        <div className="flex flex-col items-center justify-center text-white">
-                                            <Loader className="w-10 h-10 animate-spin text-indigo-500 mb-4" />
-                                            <p className="text-sm">Securing video stream...</p>
-                                        </div>
-                                    ) : (
-                                        <video
-                                            key={`video-${activeItem.id}`}
-                                            controls
-                                            controlsList="nodownload"
-                                            disablePictureInPicture
-                                            className="w-full h-full object-contain"
-                                            src={videoBlobUrl || activeItem.video_url.trim()}
-                                            onEnded={handleItemComplete}
-                                        >
-                                            Your browser does not support the HTML5 video tag.
-                                        </video>
-                                    )}
+                                <div className="absolute inset-0 w-full h-full flex items-center justify-center bg-black">
+                                    <video
+                                        key={`video-${activeItem.id}`}
+                                        controls
+                                        controlsList="nodownload"
+                                        className="w-full h-full object-contain"
+                                        src={activeItem.video_url.trim()}
+                                        onEnded={handleItemComplete}
+                                    >
+                                        Your browser does not support the HTML5 video tag.
+                                    </video>
                                 </div>
                             ) : (
                                 <div className="absolute inset-0 flex flex-col items-center justify-center text-gray-400 bg-gray-900 border border-gray-800">
