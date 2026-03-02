@@ -157,49 +157,6 @@ router.post('/:courseId/enroll', requireAuth, async (req, res) => {
     }
 });
 
-// Admin: Get course details WITH raw video_urls for editing
-router.get('/admin/:id', requireAuth, async (req, res) => {
-    try {
-        const isAdmin = await checkAdmin(req.user.id);
-        if (!isAdmin) return res.status(403).json({ error: 'Admins only' });
-
-        const courseId = req.params.id;
-        const { data: course, error: courseError } = await supabase
-            .from('courses')
-            .select(`
-                id, title, description, price, thumbnail_url,
-                level, language, estimated_duration, skills, learning_objectives, requirements,
-                profiles (full_name, bio, title, avatar_url),
-                course_modules (
-                    id, title, order_index,
-                    lessons (
-                        id, title, duration_seconds, order_index, is_free_preview, video_url, resources
-                    ),
-                    quizzes (
-                        id, title, passing_score_percentage
-                    )
-                )
-            `)
-            .eq('id', courseId)
-            .single();
-
-        if (courseError) throw courseError;
-        
-        // Sort modules and lessons
-        if (course.course_modules) {
-            course.course_modules.sort((a,b) => a.order_index - b.order_index);
-            course.course_modules.forEach(m => {
-                if(m.lessons) m.lessons.sort((a,b) => a.order_index - b.order_index);
-            });
-        }
-
-        res.json(course);
-    } catch (err) {
-        console.error('Error fetching admin course details:', err);
-        res.status(500).json({ error: 'Failed to fetch course details' });
-    }
-});
-
 // Get course details including modules and lessons (metadata only, no video URLs unless enrolled)
 router.get('/:id', async (req, res) => {
   try {
@@ -436,6 +393,49 @@ router.get('/admin/all', requireAuth, async (req, res) => {
     } catch (err) {
         console.error('Error fetching admin courses:', err);
         res.status(500).json({ error: err.message });
+    }
+});
+
+// Admin: Get course details WITH raw video_urls for editing
+router.get('/admin/:id', requireAuth, async (req, res) => {
+    try {
+        const isAdmin = await checkAdmin(req.user.id);
+        if (!isAdmin) return res.status(403).json({ error: 'Admins only' });
+
+        const courseId = req.params.id;
+        const { data: course, error: courseError } = await supabase
+            .from('courses')
+            .select(`
+                id, title, description, price, thumbnail_url,
+                level, language, estimated_duration, skills, learning_objectives, requirements,
+                profiles (full_name, bio, title, avatar_url),
+                course_modules (
+                    id, title, order_index,
+                    lessons (
+                        id, title, duration_seconds, order_index, is_free_preview, video_url, resources
+                    ),
+                    quizzes (
+                        id, title, passing_score_percentage
+                    )
+                )
+            `)
+            .eq('id', courseId)
+            .single();
+
+        if (courseError) throw courseError;
+        
+        // Sort modules and lessons
+        if (course.course_modules) {
+            course.course_modules.sort((a,b) => a.order_index - b.order_index);
+            course.course_modules.forEach(m => {
+                if(m.lessons) m.lessons.sort((a,b) => a.order_index - b.order_index);
+            });
+        }
+
+        res.json(course);
+    } catch (err) {
+        console.error('Error fetching admin course details:', err);
+        res.status(500).json({ error: 'Failed to fetch course details' });
     }
 });
 
