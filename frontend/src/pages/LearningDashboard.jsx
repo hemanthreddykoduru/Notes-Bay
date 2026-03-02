@@ -30,6 +30,8 @@ const LearningDashboard = () => {
     const [loadingQA, setLoadingQA] = useState(false);
     const [showQuestionForm, setShowQuestionForm] = useState(false);
     const [isAdmin, setIsAdmin] = useState(false);
+    const [editingAnswerId, setEditingAnswerId] = useState(null);
+    const [editAnswerText, setEditAnswerText] = useState('');
 
     const videoRef = useRef(null);
 
@@ -173,6 +175,55 @@ const LearningDashboard = () => {
         } catch (error) {
             console.error('Failed to post reply', error);
             alert('Failed to post reply');
+        }
+    };
+
+    const handleEditAnswer = async (e, questionId, answerId) => {
+        e.preventDefault();
+        if (!editAnswerText.trim()) return;
+        try {
+            const { data } = await axios.put(`${API_URL}/qa/reply/${answerId}`, {
+                content: editAnswerText
+            }, { headers: { Authorization: `Bearer ${token}` } });
+
+            setQuestions(questions.map(q => {
+                if (q.id === questionId) {
+                    return {
+                        ...q,
+                        course_answers: q.course_answers.map(a =>
+                            a.id === answerId ? data : a
+                        )
+                    };
+                }
+                return q;
+            }));
+            setEditingAnswerId(null);
+            setEditAnswerText('');
+        } catch (error) {
+            console.error('Failed to edit reply', error);
+            alert('Failed to edit reply');
+        }
+    };
+
+    const handleDeleteAnswer = async (questionId, answerId) => {
+        if (!window.confirm('Are you sure you want to delete this reply?')) return;
+        try {
+            await axios.delete(`${API_URL}/qa/reply/${answerId}`, {
+                headers: { Authorization: `Bearer ${token}` }
+            });
+
+            setQuestions(questions.map(q => {
+                if (q.id === questionId) {
+                    return {
+                        ...q,
+                        course_answers: q.course_answers.filter(a => a.id !== answerId)
+                    };
+                }
+                return q;
+            }));
+        } catch (error) {
+            console.error('Failed to delete reply', error);
+            alert('Failed to delete reply');
         }
     };
 
@@ -489,6 +540,29 @@ const LearningDashboard = () => {
                                                                         <span className="text-xs text-gray-500 font-normal ml-2">{new Date(a.created_at).toLocaleDateString()}</span>
                                                                     </h4>
                                                                     <p className="text-sm text-gray-700 dark:text-gray-300 mt-1 whitespace-pre-wrap">{a.content}</p>
+
+                                                                    {/* Edit/Delete Actions */}
+                                                                    {(isAdmin || user?.id === a.user_id) && editingAnswerId !== a.id && (
+                                                                        <div className="flex gap-3 mt-2">
+                                                                            <button onClick={() => { setEditingAnswerId(a.id); setEditAnswerText(a.content); }} className="text-xs font-semibold text-gray-500 hover:text-indigo-600 dark:hover:text-indigo-400">Edit</button>
+                                                                            <button onClick={() => handleDeleteAnswer(q.id, a.id)} className="text-xs font-semibold text-gray-500 hover:text-red-600 dark:hover:text-red-400">Delete</button>
+                                                                        </div>
+                                                                    )}
+
+                                                                    {/* Edit Form */}
+                                                                    {editingAnswerId === a.id && (
+                                                                        <form onSubmit={(e) => handleEditAnswer(e, q.id, a.id)} className="mt-3 flex gap-2">
+                                                                            <input
+                                                                                type="text"
+                                                                                className="flex-1 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-md px-3 py-1.5 text-sm text-gray-900 dark:text-white focus:outline-none focus:ring-1 focus:ring-indigo-500"
+                                                                                value={editAnswerText}
+                                                                                onChange={(e) => setEditAnswerText(e.target.value)}
+                                                                                autoFocus
+                                                                            />
+                                                                            <button type="submit" disabled={!editAnswerText.trim()} className="bg-indigo-600 hover:bg-indigo-700 disabled:opacity-50 text-white px-3 py-1.5 rounded-md text-xs font-medium">Save</button>
+                                                                            <button type="button" onClick={() => setEditingAnswerId(null)} className="bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 text-gray-800 dark:text-white px-3 py-1.5 rounded-md text-xs font-medium">Cancel</button>
+                                                                        </form>
+                                                                    )}
                                                                 </div>
                                                             </div>
                                                         ))}

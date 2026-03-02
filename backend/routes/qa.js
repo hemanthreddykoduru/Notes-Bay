@@ -115,4 +115,75 @@ router.post('/reply/:questionId', requireAuth, async (req, res) => {
     }
 });
 
+// 4. PUT (Edit) a reply/answer
+router.put('/reply/:replyId', requireAuth, async (req, res) => {
+    try {
+        const { replyId } = req.params;
+        const { content } = req.body;
+        const userId = req.user.id;
+
+        if (!content) return res.status(400).json({ error: 'Reply content is required' });
+
+        // First check if the user is the author or an admin
+        const { data: reply, error: fetchError } = await supabase
+            .from('course_answers')
+            .select('user_id')
+            .eq('id', replyId)
+            .single();
+
+        if (fetchError || !reply) return res.status(404).json({ error: 'Reply not found' });
+
+        const isAdmin = await checkAdmin(userId);
+        if (reply.user_id !== userId && !isAdmin) {
+            return res.status(403).json({ error: 'Forbidden. You can only edit your own replies.' });
+        }
+
+        const { data, error } = await supabase
+            .from('course_answers')
+            .update({ content })
+            .eq('id', replyId)
+            .select('*, profiles(full_name, avatar_url, role)')
+            .single();
+
+        if (error) throw error;
+        res.json(data);
+    } catch (err) {
+        console.error('Error editing reply:', err);
+        res.status(500).json({ error: 'Failed to edit reply' });
+    }
+});
+
+// 5. DELETE a reply/answer
+router.delete('/reply/:replyId', requireAuth, async (req, res) => {
+    try {
+        const { replyId } = req.params;
+        const userId = req.user.id;
+
+        // First check if the user is the author or an admin
+        const { data: reply, error: fetchError } = await supabase
+            .from('course_answers')
+            .select('user_id')
+            .eq('id', replyId)
+            .single();
+
+        if (fetchError || !reply) return res.status(404).json({ error: 'Reply not found' });
+
+        const isAdmin = await checkAdmin(userId);
+        if (reply.user_id !== userId && !isAdmin) {
+            return res.status(403).json({ error: 'Forbidden. You can only delete your own replies.' });
+        }
+
+        const { error } = await supabase
+            .from('course_answers')
+            .delete()
+            .eq('id', replyId);
+
+        if (error) throw error;
+        res.json({ success: true, message: 'Reply deleted successfully' });
+    } catch (err) {
+        console.error('Error deleting reply:', err);
+        res.status(500).json({ error: 'Failed to delete reply' });
+    }
+});
+
 module.exports = router;
