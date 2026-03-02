@@ -300,7 +300,7 @@ const LearningDashboard = () => {
                 <div className="bg-black w-full">
                     {activeItem?.type === 'lesson' ? (
                         <div key={`video-container-${activeItem.id}`} className="w-full max-w-6xl mx-auto aspect-video relative group bg-black">
-                            {getYoutubeEmbedUrl(activeItem.video_url) ? (
+                            {activeItem.video_url && getYoutubeEmbedUrl(activeItem.video_url) ? (
                                 <iframe
                                     key={`iframe-${activeItem.id}`}
                                     src={getYoutubeEmbedUrl(activeItem.video_url)}
