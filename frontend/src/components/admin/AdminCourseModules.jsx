@@ -32,8 +32,8 @@ export default function AdminCourseModules({ course, onBack, setToast }) {
     const fetchCurriculum = async () => {
         setLoading(true);
         try {
-            // Re-fetch course details which includes nested modules and lessons
-            const { data } = await api.get(`/courses/${course.id}`);
+            // Re-fetch course details via secure admin endpoint to retrieve hidden video URLs
+            const { data } = await api.get(`/courses/admin/${course.id}`);
             setModules(data.course_modules || []);
 
             // Auto-expand all modules
