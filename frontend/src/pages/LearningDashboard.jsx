@@ -310,14 +310,15 @@ const LearningDashboard = () => {
                                     allowFullScreen
                                     title={activeItem.title}
                                 ></iframe>
-                            ) : activeItem.video_url ? (
-                                <div className="absolute inset-0 w-full h-full flex items-center justify-center bg-black">
+                            ) : (activeItem.video_ticket || activeItem.video_url) ? (
+                                <div className="absolute inset-0 w-full h-full flex items-center justify-center bg-black" onContextMenu={(e) => e.preventDefault()}>
                                     <video
                                         key={`video-${activeItem.id}`}
                                         controls
                                         controlsList="nodownload"
+                                        disablePictureInPicture
                                         className="w-full h-full object-contain"
-                                        src={activeItem.video_url.trim()}
+                                        src={activeItem.video_ticket ? `${API_URL}/courses/proxy-video?ticket=${activeItem.video_ticket}` : activeItem.video_url?.trim()}
                                         onEnded={handleItemComplete}
                                     >
                                         Your browser does not support the HTML5 video tag.

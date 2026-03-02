@@ -3,6 +3,23 @@ const router = express.Router();
 const { createClient } = require('@supabase/supabase-js');
 const requireAuth = require('../middleware/auth');
 const multer = require('multer');
+const jwt = require('jsonwebtoken');
+
+// Proxy route for streaming video securely
+router.get('/proxy-video', (req, res) => {
+    const { ticket } = req.query;
+    if (!ticket) return res.status(400).send("No ticket provided");
+
+    try {
+        const decoded = jwt.verify(ticket, process.env.JWT_SECRET || 'secret');
+        if (!decoded.url) throw new Error("Invalid ticket payload");
+        
+        // Redirect browser to stream directly from Azure
+        res.redirect(302, decoded.url);
+    } catch (err) {
+        res.status(403).send("Invalid or expired video ticket");
+    }
+});
 
 // Initialize Supabase admin client
 const supabase = createClient(
@@ -288,7 +305,11 @@ router.get('/:id/learn', requireAuth, async (req, res) => {
                 // Secure video processing
                 m.lessons = m.lessons.map(lesson => {
                     if (lesson.video_url) {
-                        lesson.video_url = getSecureAzureVideoUrl(lesson.video_url);
+                        const azureUrl = getSecureAzureVideoUrl(lesson.video_url);
+                        // Hiding the direct Azure link from the DOM by issuing a token
+                        const ticket = jwt.sign({ url: azureUrl }, process.env.JWT_SECRET || 'secret', { expiresIn: '4h' });
+                        lesson.video_ticket = ticket;
+                        delete lesson.video_url; // Securely removed from payload
                     }
                     return lesson;
                 });
