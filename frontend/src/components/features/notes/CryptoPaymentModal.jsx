@@ -101,8 +101,9 @@ export default function CryptoPaymentModal({
   // ---------------------------------------------------------------------------
   // Copy to clipboard (copies invoice URL or wallet address)
   // ---------------------------------------------------------------------------
+  const copyTarget = paymentMode === 'direct' ? walletAddress : (invoiceUrl || walletAddress || '');
+  
   const handleCopy = async () => {
-    const copyTarget = paymentMode === 'direct' ? walletAddress : (invoiceUrl || walletAddress || '');
     try {
       await navigator.clipboard.writeText(copyTarget);
       setCopied(true);
