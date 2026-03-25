@@ -40,15 +40,16 @@ const INVOICE_EXPIRE_MINUTES = 15;
 //   - Inserts into purchases (idempotent via order_id check)
 // ---------------------------------------------------------------------------
 
-async function fulfillOrder(cryptoOrder, txid, client = supabaseAdmin) {
+async function fulfillOrder(cryptoOrder, txid, paidAmount, client = supabaseAdmin) {
   const { id, user_id, note_id, invoice_id, amount_inr } = cryptoOrder;
 
-  // 1. Update crypto_orders status
+  // 1. Update crypto_orders status and exact paid amount
   const { error: updateError } = await client
     .from('crypto_orders')
     .update({
       status: 'paid',
       txid: txid || null,
+      amount_usdt: paidAmount || cryptoOrder.amount_usdt,
     })
     .eq('id', id)
     .eq('status', 'pending'); // Only update if still pending (idempotency guard)
@@ -359,8 +360,9 @@ exports.handleWebhook = async (req, res) => {
       return res.status(200).json({ received: true });
     }
 
-    // 4. Fulfill the order
-    await fulfillOrder(order, txid || invoiceData.txid, supabaseAdmin);
+    // 5. Fulfill the order (passing the actual crypto amount received)
+    const exactPaidAmount = parseFloat(invoiceData.amount || invoiceData.total_amount?.crypto) || 0;
+    await fulfillOrder(order, txid || invoiceData.txid, exactPaidAmount, supabaseAdmin);
 
     console.log(`[Crypto Webhook] Successfully fulfilled invoice ${invoiceId}`);
     return res.status(200).json({ received: true });
