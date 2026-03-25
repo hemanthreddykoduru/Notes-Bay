@@ -17,6 +17,7 @@
     "axios": "^1.13.2",
     "lodash.debounce": "^4.0.8",
     "lucide-react": "^0.562.0",
+    "qrcode.react": "^4.2.0",
     "react": "^19.2.0",
     "react-dom": "^19.2.0",
     "react-pdf": "^10.3.0",

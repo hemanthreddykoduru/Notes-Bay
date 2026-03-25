@@ -9,6 +9,7 @@ import SocialShare from '../components/common/SocialShare';
 import RelatedNotes from '../components/features/notes/RelatedNotes';
 import NoteDetailSkeleton from '../components/skeletons/NoteDetailSkeleton';
 import SecurePDFViewer from '../components/features/notes/SecurePDFViewer';
+import CryptoPaymentModal from '../components/features/notes/CryptoPaymentModal';
 
 import SkyscraperAd from '../components/features/ads/SkyscraperAd';
 import LeaderboardAd from '../components/features/ads/LeaderboardAd';
@@ -24,6 +25,10 @@ export default function NoteDetails() {
     const [showReader, setShowReader] = useState(false);
     const [subPrice, setSubPrice] = useState(100);
     const [userEmail, setUserEmail] = useState(null);
+    // Crypto payment state
+    const [showCryptoModal, setShowCryptoModal] = useState(false);
+    const [cryptoInvoice, setCryptoInvoice] = useState(null);
+    const [cryptoProcessing, setCryptoProcessing] = useState(false);
 
     useEffect(() => {
         let mounted = true;
@@ -171,6 +176,31 @@ export default function NoteDetails() {
         }
     };
 
+    const handleCryptoBuy = async () => {
+        const { data: { session } } = await supabase.auth.getSession();
+        if (!session) { navigate('/login'); return; }
+        if (purchased) { alert('You already have access to this note!'); return; }
+
+        setCryptoProcessing(true);
+        try {
+            const { data } = await api.post('/crypto/create-invoice', { noteId: note.id });
+            setCryptoInvoice(data);
+            setShowCryptoModal(true);
+        } catch (error) {
+            console.error('Crypto payment error:', error);
+            alert(error.response?.data?.error || 'Failed to create crypto invoice. Please try again.');
+        } finally {
+            setCryptoProcessing(false);
+        }
+    };
+
+    const handleCryptoSuccess = () => {
+        setShowCryptoModal(false);
+        setCryptoInvoice(null);
+        setPurchased(true);
+        fetchNoteDetails(); // Refresh to show download button
+    };
+
     if (loading) return <NoteDetailSkeleton />;
 
     if (error || !note) {
@@ -300,7 +330,7 @@ export default function NoteDetails() {
                                             </div>
                                         </div>
 
-                                        {/* Single Purchase Option */}
+                                         {/* Single Purchase Option */}
                                         <div className="border border-gray-200 dark:border-gray-700 rounded-xl p-4 hover:border-gray-300 dark:hover:border-gray-600 transition-colors bg-white dark:bg-gray-800">
                                             <div className="flex justify-between items-center mb-3">
                                                 <div>
@@ -311,13 +341,25 @@ export default function NoteDetails() {
                                                     <span className="block text-xl font-bold text-gray-900 dark:text-white">₹{note.price}</span>
                                                 </div>
                                             </div>
-                                            <button
-                                                onClick={handleBuy}
-                                                disabled={processing}
-                                                className="w-full py-2 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-600 text-sm font-medium rounded-md shadow-sm transition-colors"
-                                            >
-                                                {processing ? 'Processing...' : 'Buy This Note Only'}
-                                            </button>
+                                            {/* Payment buttons */}
+                                            <div className="flex flex-col gap-2">
+                                                {/* Razorpay button (unchanged) */}
+                                                <button
+                                                    onClick={handleBuy}
+                                                    disabled={processing || cryptoProcessing}
+                                                    className="w-full py-2 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-600 text-sm font-medium rounded-md shadow-sm transition-colors disabled:opacity-60 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                                                >
+                                                    💳 {processing ? 'Processing...' : 'Pay with Razorpay'}
+                                                </button>
+                                                {/* Crypto button */}
+                                                <button
+                                                    onClick={handleCryptoBuy}
+                                                    disabled={processing || cryptoProcessing}
+                                                    className="w-full py-2 bg-gradient-to-r from-violet-600 to-indigo-600 hover:from-violet-700 hover:to-indigo-700 text-white text-sm font-medium rounded-md shadow-sm transition-colors disabled:opacity-60 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                                                >
+                                                    {cryptoProcessing ? '⏳ Creating invoice…' : '₿ Pay with Crypto — 10% OFF'}
+                                                </button>
+                                            </div>
                                         </div>
 
 
@@ -357,6 +399,21 @@ export default function NoteDetails() {
                         title={note.title}
                         onClose={() => setShowReader(false)}
                         userEmail={userEmail}
+                    />
+                )
+            }
+
+            {/* Crypto Payment Modal */}
+            {
+                showCryptoModal && cryptoInvoice && (
+                    <CryptoPaymentModal
+                        invoiceId={cryptoInvoice.invoiceId}
+                        walletAddress={cryptoInvoice.walletAddress}
+                        amount={cryptoInvoice.amount}
+                        amountInr={cryptoInvoice.amountInr}
+                        expiresAt={cryptoInvoice.expiresAt}
+                        onSuccess={handleCryptoSuccess}
+                        onClose={() => { setShowCryptoModal(false); setCryptoInvoice(null); }}
                     />
                 )
             }
