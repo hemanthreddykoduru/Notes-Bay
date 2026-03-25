@@ -9,7 +9,6 @@ import SocialShare from '../components/common/SocialShare';
 import RelatedNotes from '../components/features/notes/RelatedNotes';
 import NoteDetailSkeleton from '../components/skeletons/NoteDetailSkeleton';
 import SecurePDFViewer from '../components/features/notes/SecurePDFViewer';
-import CryptoPaymentModal from '../components/features/notes/CryptoPaymentModal';
 
 import SkyscraperAd from '../components/features/ads/SkyscraperAd';
 import LeaderboardAd from '../components/features/ads/LeaderboardAd';
@@ -26,8 +25,6 @@ export default function NoteDetails() {
     const [subPrice, setSubPrice] = useState(100);
     const [userEmail, setUserEmail] = useState(null);
     // Crypto payment state
-    const [showCryptoModal, setShowCryptoModal] = useState(false);
-    const [cryptoInvoice, setCryptoInvoice] = useState(null);
     const [cryptoProcessing, setCryptoProcessing] = useState(false);
 
     useEffect(() => {
@@ -184,21 +181,19 @@ export default function NoteDetails() {
         setCryptoProcessing(true);
         try {
             const { data } = await api.post('/crypto/create-invoice', { noteId: note.id });
-            setCryptoInvoice(data);
-            setShowCryptoModal(true);
+            
+            // Redirect the user directly to the CoinRemitter hosted payment page
+            if (data.invoiceUrl) {
+                window.location.href = data.invoiceUrl;
+            } else {
+                alert('No payment link received. Please try again.');
+            }
         } catch (error) {
             console.error('Crypto payment error:', error);
             alert(error.response?.data?.error || 'Failed to create crypto invoice. Please try again.');
         } finally {
             setCryptoProcessing(false);
         }
-    };
-
-    const handleCryptoSuccess = () => {
-        setShowCryptoModal(false);
-        setCryptoInvoice(null);
-        setPurchased(true);
-        fetchNoteDetails(); // Refresh to show download button
     };
 
     if (loading) return <NoteDetailSkeleton />;
@@ -403,21 +398,6 @@ export default function NoteDetails() {
                 )
             }
 
-            {/* Crypto Payment Modal */}
-            {
-                showCryptoModal && cryptoInvoice && (
-                    <CryptoPaymentModal
-                        invoiceId={cryptoInvoice.invoiceId}
-                        invoiceUrl={cryptoInvoice.invoiceUrl}
-                        walletAddress={cryptoInvoice.walletAddress}
-                        amount={cryptoInvoice.amount}
-                        amountInr={cryptoInvoice.amountInr}
-                        expiresAt={cryptoInvoice.expiresAt}
-                        onSuccess={handleCryptoSuccess}
-                        onClose={() => { setShowCryptoModal(false); setCryptoInvoice(null); }}
-                    />
-                )
-            }
         </div >
     );
 }

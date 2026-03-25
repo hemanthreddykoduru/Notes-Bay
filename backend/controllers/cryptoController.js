@@ -143,9 +143,15 @@ exports.createInvoice = async (req, res) => {
       .maybeSingle();
 
     if (pendingOrder) {
-      // Return the existing invoice rather than creating a new one
+      // For cached orders, we might have saved the URL in wallet_address
+      const invoiceUrl =
+        (pendingOrder.wallet_address && pendingOrder.wallet_address.startsWith('http'))
+          ? pendingOrder.wallet_address
+          : `https://coinremitter.com/invoice/${pendingOrder.invoice_id}`;
+
       return res.json({
         invoiceId: pendingOrder.invoice_id,
+        invoiceUrl,
         walletAddress: pendingOrder.wallet_address,
         amount: pendingOrder.amount_usdt,
         amountInr: pendingOrder.amount_inr,
