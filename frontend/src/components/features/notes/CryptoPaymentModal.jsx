@@ -183,13 +183,13 @@ export default function CryptoPaymentModal({
             </div>
           </div>
 
-          {/* Amount to send */}
+          {/* Amount info */}
           <div className="text-center bg-gradient-to-br from-violet-50 to-indigo-50 dark:from-violet-900/20 dark:to-indigo-900/20 border border-indigo-100 dark:border-indigo-800 rounded-xl p-4">
-            <p className="text-sm text-gray-500 dark:text-gray-400 mb-1">Send exactly</p>
-            <p className="text-3xl font-bold text-indigo-700 dark:text-indigo-300 tracking-tight">
-              {amount.toFixed(6)} <span className="text-lg font-semibold">LTC</span>
+            <p className="text-sm text-gray-500 dark:text-gray-400 mb-1">You pay (after 10% discount)</p>
+            <p className="text-2xl font-bold text-indigo-700 dark:text-indigo-300">
+              ₹{(amountInr * 0.9).toFixed(2)}
             </p>
-            <p className="text-xs text-gray-400 dark:text-gray-500 mt-1">Network: Litecoin (LTC)</p>
+            <p className="text-xs text-gray-400 dark:text-gray-500 mt-1">Exact LTC amount shown on payment page</p>
           </div>
 
           {/* QR Code + Pay Button */}
@@ -287,7 +287,7 @@ export default function CryptoPaymentModal({
 
           {/* Warning */}
           <div className="text-xs text-amber-700 dark:text-amber-400 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-lg px-3 py-2 leading-relaxed">
-            ⚠️ Pay via the CoinRemitter page. Send the <strong>exact LTC amount</strong> shown above. Payments are non-refundable.
+            ⚠️ Open the payment page to see the exact LTC amount. Send on the <strong>Litecoin network only</strong>. Payments are non-refundable.
           </div>
         </div>
 
