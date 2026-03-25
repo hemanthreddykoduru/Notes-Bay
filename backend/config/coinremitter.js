@@ -50,8 +50,11 @@ async function createInvoice(amountInr, label, description = '') {
   params.append('name', label.substring(0, 30));
   params.append('description', description.substring(0, 255));
   params.append('expiry_time_in_minutes', '15');
-  if (process.env.COINREMITTER_WEBHOOK_URL) {
-    params.append('notify_url', process.env.COINREMITTER_WEBHOOK_URL);
+  // Only send notify_url if it's a real public HTTPS URL.
+  // Omitting it avoids CoinRemitter's validation probe failure in dev.
+  const webhookUrl = process.env.COINREMITTER_WEBHOOK_URL || '';
+  if (webhookUrl && webhookUrl.startsWith('https://') && !webhookUrl.includes('ngrok-free.app')) {
+    params.append('notify_url', webhookUrl);
   }
   if (process.env.FRONTEND_URL) {
     params.append('success_url', process.env.FRONTEND_URL);

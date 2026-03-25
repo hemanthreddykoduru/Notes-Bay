@@ -278,12 +278,14 @@ exports.getInvoiceStatus = async (req, res) => {
 exports.handleWebhook = async (req, res) => {
   try {
     // CoinRemitter sends application/x-www-form-urlencoded
-    const { id: invoiceId, status, txid } = req.body;
+    const { id: invoiceId, status, txid } = req.body || {};
 
     console.log(`[Crypto Webhook] Received: invoice=${invoiceId} status=${status} txid=${txid}`);
 
+    // CoinRemitter validates the webhook URL by sending a test POST with no body.
+    // Always return 200 so validation passes.
     if (!invoiceId) {
-      return res.status(400).json({ error: 'Missing invoice_id' });
+      return res.status(200).json({ received: true });
     }
 
     // status === '2' means paid in CoinRemitter
