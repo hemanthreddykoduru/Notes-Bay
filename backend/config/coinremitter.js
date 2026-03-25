@@ -3,10 +3,10 @@
  * --------------------------------
  * Base URL: https://api.coinremitter.com/v1/
  * Auth: x-api-key and x-api-password HTTP headers
+ * Body format: application/x-www-form-urlencoded (NOT JSON — CoinRemitter uses --form)
  * Docs: https://coinremitter.com/docs
  *
  * Supports fiat_currency: 'INR' natively — CoinRemitter handles the conversion.
- * No need to manually fetch exchange rates.
  *
  * Env vars required:
  *   COINREMITTER_API_KEY   — from CoinRemitter dashboard → Wallet → API
@@ -18,52 +18,64 @@ const https = require('https');
 
 const BASE_URL = 'https://api.coinremitter.com/v1';
 
-// Allow self-signed / untrusted certs in development environments.
-// In production on Vercel, the standard Node.js cert store works fine.
+// Allow self-signed certs in local dev (macOS SSL issue). Safe on Vercel.
 const httpsAgent = new https.Agent({ rejectUnauthorized: false });
 
 /**
- * Returns Axios config headers for CoinRemitter auth.
+ * Returns auth headers for CoinRemitter.
  */
 function authHeaders() {
   return {
     'x-api-key': process.env.COINREMITTER_API_KEY,
     'x-api-password': process.env.COINREMITTER_PASSWORD,
-    'Content-Type': 'application/json',
+    // CoinRemitter expects form-encoded data, not JSON
+    'Content-Type': 'application/x-www-form-urlencoded',
   };
 }
 
 /**
  * Creates a new payment invoice on CoinRemitter.
- * Pass the INR amount — CoinRemitter converts to crypto automatically.
+ * Sends INR amount — CoinRemitter converts to crypto automatically.
  *
- * @param {number} amountInr      — INR price to bill (already discounted)
- * @param {string} label          — Invoice name (max 30 chars)
- * @param {string} description    — Optional description (max 255 chars)
- * @returns {Promise<Object>}     — Invoice data: { id, invoice_id, url, amount, address, expire_on_timestamp, ... }
+ * @param {number} amountInr   — INR price (already discounted)
+ * @param {string} label       — Invoice name (max 30 chars)
+ * @param {string} description — Optional description (max 255 chars)
+ * @returns {Promise<Object>}  — { id, invoice_id, url, amount, address, expire_on_timestamp, ... }
  */
 async function createInvoice(amountInr, label, description = '') {
-  const payload = {
-    amount: amountInr,
-    fiat_currency: 'INR',                              // CoinRemitter converts INR → crypto
-    name: label.substring(0, 30),
-    description: description.substring(0, 255),
-    notify_url: process.env.COINREMITTER_WEBHOOK_URL || '',
-    success_url: process.env.FRONTEND_URL || '',
-    fail_url: process.env.FRONTEND_URL || '',
-    expiry_time_in_minutes: 15,
-  };
+  // CoinRemitter requires form-encoded body (not JSON)
+  const params = new URLSearchParams();
+  params.append('amount', amountInr.toFixed(2));
+  params.append('fiat_currency', 'INR');
+  params.append('name', label.substring(0, 30));
+  params.append('description', description.substring(0, 255));
+  params.append('expiry_time_in_minutes', '15');
+  if (process.env.COINREMITTER_WEBHOOK_URL) {
+    params.append('notify_url', process.env.COINREMITTER_WEBHOOK_URL);
+  }
+  if (process.env.FRONTEND_URL) {
+    params.append('success_url', process.env.FRONTEND_URL);
+    params.append('fail_url', process.env.FRONTEND_URL);
+  }
 
-  const response = await axios.post(`${BASE_URL}/invoice/create`, payload, {
-    headers: authHeaders(),
-    httpsAgent,
-    timeout: 10000,
-  });
+  let response;
+  try {
+    response = await axios.post(`${BASE_URL}/invoice/create`, params.toString(), {
+      headers: authHeaders(),
+      httpsAgent,
+      timeout: 15000,
+    });
+  } catch (err) {
+    const detail = err.response?.data;
+    console.error('[CoinRemitter] HTTP error:', err.response?.status, JSON.stringify(detail));
+    throw new Error(
+      detail?.msg || detail?.error || `CoinRemitter HTTP ${err.response?.status}: ${err.message}`
+    );
+  }
 
   if (!response.data.success) {
-    throw new Error(
-      `CoinRemitter error: ${response.data.msg || response.data.error || 'Unknown error'}`
-    );
+    console.error('[CoinRemitter] API error:', JSON.stringify(response.data));
+    throw new Error(response.data.msg || response.data.error || 'Unknown CoinRemitter error');
   }
 
   return response.data.data;
@@ -72,23 +84,31 @@ async function createInvoice(amountInr, label, description = '') {
 /**
  * Fetches the current status of an existing invoice.
  *
- * @param {string} invoiceId  — CoinRemitter invoice_id (not the internal id)
- * @returns {Promise<Object>} — Invoice data with status field ('pending'|'paid'|'expired' etc.)
+ * @param {string} invoiceId  — CoinRemitter invoice_id
+ * @returns {Promise<Object>} — Invoice data with status field
  */
 async function getInvoice(invoiceId) {
-  const response = await axios.get(`${BASE_URL}/invoice/${invoiceId}`, {
-    headers: authHeaders(),
-    httpsAgent,
-    timeout: 10000,
-  });
+  let response;
+  try {
+    response = await axios.get(`${BASE_URL}/invoice/${invoiceId}`, {
+      headers: authHeaders(),
+      httpsAgent,
+      timeout: 10000,
+    });
+  } catch (err) {
+    const detail = err.response?.data;
+    console.error('[CoinRemitter] getInvoice HTTP error:', err.response?.status, JSON.stringify(detail));
+    throw new Error(
+      detail?.msg || detail?.error || `CoinRemitter HTTP ${err.response?.status}: ${err.message}`
+    );
+  }
 
   if (!response.data.success) {
-    throw new Error(
-      `CoinRemitter error: ${response.data.msg || response.data.error || 'Unknown error'}`
-    );
+    throw new Error(response.data.msg || response.data.error || 'Unknown CoinRemitter error');
   }
 
   return response.data.data;
 }
 
 module.exports = { createInvoice, getInvoice };
+
