@@ -186,13 +186,27 @@ exports.createInvoice = async (req, res) => {
 
     // CoinRemitter invoice responses use 'url' (hosted payment page), not a raw 'address'.
     // We store the invoice URL in wallet_address for display in the modal.
-    const invoiceUrl = invoice.url || `https://coinremitter.com/invoice/${invoice.invoice_id}`;
-    const walletAddress = invoice.address || null;
+    const invoiceId_cr = invoice.invoice_id || invoice.id;
+    const invoiceUrl = invoice.url || `https://coinremitter.com/invoice/${invoiceId_cr}`;
+
+    // Immediately fetch invoice details to get the actual LTC address and amount.
+    // The create-invoice response sometimes lacks these; the GET endpoint always has them.
+    let ltcAddress = invoice.address || null;
+    let ltcAmount = parseFloat(invoice.amount) || 0;
+    try {
+      const invoiceDetails = await coinremitter.getInvoice(invoiceId_cr);
+      console.log('[CoinRemitter] Invoice details:', JSON.stringify(invoiceDetails));
+      ltcAddress = invoiceDetails.address || ltcAddress;
+      ltcAmount = parseFloat(invoiceDetails.amount || invoiceDetails.total_amount?.crypto) || ltcAmount;
+    } catch (fetchErr) {
+      console.warn('[CoinRemitter] Could not fetch invoice details:', fetchErr.message);
+      // Non-fatal — we still have the invoice URL
+    }
 
     // expire_on_timestamp is milliseconds from CoinRemitter v1 API
     const expiresAt = invoice.expire_on_timestamp
       ? new Date(invoice.expire_on_timestamp).toISOString()
-      : new Date(Date.now() + 15 * 60 * 1000).toISOString(); // fallback: 15 min from now
+      : new Date(Date.now() + 15 * 60 * 1000).toISOString();
 
     // 6. Store in crypto_orders
     const { error: insertError } = await supabase
@@ -200,9 +214,9 @@ exports.createInvoice = async (req, res) => {
       .insert([{
         user_id: userId,
         note_id: noteId,
-        invoice_id: invoice.invoice_id || invoice.id,
-        wallet_address: walletAddress || invoiceUrl,  // fallback to URL if no address
-        amount_usdt: parseFloat(invoice.amount) || 0,
+        invoice_id: invoiceId_cr,
+        wallet_address: ltcAddress || invoiceUrl,  // fallback to URL if no address
+        amount_usdt: ltcAmount,
         amount_inr: note.price,
         status: 'pending',
         expires_at: expiresAt,
@@ -215,11 +229,11 @@ exports.createInvoice = async (req, res) => {
 
     // 7. Respond with everything the frontend needs to render the payment UI
     return res.json({
-      invoiceId: invoice.invoice_id || invoice.id,
-      invoiceUrl,                                    // CoinRemitter hosted payment page URL
-      walletAddress,                                 // raw address (null for invoice mode)
-      amount: parseFloat(invoice.amount) || 0,       // LTC amount to send
-      amountInr: note.price,                         // Original INR price for display
+      invoiceId: invoiceId_cr,
+      invoiceUrl,                 // CoinRemitter hosted payment page
+      walletAddress: ltcAddress,  // raw LTC address (for direct wallet payments)
+      amount: ltcAmount,          // LTC amount to send
+      amountInr: note.price,      // Original INR price for display
       expiresAt,
     });
 

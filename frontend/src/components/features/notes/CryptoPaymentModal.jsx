@@ -40,12 +40,13 @@ export default function CryptoPaymentModal({
   onClose,
 }) {
   // ---------------------------------------------------------------------------
+  // ---------------------------------------------------------------------------
   // State
   // ---------------------------------------------------------------------------
   const [copied, setCopied] = useState(false);
   const [timeLeft, setTimeLeft] = useState(null);     // seconds remaining
   const [status, setStatus] = useState('pending');    // 'pending' | 'paid' | 'expired' | 'error'
-  const [errorMsg, setErrorMsg] = useState('');
+  const [paymentMode, setPaymentMode] = useState(walletAddress ? 'direct' : 'link'); // 'direct' or 'link'
 
   const timerRef = useRef(null);
   const pollRef = useRef(null);
@@ -97,10 +98,11 @@ export default function CryptoPaymentModal({
   }, [pollStatus]);
 
   // ---------------------------------------------------------------------------
+  // ---------------------------------------------------------------------------
   // Copy to clipboard (copies invoice URL or wallet address)
   // ---------------------------------------------------------------------------
-  const copyTarget = walletAddress || invoiceUrl || '';
   const handleCopy = async () => {
+    const copyTarget = paymentMode === 'direct' ? walletAddress : (invoiceUrl || walletAddress || '');
     try {
       await navigator.clipboard.writeText(copyTarget);
       setCopied(true);
@@ -183,20 +185,55 @@ export default function CryptoPaymentModal({
             </div>
           </div>
 
+          {/* Dual Payment Modes */}
+          {walletAddress && invoiceUrl && (
+            <div className="flex bg-gray-100 dark:bg-gray-800 p-1 rounded-lg">
+              <button
+                onClick={() => setPaymentMode('direct')}
+                className={`flex-1 text-xs font-semibold py-1.5 rounded-md transition-colors ${paymentMode === 'direct' ? 'bg-white dark:bg-gray-700 shadow-sm text-indigo-700 dark:text-indigo-300' : 'text-gray-500  hover:text-gray-700 dark:hover:text-gray-300'}`}
+              >
+                Scan Address
+              </button>
+              <button
+                onClick={() => setPaymentMode('link')}
+                className={`flex-1 text-xs font-semibold py-1.5 rounded-md transition-colors ${paymentMode === 'link' ? 'bg-white dark:bg-gray-700 shadow-sm text-indigo-700 dark:text-indigo-300' : 'text-gray-500  hover:text-gray-700 dark:hover:text-gray-300'}`}
+              >
+                Payment Link
+              </button>
+            </div>
+          )}
+
           {/* Amount info */}
           <div className="text-center bg-gradient-to-br from-violet-50 to-indigo-50 dark:from-violet-900/20 dark:to-indigo-900/20 border border-indigo-100 dark:border-indigo-800 rounded-xl p-4">
-            <p className="text-sm text-gray-500 dark:text-gray-400 mb-1">You pay (after 10% discount)</p>
-            <p className="text-2xl font-bold text-indigo-700 dark:text-indigo-300">
-              ₹{(amountInr * 0.9).toFixed(2)}
-            </p>
-            <p className="text-xs text-gray-400 dark:text-gray-500 mt-1">Exact LTC amount shown on payment page</p>
+            {paymentMode === 'direct' && amount > 0 ? (
+              <>
+                <p className="text-sm text-gray-500 dark:text-gray-400 mb-1">Send exactly</p>
+                <div className="flex items-end justify-center gap-1.5">
+                  <p className="text-3xl font-bold text-indigo-700 dark:text-indigo-300 tracking-tight">
+                    {amount.toFixed(8)}
+                  </p>
+                  <p className="text-lg font-semibold text-indigo-600 dark:text-indigo-400 pb-1">LTC</p>
+                </div>
+                <p className="text-xs text-gray-400 dark:text-gray-500 mt-1">Network: Litecoin (LTC)</p>
+              </>
+            ) : (
+              <>
+                <p className="text-sm text-gray-500 dark:text-gray-400 mb-1">You pay (after 10% discount)</p>
+                <p className="text-2xl font-bold text-indigo-700 dark:text-indigo-300">
+                  ₹{(amountInr * 0.9).toFixed(2)}
+                </p>
+                <p className="text-xs text-gray-400 dark:text-gray-500 mt-1">
+                  Exact LTC amount shown on payment page
+                </p>
+              </>
+            )}
           </div>
 
           {/* QR Code + Pay Button */}
           <div className="flex flex-col items-center gap-3">
             <div className={`p-3 bg-white rounded-xl shadow-inner border border-gray-200 dark:border-gray-700 transition-opacity ${isExpiredOrPaid ? 'opacity-30' : 'opacity-100'}`}>
               <QRCodeSVG
-                value={invoiceUrl || walletAddress || 'https://coinremitter.com'}
+                value={copyTarget || 'https://coinremitter.com'}
                 size={160}
                 bgColor="#ffffff"
                 fgColor="#312e81"
@@ -204,10 +241,12 @@ export default function CryptoPaymentModal({
                 includeMargin={false}
               />
             </div>
-            <p className="text-xs text-gray-400 dark:text-gray-500">Scan to open payment page</p>
+            <p className="text-xs text-gray-400 dark:text-gray-500">
+              {paymentMode === 'direct' ? 'Scan with your Litecoin wallet' : 'Scan to open payment page'}
+            </p>
 
             {/* Primary CTA: Open CoinRemitter payment page */}
-            {invoiceUrl && !isExpiredOrPaid && (
+            {paymentMode === 'link' && invoiceUrl && !isExpiredOrPaid && (
               <a
                 href={invoiceUrl}
                 target="_blank"
@@ -222,11 +261,11 @@ export default function CryptoPaymentModal({
           {/* Payment URL / Wallet Address copy */}
           <div>
             <label className="block text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-1">
-              {walletAddress ? 'Wallet Address (Litecoin)' : 'Payment Link'}
+              {paymentMode === 'direct' ? 'Wallet Address (Litecoin)' : 'Payment Link'}
             </label>
             <div className="flex items-center gap-2 bg-gray-100 dark:bg-gray-800 rounded-lg px-4 py-2.5 border border-gray-200 dark:border-gray-700">
               <code className="flex-1 text-xs text-gray-800 dark:text-gray-200 break-all font-mono leading-relaxed">
-                {walletAddress || invoiceUrl}
+                {copyTarget}
               </code>
               <button
                 onClick={handleCopy}
