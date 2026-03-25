@@ -56,9 +56,11 @@ async function createInvoice(amountInr, label, description = '') {
   if (webhookUrl && webhookUrl.startsWith('https://') && !webhookUrl.includes('ngrok-free.app')) {
     params.append('notify_url', webhookUrl);
   }
-  if (process.env.FRONTEND_URL) {
-    params.append('success_url', process.env.FRONTEND_URL);
-    params.append('fail_url', process.env.FRONTEND_URL);
+  const frontendUrl = process.env.FRONTEND_URL || '';
+  // Only send redirect URLs if frontend is a real public HTTPS site (not localhost).
+  if (frontendUrl && frontendUrl.startsWith('https://') && !frontendUrl.includes('localhost')) {
+    params.append('success_url', frontendUrl);
+    params.append('fail_url', frontendUrl);
   }
 
   let response;
