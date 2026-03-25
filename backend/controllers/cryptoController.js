@@ -172,8 +172,27 @@ exports.createInvoice = async (req, res) => {
       `Purchase of note: ${note.title}`
     );
 
+    // Log full response for debugging
+    console.log('[CoinRemitter] Invoice fields:', JSON.stringify(Object.keys(invoice)));
+    console.log('[CoinRemitter] Invoice data:', JSON.stringify({
+      id: invoice.id,
+      invoice_id: invoice.invoice_id,
+      url: invoice.url,
+      amount: invoice.amount,
+      address: invoice.address,
+      expire_on_timestamp: invoice.expire_on_timestamp,
+      status: invoice.status,
+    }));
+
+    // CoinRemitter invoice responses use 'url' (hosted payment page), not a raw 'address'.
+    // We store the invoice URL in wallet_address for display in the modal.
+    const invoiceUrl = invoice.url || `https://coinremitter.com/invoice/${invoice.invoice_id}`;
+    const walletAddress = invoice.address || null;
+
     // expire_on_timestamp is milliseconds from CoinRemitter v1 API
-    const expiresAt = new Date(invoice.expire_on_timestamp).toISOString();
+    const expiresAt = invoice.expire_on_timestamp
+      ? new Date(invoice.expire_on_timestamp).toISOString()
+      : new Date(Date.now() + 15 * 60 * 1000).toISOString(); // fallback: 15 min from now
 
     // 6. Store in crypto_orders
     const { error: insertError } = await supabase
@@ -181,9 +200,9 @@ exports.createInvoice = async (req, res) => {
       .insert([{
         user_id: userId,
         note_id: noteId,
-        invoice_id: invoice.invoice_id,
-        wallet_address: invoice.address,
-        amount_usdt: parseFloat(invoice.amount),  // actual crypto amount from CR
+        invoice_id: invoice.invoice_id || invoice.id,
+        wallet_address: walletAddress || invoiceUrl,  // fallback to URL if no address
+        amount_usdt: parseFloat(invoice.amount) || 0,
         amount_inr: note.price,
         status: 'pending',
         expires_at: expiresAt,
@@ -194,12 +213,13 @@ exports.createInvoice = async (req, res) => {
       throw insertError;
     }
 
-    // 8. Respond with everything the frontend needs to render the payment UI
+    // 7. Respond with everything the frontend needs to render the payment UI
     return res.json({
-      invoiceId: invoice.invoice_id,
-      walletAddress: invoice.address,
-      amount: parseFloat(invoice.amount),   // LTC amount to send
-      amountInr: note.price,                // Original INR price for display
+      invoiceId: invoice.invoice_id || invoice.id,
+      invoiceUrl,                                    // CoinRemitter hosted payment page URL
+      walletAddress,                                 // raw address (null for invoice mode)
+      amount: parseFloat(invoice.amount) || 0,       // LTC amount to send
+      amountInr: note.price,                         // Original INR price for display
       expiresAt,
     });
 

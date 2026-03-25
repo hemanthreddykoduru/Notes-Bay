@@ -408,6 +408,7 @@ export default function NoteDetails() {
                 showCryptoModal && cryptoInvoice && (
                     <CryptoPaymentModal
                         invoiceId={cryptoInvoice.invoiceId}
+                        invoiceUrl={cryptoInvoice.invoiceUrl}
                         walletAddress={cryptoInvoice.walletAddress}
                         amount={cryptoInvoice.amount}
                         amountInr={cryptoInvoice.amountInr}

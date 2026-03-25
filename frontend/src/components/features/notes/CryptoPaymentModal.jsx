@@ -31,6 +31,7 @@ const POLL_INTERVAL_MS = 8000;
 
 export default function CryptoPaymentModal({
   invoiceId,
+  invoiceUrl,
   walletAddress,
   amount,
   amountInr,
@@ -96,17 +97,17 @@ export default function CryptoPaymentModal({
   }, [pollStatus]);
 
   // ---------------------------------------------------------------------------
-  // Copy to clipboard
+  // Copy to clipboard (copies invoice URL or wallet address)
   // ---------------------------------------------------------------------------
+  const copyTarget = walletAddress || invoiceUrl || '';
   const handleCopy = async () => {
     try {
-      await navigator.clipboard.writeText(walletAddress);
+      await navigator.clipboard.writeText(copyTarget);
       setCopied(true);
       setTimeout(() => setCopied(false), 2500);
     } catch {
-      // Fallback for older browsers
       const el = document.createElement('textarea');
-      el.value = walletAddress;
+      el.value = copyTarget;
       document.body.appendChild(el);
       el.select();
       document.execCommand('copy');
@@ -191,11 +192,11 @@ export default function CryptoPaymentModal({
             <p className="text-xs text-gray-400 dark:text-gray-500 mt-1">Network: Litecoin (LTC)</p>
           </div>
 
-          {/* QR Code */}
-          <div className="flex flex-col items-center gap-2">
+          {/* QR Code + Pay Button */}
+          <div className="flex flex-col items-center gap-3">
             <div className={`p-3 bg-white rounded-xl shadow-inner border border-gray-200 dark:border-gray-700 transition-opacity ${isExpiredOrPaid ? 'opacity-30' : 'opacity-100'}`}>
               <QRCodeSVG
-                value={walletAddress}
+                value={invoiceUrl || walletAddress || 'https://coinremitter.com'}
                 size={160}
                 bgColor="#ffffff"
                 fgColor="#312e81"
@@ -203,22 +204,34 @@ export default function CryptoPaymentModal({
                 includeMargin={false}
               />
             </div>
-            <p className="text-xs text-gray-400 dark:text-gray-500">Scan with your Litecoin wallet</p>
+            <p className="text-xs text-gray-400 dark:text-gray-500">Scan to open payment page</p>
+
+            {/* Primary CTA: Open CoinRemitter payment page */}
+            {invoiceUrl && !isExpiredOrPaid && (
+              <a
+                href={invoiceUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="w-full text-center bg-gradient-to-r from-violet-600 to-indigo-600 hover:from-violet-700 hover:to-indigo-700 text-white font-semibold text-sm py-2.5 px-4 rounded-xl transition-all shadow-sm"
+              >
+                🔗 Open Payment Page
+              </a>
+            )}
           </div>
 
-          {/* Wallet Address */}
+          {/* Payment URL / Wallet Address copy */}
           <div>
             <label className="block text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-1">
-              Wallet Address (Litecoin)
+              {walletAddress ? 'Wallet Address (Litecoin)' : 'Payment Link'}
             </label>
             <div className="flex items-center gap-2 bg-gray-100 dark:bg-gray-800 rounded-lg px-4 py-2.5 border border-gray-200 dark:border-gray-700">
               <code className="flex-1 text-xs text-gray-800 dark:text-gray-200 break-all font-mono leading-relaxed">
-                {walletAddress}
+                {walletAddress || invoiceUrl}
               </code>
               <button
                 onClick={handleCopy}
                 disabled={isExpiredOrPaid}
-                title="Copy address"
+                title="Copy"
                 className="shrink-0 p-1.5 rounded-md hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
               >
                 {copied
@@ -228,7 +241,7 @@ export default function CryptoPaymentModal({
               </button>
             </div>
             {copied && (
-              <p className="text-xs text-green-600 dark:text-green-400 mt-1 ml-1">✓ Address copied!</p>
+              <p className="text-xs text-green-600 dark:text-green-400 mt-1 ml-1">✓ Copied!</p>
             )}
           </div>
 
@@ -272,9 +285,9 @@ export default function CryptoPaymentModal({
             </div>
           </div>
 
-          {/* Important warning */}
+          {/* Warning */}
           <div className="text-xs text-amber-700 dark:text-amber-400 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-lg px-3 py-2 leading-relaxed">
-            ⚠️ Send <strong>exactly</strong> the amount shown above. Only send <strong>LTC on the Litecoin network</strong>. Sending the wrong coin or network will result in permanent loss of funds.
+            ⚠️ Pay via the CoinRemitter page. Send the <strong>exact LTC amount</strong> shown above. Payments are non-refundable.
           </div>
         </div>
 
