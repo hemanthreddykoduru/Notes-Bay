@@ -333,6 +333,7 @@ const CourseDetails = () => {
                                     </div>
                                 )}
                             </div>
+                        </div>
                     </div>
 
                     {/* Right Column: Sticky Action Card (Desktop) */}
