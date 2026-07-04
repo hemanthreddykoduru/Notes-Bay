@@ -217,7 +217,7 @@ const CourseDetails = () => {
                                 >
                                     {processing ? 'Processing...' : isEnrolled ? 'Go to Course' : 'Enroll Now'}
                                 </button>
-                                <p className="text-center text-xs text-gray-500 mt-3">30-Day Money-Back Guarantee</p>
+
                             </div>
                         </div>
 
@@ -368,9 +368,7 @@ const CourseDetails = () => {
                                     {processing ? 'Processing...' : isEnrolled ? 'Go to Course' : 'Enroll Now'}
                                 </button>
 
-                                <p className="text-center text-xs text-gray-500 dark:text-gray-400 mb-6 font-medium">
-                                    30-Day Money-Back Guarantee
-                                </p>
+
 
                                 <div className="space-y-4">
                                     <h4 className="font-bold text-gray-900 dark:text-white text-sm">This course includes:</h4>
