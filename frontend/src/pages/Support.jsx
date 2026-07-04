@@ -59,9 +59,8 @@ const Support = () => {
                 <div>
                   <h3 className="font-medium text-gray-900 dark:text-white mb-1">Our Office</h3>
                   <p className="text-gray-600 dark:text-gray-300">
-                    Gitam University<br />
-                    Bengaluru<br />
-                    India
+                    NotesBay HQ<br />
+                    Global
                   </p>
                 </div>
               </div>
