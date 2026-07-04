@@ -20,6 +20,8 @@ const LearningDashboard = () => {
     const [activeTab, setActiveTab] = useState('overview'); // overview, q&a, downloads
     const [quizState, setQuizState] = useState('intro'); // intro, playing, results
     const [quizScore, setQuizScore] = useState(0);
+    const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
+    const [selectedAnswers, setSelectedAnswers] = useState({}); // { questionIndex: optionIndex }
     const [completedItems, setCompletedItems] = useState([]); // Track completed IDs
 
     // Q&A State
@@ -249,9 +251,60 @@ const LearningDashboard = () => {
     };
 
     const handleQuizFinish = () => {
-        setQuizScore(100);
+        console.log("handleQuizFinish called. activeItem:", activeItem);
+        if (!activeItem || !activeItem.questions || activeItem.questions.length === 0) {
+            console.log("No questions found, setting perfect score.");
+            setQuizScore(100);
+            setQuizState('results');
+            handleItemComplete();
+            return;
+        }
+
+        let correct = 0;
+        activeItem.questions.forEach((q, idx) => {
+            if (selectedAnswers[idx] === q.correctOptionIndex) {
+                correct++;
+            }
+        });
+
+        const score = Math.round((correct / activeItem.questions.length) * 100);
+        setQuizScore(score);
         setQuizState('results');
-        handleItemComplete();
+
+        if (score >= activeItem.passing_score_percentage) {
+            handleItemComplete();
+        }
+    };
+
+    const handleQuizNextItem = () => {
+        // Find next item in current module
+        let foundCurrent = false;
+        let nextItemToLoad = null;
+
+        for (const module of course.course_modules || []) {
+            const allItems = [...(module.lessons || []), ...(module.quizzes || [])]
+                .sort((a, b) => a.order_index - b.order_index);
+
+            for (const item of allItems) {
+                if (foundCurrent) {
+                    nextItemToLoad = item;
+                    break;
+                }
+                if (item.id === activeItem.id && item.type === activeItem.type) {
+                    foundCurrent = true;
+                }
+            }
+            if (nextItemToLoad) break;
+        }
+
+        if (nextItemToLoad) {
+            setActiveItem(nextItemToLoad);
+            setQuizState('intro');
+            setCurrentQuestionIndex(0);
+            setSelectedAnswers({});
+        } else {
+            navigate('/my-learning');
+        }
     };
 
     if (loading) {
@@ -334,52 +387,97 @@ const LearningDashboard = () => {
                         </div>
                     ) : activeItem?.type === 'quiz' ? (
                         <div className="w-full max-w-6xl mx-auto py-16 md:py-24 px-4 md:px-8 flex items-center justify-center bg-gray-900 border-b border-gray-800 min-h-[500px]">
+                            {console.log("Rendering Quiz Block. State:", quizState, "Item:", activeItem)}
                             {quizState === 'intro' && (
                                 <div className="text-center max-w-lg">
                                     <HelpCircle className="w-16 h-16 text-indigo-500 mx-auto mb-6" />
                                     <h2 className="text-3xl font-bold text-white mb-4">Quiz: {activeItem.title}</h2>
                                     <p className="text-gray-400 mb-8">Test your knowledge to ensure you've grasped the concepts from this section. Passing score: <span className="text-white font-bold">{activeItem.passing_score_percentage}%</span></p>
-                                    <button onClick={() => setQuizState('playing')} className="px-8 py-3 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-lg transition-colors">
+                                    <button onClick={() => {
+                                        setQuizState('playing');
+                                        setCurrentQuestionIndex(0);
+                                        setSelectedAnswers({});
+                                    }} className="px-8 py-3 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-lg transition-colors shadow-lg shadow-indigo-500/30">
                                         Start Quiz
                                     </button>
                                 </div>
                             )}
                             {quizState === 'playing' && (
-                                <div className="max-w-2xl w-full bg-gray-800 p-8 rounded-xl border border-gray-700">
-                                    <div className="flex justify-between items-center text-gray-400 text-sm font-semibold mb-6">
-                                        <span>Question 1 of 1</span>
-                                        <span>Passing: {activeItem.passing_score_percentage}%</span>
-                                    </div>
-                                    <h3 className="text-xl font-bold text-white mb-6">Which of these best describes this topic?</h3>
-                                    <div className="space-y-3">
-                                        {['It is a critical component of the system.', 'It is completely optional.', 'It was deprecated recently.', 'None of the above'].map((opt, i) => (
-                                            <button key={i} className="w-full text-left p-4 rounded-lg bg-gray-700/50 hover:bg-gray-600 border border-gray-600 hover:border-indigo-500 text-gray-200 transition-colors">
-                                                {opt}
+                                <div className="max-w-2xl w-full bg-gray-800 p-8 rounded-xl border border-gray-700 shadow-xl">
+                                    {(!activeItem.questions || activeItem.questions.length === 0) ? (
+                                        <div className="text-center text-gray-400 py-10">
+                                            <p className="mb-4">This quiz has no questions yet.</p>
+                                            <button onClick={handleQuizFinish} className="px-6 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-lg transition-colors">
+                                                Finish Quiz
                                             </button>
-                                        ))}
-                                    </div>
-                                    <div className="mt-8 flex justify-end">
-                                        <button onClick={handleQuizFinish} className="px-6 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-lg transition-colors">
-                                            Submit Answer
-                                        </button>
-                                    </div>
+                                        </div>
+                                    ) : (
+                                        <>
+                                            <div className="flex justify-between items-center text-gray-400 text-sm font-semibold mb-6 pb-4 border-b border-gray-700">
+                                                <span>Question {currentQuestionIndex + 1} of {activeItem.questions.length}</span>
+                                                <span>Passing: {activeItem.passing_score_percentage}%</span>
+                                            </div>
+                                            <h3 className="text-xl font-bold text-white mb-8">{activeItem.questions[currentQuestionIndex].text}</h3>
+                                            <div className="space-y-4">
+                                                {activeItem.questions[currentQuestionIndex].options.map((opt, i) => (
+                                                    <button
+                                                        key={i}
+                                                        onClick={() => setSelectedAnswers({ ...selectedAnswers, [currentQuestionIndex]: i })}
+                                                        className={`w-full text-left p-5 rounded-lg border-2 transition-all duration-200 ${selectedAnswers[currentQuestionIndex] === i
+                                                            ? 'bg-indigo-600/20 border-indigo-500 text-white relative pl-12'
+                                                            : 'bg-gray-700/30 hover:bg-gray-700 border-gray-600 hover:border-gray-500 text-gray-300'
+                                                            }`}
+                                                    >
+                                                        {selectedAnswers[currentQuestionIndex] === i && (
+                                                            <div className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 rounded-full bg-indigo-500 flex items-center justify-center">
+                                                                <div className="w-1.5 h-1.5 rounded-full bg-white"></div>
+                                                            </div>
+                                                        )}
+                                                        {opt}
+                                                    </button>
+                                                ))}
+                                            </div>
+                                            <div className="mt-10 flex justify-end">
+                                                {currentQuestionIndex < activeItem.questions.length - 1 ? (
+                                                    <button
+                                                        onClick={() => setCurrentQuestionIndex(prev => prev + 1)}
+                                                        disabled={selectedAnswers[currentQuestionIndex] === undefined}
+                                                        className="px-8 py-3 bg-indigo-600 hover:bg-indigo-700 disabled:bg-gray-700 disabled:text-gray-500 text-white font-bold rounded-lg transition-colors"
+                                                    >
+                                                        Next Question <ChevronRight className="w-4 h-4 ml-1 inline" />
+                                                    </button>
+                                                ) : (
+                                                    <button
+                                                        onClick={handleQuizFinish}
+                                                        disabled={selectedAnswers[currentQuestionIndex] === undefined}
+                                                        className="px-8 py-3 bg-green-600 hover:bg-green-700 disabled:bg-gray-700 disabled:text-gray-500 text-white font-bold rounded-lg transition-colors shadow-lg shadow-green-600/20"
+                                                    >
+                                                        Submit Answers
+                                                    </button>
+                                                )}
+                                            </div>
+                                        </>
+                                    )}
                                 </div>
                             )}
                             {quizState === 'results' && (
-                                <div className="text-center max-w-lg bg-gray-800 p-8 rounded-xl border border-gray-700">
-                                    <CheckCircle className="w-16 h-16 text-green-500 mx-auto mb-4" />
-                                    <h2 className="text-3xl font-bold text-white mb-2">Quiz Completed!</h2>
-                                    <p className="text-gray-300 mb-6">You scored {quizScore}%. The passing score is {activeItem.passing_score_percentage}%.</p>
-                                    <div className="flex justify-center gap-4">
-                                        <button onClick={() => setQuizState('intro')} className="px-6 py-2 border border-gray-600 text-gray-300 hover:bg-gray-700 rounded-lg transition-colors font-medium">
+                                <div className={`text-center max-w-lg bg-gray-800 p-10 rounded-xl border-2 ${quizScore >= activeItem.passing_score_percentage ? 'border-green-500/50 shadow-lg shadow-green-500/10' : 'border-red-500/50 shadow-lg shadow-red-500/10'}`}>
+                                    {quizScore >= activeItem.passing_score_percentage ? (
+                                        <CheckCircle className="w-20 h-20 text-green-500 mx-auto mb-6" />
+                                    ) : (
+                                        <X className="w-20 h-20 text-red-500 mx-auto mb-6" />
+                                    )}
+                                    <h2 className="text-4xl font-black text-white mb-2">{quizScore >= activeItem.passing_score_percentage ? 'Passed!' : 'Try Again'}</h2>
+                                    <p className="text-gray-300 text-lg mb-8">You scored <span className="font-bold text-white">{quizScore}%</span>. The passing score is {activeItem.passing_score_percentage}%.</p>
+                                    <div className="flex flex-col sm:flex-row justify-center gap-4">
+                                        <button onClick={() => setQuizState('intro')} className="px-6 py-3 border-2 border-gray-600 text-gray-300 hover:bg-gray-700 hover:text-white hover:border-gray-500 rounded-lg transition-colors font-bold">
                                             Retake Quiz
                                         </button>
-                                        <button onClick={() => {
-                                            // Auto-advance to next item logic can go here
-                                            alert("Advance to next lesson not fully implemented in mock.");
-                                        }} className="px-6 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg transition-colors font-bold">
-                                            Continue Learning
-                                        </button>
+                                        {quizScore >= activeItem.passing_score_percentage && (
+                                            <button onClick={handleQuizNextItem} className="px-8 py-3 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg transition-colors font-bold shadow-md shadow-indigo-600/30">
+                                                Continue Learning
+                                            </button>
+                                        )}
                                     </div>
                                 </div>
                             )}
@@ -444,26 +542,6 @@ const LearningDashboard = () => {
                                         <p className="text-gray-700 dark:text-gray-300 leading-relaxed">
                                             {activeItem.description || `In this ${activeItem.type}, we will explore the core concepts related to ${activeItem.title}. Make sure to pay close attention to the examples provided.`}
                                         </p>
-                                    </div>
-
-                                    <hr className="border-gray-200 dark:border-gray-800" />
-
-                                    <div>
-                                        <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-4">Instructor</h3>
-                                        <div className="flex items-start">
-                                            {course.profiles?.avatar_url ? (
-                                                <img src={course.profiles.avatar_url} alt="Instructor" className="w-12 h-12 rounded-full mr-4" />
-                                            ) : (
-                                                <div className="w-12 h-12 bg-indigo-100 dark:bg-indigo-900/50 rounded-full flex items-center justify-center mr-4 shrink-0 border border-indigo-200 dark:border-indigo-800">
-                                                    <User className="w-6 h-6 text-indigo-600 dark:text-indigo-400" />
-                                                </div>
-                                            )}
-                                            <div>
-                                                <h4 className="font-bold text-indigo-600 dark:text-indigo-400">{course.profiles?.full_name || 'Instructor Name'}</h4>
-                                                <p className="text-sm font-medium text-gray-500 dark:text-gray-400 mb-2">{course.profiles?.title || 'Expert Instructor'}</p>
-                                                <p className="text-sm text-gray-700 dark:text-gray-300">{course.profiles?.bio || 'Passionate about sharing knowledge and helping students grow.'}</p>
-                                            </div>
-                                        </div>
                                     </div>
                                 </div>
                             )}

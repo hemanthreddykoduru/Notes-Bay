@@ -333,32 +333,6 @@ const CourseDetails = () => {
                                     </div>
                                 )}
                             </div>
-                        </div>
-
-                        {/* Instructor */}
-                        {course.profiles && (
-                            <div className="pt-8 border-t border-gray-200 dark:border-gray-800">
-                                <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-6">Your Instructor</h2>
-                                <div className="flex flex-col sm:flex-row gap-6">
-                                    <div className="shrink-0">
-                                        {course.profiles.avatar_url ? (
-                                            <img src={course.profiles.avatar_url} alt="Instructor" className="w-24 h-24 rounded-full object-cover border-4 border-gray-100 dark:border-gray-800" />
-                                        ) : (
-                                            <div className="w-24 h-24 rounded-full bg-indigo-100 dark:bg-indigo-900 flex items-center justify-center text-indigo-500 font-bold text-3xl">
-                                                {course.profiles.full_name.charAt(0)}
-                                            </div>
-                                        )}
-                                    </div>
-                                    <div>
-                                        <h3 className="text-xl font-bold text-indigo-700 dark:text-indigo-400 underline decoration-indigo-200 underline-offset-4">{course.profiles.full_name}</h3>
-                                        <p className="text-gray-500 dark:text-gray-400 font-medium mb-4">{course.profiles.title || 'Expert Educator'}</p>
-                                        <p className="text-gray-700 dark:text-gray-300 leading-relaxed text-sm">
-                                            {course.profiles.bio || "This instructor is a dedicated professional with years of experience in the field, passionate about sharing knowledge and helping students achieve their career goals."}
-                                        </p>
-                                    </div>
-                                </div>
-                            </div>
-                        )}
                     </div>
 
                     {/* Right Column: Sticky Action Card (Desktop) */}
