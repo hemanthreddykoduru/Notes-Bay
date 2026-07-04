@@ -89,7 +89,7 @@ const CancellationRefund = () => {
                         If you have any questions about our Cancellation and Refund Policy, please contact us:
                     </p>
                     <ul className="ml-4 mt-2 space-y-1 text-gray-600 dark:text-gray-300">
-                        <li>Email: contact@hemanthreddykoduru.dev</li>
+                        <li>Email: contact@notesbay.com</li>
                         <li>Phone: +91 98765 43210</li>
                     </ul>
                 </section>

@@ -83,7 +83,7 @@ const Support = () => {
                 </div>
                 <div>
                   <h3 className="font-medium text-gray-900 dark:text-white mb-1">Email Us</h3>
-                  <p className="text-gray-600 dark:text-gray-300">contact@hemanthreddykoduru.dev</p>
+                  <p className="text-gray-600 dark:text-gray-300">contact@notesbay.com</p>
                 </div>
               </div>
             </div>
