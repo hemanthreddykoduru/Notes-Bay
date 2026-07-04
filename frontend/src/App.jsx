@@ -8,6 +8,7 @@ import { AdProvider } from './context/AdContext';
 import { ThemeProvider } from './context/ThemeContext';
 import Footer from './components/layout/Footer';
 import ProtectedRoute from './components/features/auth/ProtectedRoute';
+import ScrollToTop from './components/layout/ScrollToTop';
 
 // Skeletons
 import HomeSkeleton from './components/skeletons/HomeSkeleton';
@@ -45,6 +46,7 @@ function App() {
     <ThemeProvider>
       <AdProvider>
         <Router>
+          <ScrollToTop />
           <AuthHandler />
           <GoogleAdSenseLoader />
           <AdBlockDetector />
