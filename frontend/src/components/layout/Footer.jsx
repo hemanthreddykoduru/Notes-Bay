@@ -76,7 +76,7 @@ const Footer = () => {
                         <ul className="space-y-3">
                             <li className="flex items-start space-x-3 text-sm text-gray-600 dark:text-gray-400">
                                 <MapPin className="h-5 w-5 text-indigo-500 shrink-0" />
-                                <span>Gitam University, Bengaluru, India</span>
+                                <span>NotesBay HQ, Global</span>
                             </li>
                             <li className="flex items-center space-x-3 text-sm text-gray-600 dark:text-gray-400">
                                 <Phone className="h-5 w-5 text-indigo-500 shrink-0" />
