@@ -165,7 +165,7 @@ router.get('/:id', async (req, res) => {
     const { data: course, error: courseError } = await supabase
       .from('courses')
       .select(`
-        id, title, description, price, thumbnail_url, program_outline,
+        id, title, description, price, thumbnail_url, program_outline, offer_text,
         level, language, estimated_duration, skills, learning_objectives, requirements,
         profiles (full_name, bio, title, avatar_url),
         course_modules (
@@ -278,7 +278,7 @@ router.get('/:id/learn', requireAuth, async (req, res) => {
     const { data: course, error: courseError } = await supabase
       .from('courses')
       .select(`
-        id, title, description, price, thumbnail_url, program_outline,
+        id, title, description, price, thumbnail_url, program_outline, offer_text,
         level, language, estimated_duration, skills, learning_objectives, requirements,
         profiles (full_name, bio, title, avatar_url),
         course_modules (
