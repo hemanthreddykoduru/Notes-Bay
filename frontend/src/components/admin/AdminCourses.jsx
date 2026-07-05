@@ -235,9 +235,9 @@ export default function AdminCourses({ setToast }) {
                             className="p-2 border rounded w-full bg-gray-50 dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white outline-none" />
 
                         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
-                            <input type="number" name="original_price" placeholder="Crossed-out Price (₹)" min="0" value={formData.original_price} onChange={handleChange}
+                            <input type="number" name="price" placeholder="Base Price (Sent to Razorpay) (₹)" min="0" required value={formData.price} onChange={handleChange}
                                 className="p-2 border rounded w-full bg-gray-50 dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white outline-none" />
-                            <input type="number" name="price" placeholder="Final Price (₹) - 0 for Free" min="0" required value={formData.price} onChange={handleChange}
+                            <input type="number" name="original_price" placeholder="Visual Discounted Price (₹)" min="0" value={formData.original_price} onChange={handleChange}
                                 className="p-2 border rounded w-full bg-gray-50 dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white outline-none" />
                             <input type="text" name="offer_text" placeholder="Offer text (e.g. 20% FLAT OFF)" value={formData.offer_text} onChange={handleChange}
                                 className="p-2 border rounded w-full bg-gray-50 dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white outline-none" />

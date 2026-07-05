@@ -208,14 +208,20 @@ const CourseDetails = () => {
                             </div>
                             <div className="p-6">
                                 <div className="flex flex-col mb-4">
-                                    {course.original_price && Number(course.original_price) > Number(course.price) && (
-                                        <span className="text-lg text-gray-400 dark:text-gray-500 line-through font-normal">
-                                            ₹{course.original_price}
+                                    {course.original_price && Number(course.original_price) > 0 ? (
+                                        <>
+                                            <span className="text-lg text-gray-400 dark:text-gray-500 line-through font-normal">
+                                                ₹{course.price}
+                                            </span>
+                                            <span className="text-3xl font-extrabold text-gray-900 dark:text-white">
+                                                ₹{course.original_price}
+                                            </span>
+                                        </>
+                                    ) : (
+                                        <span className="text-3xl font-extrabold text-gray-900 dark:text-white">
+                                            {course.price > 0 ? `₹${course.price}` : 'Free'}
                                         </span>
                                     )}
-                                    <span className="text-3xl font-extrabold text-gray-900 dark:text-white">
-                                        {course.price > 0 ? `₹${course.price}` : 'Free'}
-                                    </span>
                                 </div>
                                 <button
                                     onClick={handleEnroll}
@@ -403,14 +409,20 @@ const CourseDetails = () => {
 
                             <div className="p-6">
                                 <div className="flex flex-col mb-6">
-                                    {course.original_price && Number(course.original_price) > Number(course.price) && (
-                                        <span className="text-xl text-gray-400 dark:text-gray-500 line-through font-normal">
-                                            ₹{course.original_price}
+                                    {course.original_price && Number(course.original_price) > 0 ? (
+                                        <>
+                                            <span className="text-xl text-gray-400 dark:text-gray-500 line-through font-normal">
+                                                ₹{course.price}
+                                            </span>
+                                            <span className="text-4xl font-extrabold text-gray-900 dark:text-white">
+                                                ₹{course.original_price}
+                                            </span>
+                                        </>
+                                    ) : (
+                                        <span className="text-4xl font-extrabold text-gray-900 dark:text-white">
+                                            {course.price > 0 ? `₹${course.price}` : 'Free'}
                                         </span>
                                     )}
-                                    <span className="text-4xl font-extrabold text-gray-900 dark:text-white">
-                                        {course.price > 0 ? `₹${course.price}` : 'Free'}
-                                    </span>
                                 </div>
 
                                 <button
