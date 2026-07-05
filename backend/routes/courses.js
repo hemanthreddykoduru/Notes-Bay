@@ -474,7 +474,7 @@ router.put('/:id', requireAuth, async (req, res) => {
         if (!isAdmin) return res.status(403).json({ error: 'Admins only' });
 
         const { 
-            title, description, price, thumbnail_url, is_published, program_outline, offer_text,
+            title, description, price, original_price, thumbnail_url, is_published, program_outline, offer_text,
             level, language, estimated_duration, skills, learning_objectives, requirements 
         } = req.body;
         
