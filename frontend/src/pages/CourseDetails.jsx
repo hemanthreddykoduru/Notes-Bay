@@ -262,6 +262,40 @@ const CourseDetails = () => {
                             </div>
                         )}
 
+                        {/* Program Outline */}
+                        {course.program_outline && course.program_outline.length > 0 && (
+                            <div className="mb-12">
+                                <h2 className="text-3xl font-bold text-gray-900 dark:text-white mb-8">Program Outline</h2>
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                    {course.program_outline.map((card, idx) => (
+                                        <div key={idx} className="bg-white dark:bg-gray-800 p-6 sm:p-8 rounded-2xl shadow-[0_2px_12px_rgba(0,0,0,0.04)] border border-gray-100 dark:border-gray-700 hover:shadow-md transition-shadow">
+                                            {card.tag && (
+                                                <p className="text-[#3b82f6] dark:text-blue-400 font-semibold text-sm mb-2">{card.tag}</p>
+                                            )}
+                                            {card.title && (
+                                                <h3 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">{card.title}</h3>
+                                            )}
+                                            {card.description && (
+                                                <p className="text-gray-600 dark:text-gray-300 text-sm leading-relaxed mb-6">
+                                                    {card.description}
+                                                </p>
+                                            )}
+                                            {card.bullets && (
+                                                <ul className="space-y-3">
+                                                    {card.bullets.split('\n').filter(b => b.trim()).map((bullet, bIdx) => (
+                                                        <li key={bIdx} className="flex items-start">
+                                                            <span className="flex-shrink-0 h-1.5 w-1.5 rounded-full bg-gray-400 dark:bg-gray-500 mt-2 mr-3"></span>
+                                                            <span className="text-sm text-gray-700 dark:text-gray-300">{bullet.trim()}</span>
+                                                        </li>
+                                                    ))}
+                                                </ul>
+                                            )}
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+                        )}
+
                         {/* Syllabus */}
                         <div>
                             <div className="flex items-center justify-between mb-6">

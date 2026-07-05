@@ -51,7 +51,7 @@ router.get('/', async (req, res) => {
   try {
     const { data, error } = await supabase
       .from('courses')
-      .select('id, title, description, price, thumbnail_url, level, language, estimated_duration, instructor_id, profiles(full_name, bio, title, avatar_url)')
+      .select('id, title, description, price, thumbnail_url, level, language, estimated_duration, instructor_id, program_outline, profiles(full_name, bio, title, avatar_url)')
       .eq('is_published', true);
 
     if (error) throw error;
@@ -70,7 +70,7 @@ router.get('/my-learning', requireAuth, async (req, res) => {
       .select(`
         created_at,
         courses (
-          id, title, description, thumbnail_url, estimated_duration,
+          id, title, description, thumbnail_url, estimated_duration, program_outline,
           profiles (full_name),
           course_modules (
             id,
@@ -165,7 +165,7 @@ router.get('/:id', async (req, res) => {
     const { data: course, error: courseError } = await supabase
       .from('courses')
       .select(`
-        id, title, description, price, thumbnail_url,
+        id, title, description, price, thumbnail_url, program_outline,
         level, language, estimated_duration, skills, learning_objectives, requirements,
         profiles (full_name, bio, title, avatar_url),
         course_modules (
@@ -174,7 +174,7 @@ router.get('/:id', async (req, res) => {
             id, title, duration_seconds, order_index, is_free_preview, resources
           ),
           quizzes (
-            id, title, passing_score_percentage
+            id, title, passing_score_percentage, questions
           )
         )
       `)
@@ -278,7 +278,7 @@ router.get('/:id/learn', requireAuth, async (req, res) => {
     const { data: course, error: courseError } = await supabase
       .from('courses')
       .select(`
-        id, title, description, price, thumbnail_url,
+        id, title, description, price, thumbnail_url, program_outline,
         level, language, estimated_duration, skills, learning_objectives, requirements,
         profiles (full_name, bio, title, avatar_url),
         course_modules (
@@ -287,7 +287,7 @@ router.get('/:id/learn', requireAuth, async (req, res) => {
             id, title, duration_seconds, order_index, is_free_preview, video_url, resources
           ),
           quizzes (
-            id, title, passing_score_percentage
+            id, title, passing_score_percentage, questions
           )
         )
       `)
@@ -406,7 +406,7 @@ router.get('/admin/:id', requireAuth, async (req, res) => {
         const { data: course, error: courseError } = await supabase
             .from('courses')
             .select(`
-                id, title, description, price, thumbnail_url,
+                id, title, description, price, thumbnail_url, program_outline,
                 level, language, estimated_duration, skills, learning_objectives, requirements,
                 profiles (full_name, bio, title, avatar_url),
                 course_modules (
@@ -415,7 +415,7 @@ router.get('/admin/:id', requireAuth, async (req, res) => {
                         id, title, duration_seconds, order_index, is_free_preview, video_url, resources
                     ),
                     quizzes (
-                        id, title, passing_score_percentage
+                        id, title, passing_score_percentage, questions
                     )
                 )
             `)
@@ -446,14 +446,14 @@ router.post('/', requireAuth, async (req, res) => {
         if (!isAdmin) return res.status(403).json({ error: 'Admins only' });
 
         const { 
-            title, description, price, thumbnail_url, is_published,
+            title, description, price, thumbnail_url, is_published, program_outline,
             level, language, estimated_duration, skills, learning_objectives, requirements 
         } = req.body;
         
         const { data, error } = await supabase
             .from('courses')
             .insert([{ 
-                title, description, price, thumbnail_url, is_published, 
+                title, description, price, thumbnail_url, is_published, program_outline,
                 instructor_id: req.user.id,
                 level, language, estimated_duration, skills, learning_objectives, requirements
             }])
@@ -474,7 +474,7 @@ router.put('/:id', requireAuth, async (req, res) => {
         if (!isAdmin) return res.status(403).json({ error: 'Admins only' });
 
         const { 
-            title, description, price, thumbnail_url, is_published,
+            title, description, price, thumbnail_url, is_published, program_outline,
             level, language, estimated_duration, skills, learning_objectives, requirements 
         } = req.body;
         
@@ -764,10 +764,10 @@ router.post('/modules/:moduleId/quizzes', requireAuth, async (req, res) => {
         const isAdmin = await checkAdmin(req.user.id);
         if (!isAdmin) return res.status(403).json({ error: 'Admins only' });
 
-        const { title, passing_score_percentage } = req.body;
+        const { title, passing_score_percentage, questions } = req.body;
         const { data, error } = await supabase
             .from('quizzes')
-            .insert([{ module_id: req.params.moduleId, title, passing_score_percentage }])
+            .insert([{ module_id: req.params.moduleId, title, passing_score_percentage, questions: questions || [] }])
             .select();
 
         if (error) throw error;
@@ -783,10 +783,15 @@ router.put('/quizzes/:quizId', requireAuth, async (req, res) => {
         const isAdmin = await checkAdmin(req.user.id);
         if (!isAdmin) return res.status(403).json({ error: 'Admins only' });
 
-        const { title, passing_score_percentage } = req.body;
+        const { title, passing_score_percentage, questions } = req.body;
+        const updates = {};
+        if (title !== undefined) updates.title = title;
+        if (passing_score_percentage !== undefined) updates.passing_score_percentage = passing_score_percentage;
+        if (questions !== undefined) updates.questions = questions;
+
         const { data, error } = await supabase
             .from('quizzes')
-            .update({ title, passing_score_percentage })
+            .update(updates)
             .eq('id', req.params.quizId)
             .select();
 

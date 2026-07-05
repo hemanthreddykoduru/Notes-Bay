@@ -100,7 +100,8 @@ export default function AdminCourses({ setToast }) {
                 estimated_duration: formData.estimated_duration,
                 skills: formData.skills.split(',').map(s => s.trim()).filter(Boolean),
                 learning_objectives: formData.learning_objectives.split('\n').map(s => s.trim()).filter(Boolean),
-                requirements: formData.requirements.split('\n').map(s => s.trim()).filter(Boolean)
+                requirements: formData.requirements.split('\n').map(s => s.trim()).filter(Boolean),
+                program_outline: formData.program_outline
             };
 
             if (editingCourse) {
@@ -134,7 +135,8 @@ export default function AdminCourses({ setToast }) {
             estimated_duration: course.estimated_duration || '',
             skills: (course.skills || []).join(', '),
             learning_objectives: (course.learning_objectives || []).join('\n'),
-            requirements: (course.requirements || []).join('\n')
+            requirements: (course.requirements || []).join('\n'),
+            program_outline: course.program_outline || []
         });
         setShowForm(true);
     };
@@ -171,7 +173,8 @@ export default function AdminCourses({ setToast }) {
         setEditingCourse(null);
         setFormData({
             title: '', description: '', price: '0', thumbnail: null, is_published: false,
-            level: 'All Levels', language: 'English', estimated_duration: '', skills: '', learning_objectives: '', requirements: ''
+            level: 'All Levels', language: 'English', estimated_duration: '', skills: '', learning_objectives: '', requirements: '',
+            program_outline: []
         });
     };
 
@@ -265,6 +268,55 @@ export default function AdminCourses({ setToast }) {
                             <div>
                                 <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">Requirements (One per line)</label>
                                 <textarea name="requirements" placeholder="- Basic HTML/CSS&#10;- A computer" rows="4" value={formData.requirements} onChange={handleChange} className="p-2 border rounded w-full bg-gray-50 dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white outline-none"></textarea>
+                            </div>
+                        </div>
+
+                        <div className="pt-4 border-t border-gray-200 dark:border-gray-700">
+                            <div className="flex justify-between items-center mb-4">
+                                <label className="block text-sm font-semibold text-gray-900 dark:text-white">Program Outline (Grid Cards)</label>
+                                <button type="button" onClick={() => setFormData(prev => ({ ...prev, program_outline: [...(prev.program_outline || []), { tag: '', title: '', description: '', bullets: '' }] }))} className="text-xs bg-indigo-100 text-indigo-700 px-3 py-1.5 rounded-md font-medium hover:bg-indigo-200">
+                                    + Add Card
+                                </button>
+                            </div>
+                            <div className="space-y-4">
+                                {(formData.program_outline || []).map((card, idx) => (
+                                    <div key={idx} className="p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg border border-gray-200 dark:border-gray-600 relative">
+                                        <button type="button" onClick={() => setFormData(prev => {
+                                            const newOutline = [...prev.program_outline];
+                                            newOutline.splice(idx, 1);
+                                            return { ...prev, program_outline: newOutline };
+                                        })} className="absolute top-2 right-2 text-red-500 hover:text-red-700"><X className="w-4 h-4" /></button>
+                                        
+                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mb-3">
+                                            <input type="text" placeholder="Top Tag (e.g. Prompt LLMs Reliably)" value={card.tag} onChange={e => {
+                                                const newOutline = [...formData.program_outline];
+                                                newOutline[idx].tag = e.target.value;
+                                                setFormData({ ...formData, program_outline: newOutline });
+                                            }} className="p-2 border rounded w-full bg-white dark:bg-gray-800 border-gray-300 dark:border-gray-600 text-sm text-gray-900 dark:text-white outline-none" />
+                                            
+                                            <input type="text" placeholder="Main Title (e.g. Week 1 - Session 1)" value={card.title} onChange={e => {
+                                                const newOutline = [...formData.program_outline];
+                                                newOutline[idx].title = e.target.value;
+                                                setFormData({ ...formData, program_outline: newOutline });
+                                            }} className="p-2 border rounded w-full bg-white dark:bg-gray-800 border-gray-300 dark:border-gray-600 text-sm text-gray-900 dark:text-white outline-none" />
+                                        </div>
+                                        
+                                        <textarea placeholder="Description" rows="2" value={card.description} onChange={e => {
+                                            const newOutline = [...formData.program_outline];
+                                            newOutline[idx].description = e.target.value;
+                                            setFormData({ ...formData, program_outline: newOutline });
+                                        }} className="p-2 border rounded w-full bg-white dark:bg-gray-800 border-gray-300 dark:border-gray-600 text-sm mb-3 text-gray-900 dark:text-white outline-none"></textarea>
+                                        
+                                        <textarea placeholder="Bullet points (one per line)" rows="3" value={card.bullets} onChange={e => {
+                                            const newOutline = [...formData.program_outline];
+                                            newOutline[idx].bullets = e.target.value;
+                                            setFormData({ ...formData, program_outline: newOutline });
+                                        }} className="p-2 border rounded w-full bg-white dark:bg-gray-800 border-gray-300 dark:border-gray-600 text-sm text-gray-900 dark:text-white outline-none"></textarea>
+                                    </div>
+                                ))}
+                                {(!formData.program_outline || formData.program_outline.length === 0) && (
+                                    <p className="text-sm text-gray-500 italic text-center py-4 border border-dashed border-gray-300 dark:border-gray-600 rounded-md">No outline cards added yet. Click "+ Add Card" to start building the grid layout.</p>
+                                )}
                             </div>
                         </div>
 
