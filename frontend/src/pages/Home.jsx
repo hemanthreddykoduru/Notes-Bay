@@ -27,7 +27,14 @@ export default function Home() {
     const [showFilters, setShowFilters] = useState(false);
 
     const [isSubscribed, setIsSubscribed] = useState(false);
-    const [subPrice, setSubPrice] = useState(100);
+    const [subPrice, setSubPrice] = useState(() => {
+        try {
+            const cached = localStorage.getItem('sub_price');
+            return cached ? JSON.parse(cached).value : '...';
+        } catch {
+            return '...';
+        }
+    });
     const [error, setError] = useState(null);
     const [loadingStatus, setLoadingStatus] = useState('');
 
