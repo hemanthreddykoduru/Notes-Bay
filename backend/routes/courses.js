@@ -490,6 +490,7 @@ router.put('/:id', requireAuth, async (req, res) => {
         if (skills !== undefined) updates.skills = skills;
         if (learning_objectives !== undefined) updates.learning_objectives = learning_objectives;
         if (requirements !== undefined) updates.requirements = requirements;
+        if (program_outline !== undefined) updates.program_outline = program_outline;
 
         if (Object.keys(updates).length === 0) return res.status(400).json({ error: 'No updates provided' });
 
