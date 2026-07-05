@@ -23,7 +23,7 @@ export default function AdminCourseModules({ course, onBack, setToast }) {
     // Resource Upload State
     const [uploadingResourceFor, setUploadingResourceFor] = useState(null);
     const [resourceFile, setResourceFile] = useState(null);
-    const [quizData, setQuizData] = useState({ title: '', passing_score_percentage: 80 });
+    const [quizData, setQuizData] = useState({ title: '', passing_score_percentage: 80, questions: [] });
 
     useEffect(() => {
         fetchCurriculum();
@@ -85,13 +85,25 @@ export default function AdminCourseModules({ course, onBack, setToast }) {
     };
 
     // --- LESSONS ---
+    const parseDuration = (val) => {
+        if (!val) return 0;
+        if (typeof val === 'number') return val;
+        const str = String(val).trim();
+        if (str.includes(':')) {
+            const parts = str.split(':').map(Number);
+            if (parts.length === 2) return (parts[0] * 60) + (parts[1] || 0);
+            if (parts.length === 3) return (parts[0] * 3600) + (parts[1] * 60) + (parts[2] || 0);
+        }
+        return parseInt(str) || 0;
+    };
+
     const handleLessonSubmit = async (e, moduleId) => {
         e.preventDefault();
         try {
             const payload = {
                 title: lessonData.title,
                 video_url: lessonData.video_url,
-                duration_seconds: parseInt(lessonData.duration_seconds) || 0,
+                duration_seconds: parseDuration(lessonData.duration_seconds),
                 is_free_preview: lessonData.is_free_preview,
                 order_index: editingLesson ? editingLesson.order_index : (modules.find(m => m.id === moduleId)?.lessons?.length || 0)
             };
@@ -171,7 +183,8 @@ export default function AdminCourseModules({ course, onBack, setToast }) {
         try {
             const payload = {
                 title: quizData.title,
-                passing_score_percentage: parseInt(quizData.passing_score_percentage) || 80
+                passing_score_percentage: parseInt(quizData.passing_score_percentage) || 80,
+                questions: quizData.questions || []
             };
 
             if (editingQuiz) {
@@ -182,7 +195,7 @@ export default function AdminCourseModules({ course, onBack, setToast }) {
                 setToast({ message: 'Quiz added!', type: 'success' });
             }
 
-            setQuizData({ title: '', passing_score_percentage: 80 });
+            setQuizData({ title: '', passing_score_percentage: 80, questions: [] });
             setShowQuizForm(null);
             setEditingQuiz(null);
             fetchCurriculum();
@@ -274,7 +287,13 @@ export default function AdminCourseModules({ course, onBack, setToast }) {
                                                     <div className="flex space-x-2">
                                                         <button onClick={() => {
                                                             setEditingLesson(lesson);
-                                                            setLessonData({ title: lesson.title, video_url: lesson.video_url || '', duration_seconds: lesson.duration_seconds, is_free_preview: lesson.is_free_preview });
+                                                            const formatDur = (sec) => {
+                                                                if (!sec) return '';
+                                                                const m = Math.floor(sec / 60);
+                                                                const s = sec % 60;
+                                                                return `${m}:${s.toString().padStart(2, '0')}`;
+                                                            };
+                                                            setLessonData({ title: lesson.title, video_url: lesson.video_url || '', duration_seconds: formatDur(lesson.duration_seconds), is_free_preview: lesson.is_free_preview });
                                                             setShowLessonForm(module.id);
                                                         }} className="text-gray-400 hover:text-indigo-600 text-sm">Edit</button>
                                                         <button onClick={() => deleteLesson(lesson.id)} className="text-gray-400 hover:text-red-600 text-sm">Delete</button>
@@ -335,7 +354,7 @@ export default function AdminCourseModules({ course, onBack, setToast }) {
                                                 <div className="flex space-x-2">
                                                     <button onClick={() => {
                                                         setEditingQuiz(quiz);
-                                                        setQuizData({ title: quiz.title, passing_score_percentage: quiz.passing_score_percentage });
+                                                        setQuizData({ title: quiz.title, passing_score_percentage: quiz.passing_score_percentage, questions: quiz.questions || [] });
                                                         setShowQuizForm(module.id);
                                                         setShowLessonForm(null);
                                                     }} className="text-gray-400 hover:text-indigo-600 text-sm">Edit</button>
@@ -361,8 +380,8 @@ export default function AdminCourseModules({ course, onBack, setToast }) {
                                             </div>
                                             <div className="flex items-center gap-6">
                                                 <div>
-                                                    <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">Duration (Seconds)</label>
-                                                    <input type="number" value={lessonData.duration_seconds} onChange={e => setLessonData({ ...lessonData, duration_seconds: e.target.value })}
+                                                    <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">Duration (e.g. 3:20)</label>
+                                                    <input type="text" placeholder="MM:SS" value={lessonData.duration_seconds} onChange={e => setLessonData({ ...lessonData, duration_seconds: e.target.value })}
                                                         className="w-32 px-3 py-2 border rounded border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-white text-sm" />
                                                 </div>
                                                 <div className="flex items-center mt-4">
@@ -392,7 +411,81 @@ export default function AdminCourseModules({ course, onBack, setToast }) {
                                                         className="w-full px-3 py-2 border rounded border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-white text-sm" />
                                                 </div>
                                             </div>
-                                            <div className="flex gap-2">
+
+                                            {/* Dynamic Questions Builder */}
+                                            <div className="mt-6 border-t border-indigo-200 dark:border-indigo-800/50 pt-4">
+                                                <div className="flex justify-between items-center mb-4">
+                                                    <h4 className="text-sm font-bold text-gray-900 dark:text-white">Quiz Questions</h4>
+                                                    <button type="button" onClick={() => {
+                                                        const newQ = { text: '', options: ['', ''], correctOptionIndex: 0 };
+                                                        setQuizData({ ...quizData, questions: [...(quizData.questions || []), newQ] });
+                                                    }} className="text-xs flex items-center bg-indigo-100 text-indigo-700 hover:bg-indigo-200 px-2 py-1 rounded dark:bg-indigo-900/50 dark:text-indigo-300">
+                                                        <Plus className="w-3 h-3 mr-1" /> Add Question
+                                                    </button>
+                                                </div>
+
+                                                {(quizData.questions || []).map((q, qIdx) => (
+                                                    <div key={qIdx} className="bg-white dark:bg-gray-800 p-3 rounded-md border border-gray-200 dark:border-gray-700 mb-3 relative">
+                                                        <button type="button" onClick={() => {
+                                                            const newQs = [...quizData.questions];
+                                                            newQs.splice(qIdx, 1);
+                                                            setQuizData({ ...quizData, questions: newQs });
+                                                        }} className="absolute top-2 right-2 text-gray-400 hover:text-red-500">
+                                                            <X className="w-4 h-4" />
+                                                        </button>
+
+                                                        <div className="mb-3 pr-6">
+                                                            <label className="block text-xs font-semibold text-gray-700 dark:text-gray-300 mb-1">Question {qIdx + 1}</label>
+                                                            <input type="text" required value={q.text} placeholder="e.g., What is the capital of France?" onChange={(e) => {
+                                                                const newQs = [...quizData.questions];
+                                                                newQs[qIdx].text = e.target.value;
+                                                                setQuizData({ ...quizData, questions: newQs });
+                                                            }} className="w-full px-2 py-1.5 border rounded border-gray-300 dark:border-gray-600 bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-white text-sm" />
+                                                        </div>
+
+                                                        <div className="pl-4 border-l-2 border-indigo-200 dark:border-indigo-800 space-y-2">
+                                                            <label className="block text-xs font-semibold text-gray-600 dark:text-gray-400">Options (Select the correct one)</label>
+                                                            {q.options.map((opt, oIdx) => (
+                                                                <div key={oIdx} className="flex items-center gap-2">
+                                                                    <input type="radio" name={`correct-${qIdx}`} checked={q.correctOptionIndex === oIdx} onChange={() => {
+                                                                        const newQs = [...quizData.questions];
+                                                                        newQs[qIdx].correctOptionIndex = oIdx;
+                                                                        setQuizData({ ...quizData, questions: newQs });
+                                                                    }} className="w-4 h-4 text-indigo-600" />
+
+                                                                    <input type="text" required value={opt} placeholder={`Option ${oIdx + 1}`} onChange={(e) => {
+                                                                        const newQs = [...quizData.questions];
+                                                                        newQs[qIdx].options[oIdx] = e.target.value;
+                                                                        setQuizData({ ...quizData, questions: newQs });
+                                                                    }} className="flex-1 px-2 py-1 border rounded border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-white text-xs" />
+
+                                                                    {q.options.length > 2 && (
+                                                                        <button type="button" onClick={() => {
+                                                                            const newQs = [...quizData.questions];
+                                                                            newQs[qIdx].options.splice(oIdx, 1);
+                                                                            if (newQs[qIdx].correctOptionIndex >= newQs[qIdx].options.length) newQs[qIdx].correctOptionIndex = 0;
+                                                                            setQuizData({ ...quizData, questions: newQs });
+                                                                        }} className="text-gray-400 hover:text-red-500"><X className="w-3 h-3" /></button>
+                                                                    )}
+                                                                </div>
+                                                            ))}
+
+                                                            {q.options.length < 5 && (
+                                                                <button type="button" onClick={() => {
+                                                                    const newQs = [...quizData.questions];
+                                                                    newQs[qIdx].options.push('');
+                                                                    setQuizData({ ...quizData, questions: newQs });
+                                                                }} className="text-[10px] text-indigo-600 dark:text-indigo-400 hover:underline mt-1 inline-block">+ Add Option</button>
+                                                            )}
+                                                        </div>
+                                                    </div>
+                                                ))}
+                                                {(quizData.questions || []).length === 0 && (
+                                                    <div className="text-xs text-gray-500 dark:text-gray-400 italic">No questions added yet.</div>
+                                                )}
+                                            </div>
+
+                                            <div className="flex gap-2 pt-2 border-t border-indigo-100 dark:border-indigo-900/50">
                                                 <button type="submit" className="bg-indigo-600 text-white px-4 py-2 rounded-md hover:bg-indigo-700 text-sm">Save Quiz</button>
                                                 <button type="button" onClick={() => { setShowQuizForm(null); setEditingQuiz(null); }} className="text-gray-500 px-4 py-2 text-sm">Cancel</button>
                                             </div>
@@ -408,7 +501,7 @@ export default function AdminCourseModules({ course, onBack, setToast }) {
                                                 <Plus className="w-4 h-4 mr-1" /> Add Lesson
                                             </button>
                                             <button
-                                                onClick={() => { setEditingQuiz(null); setQuizData({ title: '', passing_score_percentage: 80 }); setShowQuizForm(module.id); setShowLessonForm(null); }}
+                                                onClick={() => { setEditingQuiz(null); setQuizData({ title: '', passing_score_percentage: 80, questions: [] }); setShowQuizForm(module.id); setShowLessonForm(null); }}
                                                 className="text-sm text-purple-600 dark:text-purple-400 font-medium hover:text-purple-800 dark:hover:text-purple-300 flex items-center"
                                             >
                                                 <HelpCircle className="w-4 h-4 mr-1" /> Add Quiz
