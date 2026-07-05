@@ -217,6 +217,11 @@ const CourseDetails = () => {
                                 >
                                     {processing ? 'Processing...' : isEnrolled ? 'Go to Course' : 'Enroll Now'}
                                 </button>
+                                {course.offer_text && (
+                                    <p className="text-center text-sm font-semibold text-green-600 dark:text-green-400 mt-2">
+                                        {course.offer_text}
+                                    </p>
+                                )}
 
                             </div>
                         </div>
@@ -401,6 +406,11 @@ const CourseDetails = () => {
                                 >
                                     {processing ? 'Processing...' : isEnrolled ? 'Go to Course' : 'Enroll Now'}
                                 </button>
+                                {course.offer_text && (
+                                    <p className="text-center text-sm font-semibold text-green-600 dark:text-green-400 mb-4 -mt-2">
+                                        {course.offer_text}
+                                    </p>
+                                )}
 
 
 

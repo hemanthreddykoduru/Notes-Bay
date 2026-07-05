@@ -17,6 +17,7 @@ export default function AdminCourses({ setToast }) {
         title: '',
         description: '',
         price: '0',
+        offer_text: '',
         thumbnail: null,
         is_published: false,
         level: 'All Levels',
@@ -93,6 +94,7 @@ export default function AdminCourses({ setToast }) {
                 title: formData.title,
                 description: formData.description,
                 price: parseFloat(formData.price),
+                offer_text: formData.offer_text,
                 is_published: formData.is_published,
                 thumbnail_url: thumbnailUrl,
                 level: formData.level,
@@ -128,6 +130,7 @@ export default function AdminCourses({ setToast }) {
             title: course.title,
             description: course.description || '',
             price: course.price.toString(),
+            offer_text: course.offer_text || '',
             is_published: course.is_published,
             thumbnail: null,
             level: course.level || 'All Levels',
@@ -172,8 +175,8 @@ export default function AdminCourses({ setToast }) {
         setShowForm(false);
         setEditingCourse(null);
         setFormData({
-            title: '', description: '', price: '0', thumbnail: null, is_published: false,
-            level: 'All Levels', language: 'English', estimated_duration: '', skills: '', learning_objectives: '', requirements: '',
+            title: '', description: '', price: '0', offer_text: '', thumbnail: null, is_published: false,
+            level: 'Beginner', language: 'English', estimated_duration: '', skills: '', learning_objectives: '', requirements: '',
             program_outline: []
         });
     };
@@ -225,10 +228,13 @@ export default function AdminCourses({ setToast }) {
                         {editingCourse ? 'Edit Course' : 'Add New Course'}
                     </h2>
                     <form onSubmit={handleSubmit} className="space-y-4">
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                            <input type="text" name="title" placeholder="Course Title" required value={formData.title} onChange={handleChange}
-                                className="p-2 border rounded w-full bg-gray-50 dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white outline-none" />
+                        <input type="text" name="title" placeholder="Course Title" required value={formData.title} onChange={handleChange}
+                            className="p-2 border rounded w-full bg-gray-50 dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white outline-none" />
+
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
                             <input type="number" name="price" placeholder="Price (₹) - 0 for Free/Included" min="0" required value={formData.price} onChange={handleChange}
+                                className="p-2 border rounded w-full bg-gray-50 dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white outline-none" />
+                            <input type="text" name="offer_text" placeholder="Offer text (e.g. 20% FLAT OFF)" value={formData.offer_text} onChange={handleChange}
                                 className="p-2 border rounded w-full bg-gray-50 dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white outline-none" />
                         </div>
 

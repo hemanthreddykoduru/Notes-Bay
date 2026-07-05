@@ -446,14 +446,14 @@ router.post('/', requireAuth, async (req, res) => {
         if (!isAdmin) return res.status(403).json({ error: 'Admins only' });
 
         const { 
-            title, description, price, thumbnail_url, is_published, program_outline,
+            title, description, price, thumbnail_url, is_published, program_outline, offer_text,
             level, language, estimated_duration, skills, learning_objectives, requirements 
         } = req.body;
         
         const { data, error } = await supabase
             .from('courses')
             .insert([{ 
-                title, description, price, thumbnail_url, is_published, program_outline,
+                title, description, price, thumbnail_url, is_published, program_outline, offer_text,
                 instructor_id: req.user.id,
                 level, language, estimated_duration, skills, learning_objectives, requirements
             }])
@@ -474,7 +474,7 @@ router.put('/:id', requireAuth, async (req, res) => {
         if (!isAdmin) return res.status(403).json({ error: 'Admins only' });
 
         const { 
-            title, description, price, thumbnail_url, is_published, program_outline,
+            title, description, price, thumbnail_url, is_published, program_outline, offer_text,
             level, language, estimated_duration, skills, learning_objectives, requirements 
         } = req.body;
         
@@ -491,6 +491,7 @@ router.put('/:id', requireAuth, async (req, res) => {
         if (learning_objectives !== undefined) updates.learning_objectives = learning_objectives;
         if (requirements !== undefined) updates.requirements = requirements;
         if (program_outline !== undefined) updates.program_outline = program_outline;
+        if (offer_text !== undefined) updates.offer_text = offer_text;
 
         if (Object.keys(updates).length === 0) return res.status(400).json({ error: 'No updates provided' });
 
