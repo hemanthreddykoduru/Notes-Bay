@@ -136,6 +136,21 @@ const CourseDetails = () => {
         );
     }
 
+    const renderTextWithLinks = (text) => {
+        if (!text) return null;
+        const urlRegex = /(https?:\/\/[^\s]+)/g;
+        return text.split(urlRegex).map((part, i) => {
+            if (part.match(urlRegex)) {
+                return (
+                    <a key={i} href={part} target="_blank" rel="noopener noreferrer" className="text-indigo-400 hover:text-indigo-300 underline">
+                        {part}
+                    </a>
+                );
+            }
+            return part;
+        });
+    };
+
     const totalLessons = course.course_modules?.reduce((acc, mod) => acc + (mod.lessons?.length || 0), 0) || 0;
     const totalQuizzes = course.course_modules?.reduce((acc, mod) => acc + (mod.quizzes?.length || 0), 0) || 0;
     const skills = course.skills || [];
