@@ -59,7 +59,7 @@ export default function LeaderboardAd() {
         return (
             <div className="flex justify-center my-6">
                 <div
-                    className="bg-gray-50 dark:bg-gray-800 rounded-lg overflow-hidden flex items-center justify-center w-[728px] h-[90px] cursor-pointer hover:opacity-90 transition-opacity"
+                    className="bg-gray-50 dark:bg-gray-800 rounded-lg overflow-hidden flex items-center justify-center w-full max-w-[728px] h-auto min-h-[90px] aspect-[728/90] cursor-pointer hover:opacity-90 transition-opacity mx-auto"
                     onClick={() => navigate('/pricing')}
                 >
                     <img
@@ -74,7 +74,7 @@ export default function LeaderboardAd() {
 
     return (
         <div className="flex justify-center my-6">
-            <div ref={containerRef} className="bg-gray-50 dark:bg-gray-800 rounded-lg overflow-hidden flex items-center justify-center w-[728px] h-[90px]">
+            <div ref={containerRef} className="bg-gray-50 dark:bg-gray-800 rounded-lg overflow-hidden flex items-center justify-center w-full max-w-[728px] h-auto min-h-[90px] aspect-[728/90] mx-auto">
                 {/* Ad will be injected here into an iframe */}
             </div>
         </div>
