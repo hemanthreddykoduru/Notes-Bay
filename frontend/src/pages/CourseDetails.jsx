@@ -159,7 +159,7 @@ const CourseDetails = () => {
                             {course.title}
                         </h1>
                         <p className="text-lg sm:text-xl text-gray-300 mb-8 max-w-2xl leading-relaxed">
-                            {course.description || "Master this subject with our comprehensive video course."}
+                            {renderTextWithLinks(course.description) || "Master this subject with our comprehensive video course."}
                         </p>
 
                         <div className="flex flex-wrap items-center gap-4 sm:gap-6 text-sm text-gray-300 mb-8">
