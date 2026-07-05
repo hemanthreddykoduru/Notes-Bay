@@ -61,6 +61,16 @@ export default function Navbar() {
                     <div className="hidden md:flex items-center space-x-4">
                         <ThemeToggle />
 
+                        <Link to="/home" className="text-gray-900 dark:text-gray-100 px-3 py-2 rounded-md text-sm font-medium hover:text-indigo-600 dark:hover:text-indigo-400">
+                            Home
+                        </Link>
+                        <Link to="/pricing" className="text-gray-900 dark:text-gray-100 px-3 py-2 rounded-md text-sm font-medium hover:text-indigo-600 dark:hover:text-indigo-400">
+                            Subscription
+                        </Link>
+                        <Link to="/courses" className="text-gray-900 dark:text-gray-100 px-3 py-2 rounded-md text-sm font-medium hover:text-indigo-600 dark:hover:text-indigo-400">
+                            Courses
+                        </Link>
+
                         {user ? (
                             <>
                                 {role === 'admin' && (
@@ -68,15 +78,6 @@ export default function Navbar() {
                                         Admin
                                     </Link>
                                 )}
-                                <Link to="/home" className="text-gray-900 dark:text-gray-100 px-3 py-2 rounded-md text-sm font-medium hover:text-indigo-600 dark:hover:text-indigo-400">
-                                    Home
-                                </Link>
-                                <Link to="/pricing" className="text-gray-900 dark:text-gray-100 px-3 py-2 rounded-md text-sm font-medium hover:text-indigo-600 dark:hover:text-indigo-400">
-                                    Subscription
-                                </Link>
-                                <Link to="/courses" className="text-gray-900 dark:text-gray-100 px-3 py-2 rounded-md text-sm font-medium hover:text-indigo-600 dark:hover:text-indigo-400">
-                                    Courses
-                                </Link>
                                 <Link to="/my-learning" className="text-gray-900 dark:text-gray-100 px-3 py-2 rounded-md text-sm font-medium hover:text-indigo-600 dark:hover:text-indigo-400">
                                     My Learning
                                 </Link>
@@ -137,17 +138,18 @@ export default function Navbar() {
             {isMenuOpen && (
                 <div className="md:hidden bg-white dark:bg-gray-800 shadow-lg border-t border-gray-200 dark:border-gray-700">
                     <div className="px-2 pt-2 pb-3 space-y-1 sm:px-3">
+                        <Link to="/home" onClick={() => setIsMenuOpen(false)} className="block px-3 py-2 rounded-md text-base font-medium text-gray-700 dark:text-gray-200 hover:text-indigo-600 dark:hover:text-indigo-400 hover:bg-gray-50 dark:hover:bg-gray-700">
+                            Home
+                        </Link>
+                        <Link to="/pricing" onClick={() => setIsMenuOpen(false)} className="block px-3 py-2 rounded-md text-base font-medium text-gray-700 dark:text-gray-200 hover:text-indigo-600 dark:hover:text-indigo-400 hover:bg-gray-50 dark:hover:bg-gray-700">
+                            Subscription
+                        </Link>
+                        <Link to="/courses" onClick={() => setIsMenuOpen(false)} className="block px-3 py-2 rounded-md text-base font-medium text-gray-700 dark:text-gray-200 hover:text-indigo-600 dark:hover:text-indigo-400 hover:bg-gray-50 dark:hover:bg-gray-700">
+                            Courses
+                        </Link>
+                        
                         {user ? (
                             <>
-                                <Link to="/home" onClick={() => setIsMenuOpen(false)} className="block px-3 py-2 rounded-md text-base font-medium text-gray-700 dark:text-gray-200 hover:text-indigo-600 dark:hover:text-indigo-400 hover:bg-gray-50 dark:hover:bg-gray-700">
-                                    Home
-                                </Link>
-                                <Link to="/pricing" onClick={() => setIsMenuOpen(false)} className="block px-3 py-2 rounded-md text-base font-medium text-gray-700 dark:text-gray-200 hover:text-indigo-600 dark:hover:text-indigo-400 hover:bg-gray-50 dark:hover:bg-gray-700">
-                                    Subscription
-                                </Link>
-                                <Link to="/courses" onClick={() => setIsMenuOpen(false)} className="block px-3 py-2 rounded-md text-base font-medium text-gray-700 dark:text-gray-200 hover:text-indigo-600 dark:hover:text-indigo-400 hover:bg-gray-50 dark:hover:bg-gray-700">
-                                    Courses
-                                </Link>
                                 <Link to="/my-learning" onClick={() => setIsMenuOpen(false)} className="block px-3 py-2 rounded-md text-base font-medium text-gray-700 dark:text-gray-200 hover:text-indigo-600 dark:hover:text-indigo-400 hover:bg-gray-50 dark:hover:bg-gray-700">
                                     My Learning
                                 </Link>
