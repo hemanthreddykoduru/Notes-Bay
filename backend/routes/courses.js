@@ -165,7 +165,7 @@ router.get('/:id', async (req, res) => {
     const { data: course, error: courseError } = await supabase
       .from('courses')
       .select(`
-        id, title, description, price, thumbnail_url, program_outline, offer_text,
+        id, title, description, price, original_price, thumbnail_url, program_outline, offer_text,
         level, language, estimated_duration, skills, learning_objectives, requirements,
         profiles (full_name, bio, title, avatar_url),
         course_modules (
@@ -278,7 +278,7 @@ router.get('/:id/learn', requireAuth, async (req, res) => {
     const { data: course, error: courseError } = await supabase
       .from('courses')
       .select(`
-        id, title, description, price, thumbnail_url, program_outline, offer_text,
+        id, title, description, price, original_price, thumbnail_url, program_outline, offer_text,
         level, language, estimated_duration, skills, learning_objectives, requirements,
         profiles (full_name, bio, title, avatar_url),
         course_modules (
@@ -446,14 +446,14 @@ router.post('/', requireAuth, async (req, res) => {
         if (!isAdmin) return res.status(403).json({ error: 'Admins only' });
 
         const { 
-            title, description, price, thumbnail_url, is_published, program_outline, offer_text,
+            title, description, price, original_price, thumbnail_url, is_published, program_outline, offer_text,
             level, language, estimated_duration, skills, learning_objectives, requirements 
         } = req.body;
         
         const { data, error } = await supabase
             .from('courses')
             .insert([{ 
-                title, description, price, thumbnail_url, is_published, program_outline, offer_text,
+                title, description, price, original_price, thumbnail_url, is_published, program_outline, offer_text,
                 instructor_id: req.user.id,
                 level, language, estimated_duration, skills, learning_objectives, requirements
             }])
@@ -482,6 +482,7 @@ router.put('/:id', requireAuth, async (req, res) => {
         if (title !== undefined) updates.title = title;
         if (description !== undefined) updates.description = description;
         if (price !== undefined) updates.price = price;
+        if (original_price !== undefined) updates.original_price = original_price;
         if (thumbnail_url !== undefined) updates.thumbnail_url = thumbnail_url;
         if (is_published !== undefined) updates.is_published = is_published;
         if (level !== undefined) updates.level = level;
