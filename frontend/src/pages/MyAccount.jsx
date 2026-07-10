@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '../lib/supabase';
-import { User, Phone, Mail, Save, Loader, Lock, X } from 'lucide-react';
+import { User, Phone, Mail, Save, Loader, Lock, X, Camera, Shield } from 'lucide-react';
 import Toast from '../components/common/Toast';
 import MyAccountSkeleton from '../components/skeletons/MyAccountSkeleton';
 
@@ -159,105 +159,137 @@ export default function MyAccount() {
     }
 
     return (
-        <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+        <div className="min-h-screen bg-gray-50 dark:bg-gray-900 py-12 px-4 sm:px-6 lg:px-8">
             {toast && <Toast message={toast.message} type={toast.type} onClose={() => setToast(null)} />}
-            <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-8">My Account</h1>
+            
+            <div className="max-w-4xl mx-auto">
+                {/* Header Section */}
+                <div className="mb-8">
+                    <h1 className="text-4xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-indigo-600 to-purple-600 dark:from-indigo-400 dark:to-purple-400 mb-2">
+                        Account Settings
+                    </h1>
+                    <p className="text-gray-500 dark:text-gray-400">Manage your profile information and security preferences.</p>
+                </div>
 
-            <div className="bg-white dark:bg-gray-800 shadow rounded-lg overflow-hidden">
-                <div className="p-6 md:p-8 space-y-6">
-                    <form onSubmit={handleSubmit}>
-                        {/* Email - Read Only */}
-                        <div className="mb-6">
-                            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                                Email Address
-                            </label>
-                            <div className="relative rounded-md shadow-sm">
-                                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                                    <Mail className="h-5 w-5 text-gray-400" />
+                <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-xl overflow-hidden border border-gray-100 dark:border-gray-700/50">
+                    <div className="md:flex">
+                        {/* Sidebar / Avatar Section */}
+                        <div className="md:w-1/3 bg-gray-50 dark:bg-gray-800/50 p-8 border-b md:border-b-0 md:border-r border-gray-100 dark:border-gray-700/50 flex flex-col items-center justify-center text-center">
+                            <div className="relative group cursor-pointer mb-6">
+                                <div className="h-32 w-32 rounded-full bg-gradient-to-tr from-indigo-500 to-purple-500 flex items-center justify-center text-white text-4xl font-bold shadow-lg ring-4 ring-white dark:ring-gray-800">
+                                    {profile.full_name ? profile.full_name.charAt(0).toUpperCase() : <User className="h-12 w-12" />}
                                 </div>
-                                <input
-                                    type="email"
-                                    value={user?.email || ''}
-                                    disabled
-                                    className="focus:ring-indigo-500 focus:border-indigo-500 block w-full pl-10 sm:text-sm border-gray-300 dark:border-gray-600 rounded-md bg-gray-100 dark:bg-gray-700 text-gray-500 dark:text-gray-400 cursor-not-allowed"
-                                />
+                                <div className="absolute inset-0 bg-black bg-opacity-50 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+                                    <Camera className="h-8 w-8 text-white" />
+                                </div>
                             </div>
-                            <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">
-                                Email cannot be changed.
+                            <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-1">
+                                {profile.full_name || 'Student'}
+                            </h3>
+                            <p className="text-sm text-gray-500 dark:text-gray-400 flex items-center justify-center gap-1 mb-4">
+                                <Shield className="h-4 w-4 text-green-500" /> Secure Account
                             </p>
                         </div>
 
-                        {/* Full Name */}
-                        <div className="mb-6">
-                            <label htmlFor="full_name" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                                Full Name
-                            </label>
-                            <div className="relative rounded-md shadow-sm">
-                                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                                    <User className="h-5 w-5 text-gray-400" />
+                        {/* Form Section */}
+                        <div className="md:w-2/3 p-8">
+                            <form onSubmit={handleSubmit} className="space-y-6">
+                                <div className="grid grid-cols-1 gap-6">
+                                    {/* Email */}
+                                    <div>
+                                        <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
+                                            Email Address
+                                        </label>
+                                        <div className="relative">
+                                            <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                                                <Mail className="h-5 w-5 text-gray-400" />
+                                            </div>
+                                            <input
+                                                type="email"
+                                                value={user?.email || ''}
+                                                disabled
+                                                className="block w-full pl-11 pr-4 py-3 bg-gray-100 dark:bg-gray-900/50 border border-transparent rounded-xl text-gray-500 dark:text-gray-400 cursor-not-allowed sm:text-sm focus:ring-0"
+                                            />
+                                        </div>
+                                        <p className="mt-2 text-xs text-gray-500 dark:text-gray-400 flex items-center gap-1">
+                                            Email cannot be changed for security reasons.
+                                        </p>
+                                    </div>
+
+                                    {/* Full Name */}
+                                    <div>
+                                        <label htmlFor="full_name" className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
+                                            Full Name
+                                        </label>
+                                        <div className="relative group">
+                                            <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                                                <User className="h-5 w-5 text-gray-400 group-focus-within:text-indigo-500 transition-colors" />
+                                            </div>
+                                            <input
+                                                type="text"
+                                                name="full_name"
+                                                id="full_name"
+                                                value={profile.full_name}
+                                                onChange={handleChange}
+                                                placeholder="John Doe"
+                                                className="block w-full pl-11 pr-4 py-3 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl text-gray-900 dark:text-white sm:text-sm focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-shadow"
+                                            />
+                                        </div>
+                                    </div>
+
+                                    {/* Mobile Number */}
+                                    <div>
+                                        <label htmlFor="mobile_number" className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
+                                            Mobile Number
+                                        </label>
+                                        <div className="relative group">
+                                            <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                                                <Phone className="h-5 w-5 text-gray-400 group-focus-within:text-indigo-500 transition-colors" />
+                                            </div>
+                                            <input
+                                                type="tel"
+                                                name="mobile_number"
+                                                id="mobile_number"
+                                                value={profile.mobile_number}
+                                                onChange={handleChange}
+                                                placeholder="+91 98765 43210"
+                                                className="block w-full pl-11 pr-4 py-3 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl text-gray-900 dark:text-white sm:text-sm focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-shadow"
+                                            />
+                                        </div>
+                                    </div>
                                 </div>
-                                <input
-                                    type="text"
-                                    name="full_name"
-                                    id="full_name"
-                                    value={profile.full_name}
-                                    onChange={handleChange}
-                                    placeholder="John Doe"
-                                    className="focus:ring-indigo-500 focus:border-indigo-500 block w-full pl-10 sm:text-sm border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
-                                />
-                            </div>
-                        </div>
 
-                        {/* Mobile Number */}
-                        <div className="mb-8">
-                            <label htmlFor="mobile_number" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                                Mobile Number
-                            </label>
-                            <div className="relative rounded-md shadow-sm">
-                                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                                    <Phone className="h-5 w-5 text-gray-400" />
+                                <div className="flex flex-col sm:flex-row justify-between items-center pt-8 mt-8 border-t border-gray-100 dark:border-gray-700/50 gap-4">
+                                    <button
+                                        type="button"
+                                        onClick={() => setShowPasswordModal(true)}
+                                        className="w-full sm:w-auto inline-flex justify-center items-center px-6 py-3 border border-gray-200 dark:border-gray-700 rounded-xl shadow-sm text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-all duration-200"
+                                    >
+                                        <Lock className="h-4 w-4 mr-2 text-indigo-500" />
+                                        Change Password
+                                    </button>
+
+                                    <button
+                                        type="submit"
+                                        disabled={saving}
+                                        className="w-full sm:w-auto inline-flex justify-center items-center px-8 py-3 border border-transparent rounded-xl shadow-lg text-sm font-medium text-white bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50 transform hover:-translate-y-0.5 transition-all duration-200"
+                                    >
+                                        {saving ? (
+                                            <>
+                                                <Loader className="animate-spin -ml-1 mr-2 h-5 w-5" />
+                                                Saving...
+                                            </>
+                                        ) : (
+                                            <>
+                                                <Save className="-ml-1 mr-2 h-5 w-5" />
+                                                Save Changes
+                                            </>
+                                        )}
+                                    </button>
                                 </div>
-                                <input
-                                    type="tel"
-                                    name="mobile_number"
-                                    id="mobile_number"
-                                    value={profile.mobile_number}
-                                    onChange={handleChange}
-                                    placeholder="+91 98765 43210"
-                                    className="focus:ring-indigo-500 focus:border-indigo-500 block w-full pl-10 sm:text-sm border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
-                                />
-                            </div>
+                            </form>
                         </div>
-
-                        <div className="flex justify-between items-center pt-4">
-                            <button
-                                type="button"
-                                onClick={() => setShowPasswordModal(true)}
-                                className="inline-flex items-center text-sm font-medium text-indigo-600 dark:text-indigo-400 hover:text-indigo-500"
-                            >
-                                <Lock className="h-4 w-4 mr-1" />
-                                Change Password
-                            </button>
-
-                            <button
-                                type="submit"
-                                disabled={saving}
-                                className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50"
-                            >
-                                {saving ? (
-                                    <>
-                                        <Loader className="animate-spin -ml-1 mr-2 h-4 w-4" />
-                                        Saving...
-                                    </>
-                                ) : (
-                                    <>
-                                        <Save className="-ml-1 mr-2 h-4 w-4" />
-                                        Save Changes
-                                    </>
-                                )}
-                            </button>
-                        </div>
-                    </form>
+                    </div>
                 </div>
             </div>
 
@@ -265,29 +297,28 @@ export default function MyAccount() {
             {showPasswordModal && (
                 <div className="fixed inset-0 z-50 overflow-y-auto" aria-labelledby="modal-title" role="dialog" aria-modal="true">
                     <div className="flex items-end justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
-                        {/* Background Overlay */}
-                        <div className="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity" aria-hidden="true" onClick={() => setShowPasswordModal(false)}></div>
+                        <div className="fixed inset-0 bg-gray-900/75 backdrop-blur-sm transition-opacity" aria-hidden="true" onClick={() => setShowPasswordModal(false)}></div>
 
-                        {/* Modal Panel */}
                         <span className="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">&#8203;</span>
-                        <div className="relative inline-block align-bottom bg-white dark:bg-gray-800 rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg w-full">
-                            <div className="bg-white dark:bg-gray-800 px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
-                                <div className="flex justify-between items-start mb-4">
-                                    <h3 className="text-lg leading-6 font-medium text-gray-900 dark:text-white" id="modal-title">
-                                        Change Password
+                        <div className="relative inline-block align-bottom bg-white dark:bg-gray-800 rounded-2xl text-left overflow-hidden shadow-2xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg w-full border border-gray-100 dark:border-gray-700">
+                            <div className="bg-white dark:bg-gray-800 px-6 pt-6 pb-6 border-b border-gray-100 dark:border-gray-700/50">
+                                <div className="flex justify-between items-center mb-6">
+                                    <h3 className="text-xl font-bold text-gray-900 dark:text-white flex items-center gap-2" id="modal-title">
+                                        <Lock className="h-6 w-6 text-indigo-500" />
+                                        Update Security
                                     </h3>
                                     <button
                                         onClick={() => setShowPasswordModal(false)}
-                                        className="bg-white dark:bg-gray-800 rounded-md text-gray-400 hover:text-gray-500 focus:outline-none"
+                                        className="rounded-full p-1.5 text-gray-400 hover:text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-700 focus:outline-none transition-colors"
                                     >
-                                        <X className="h-6 w-6" />
+                                        <X className="h-5 w-5" />
                                     </button>
                                 </div>
 
                                 <form onSubmit={handlePasswordUpdate}>
-                                    <div className="space-y-4">
+                                    <div className="space-y-5">
                                         <div>
-                                            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                                            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
                                                 Current Password
                                             </label>
                                             <input
@@ -295,12 +326,12 @@ export default function MyAccount() {
                                                 value={passwordData.currentPassword}
                                                 onChange={(e) => setPasswordData({ ...passwordData, currentPassword: e.target.value })}
                                                 required
-                                                placeholder="Enter current password"
-                                                className="focus:ring-indigo-500 focus:border-indigo-500 block w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-white sm:text-sm"
+                                                placeholder="••••••••"
+                                                className="block w-full px-4 py-3 border border-gray-200 dark:border-gray-700 rounded-xl bg-white dark:bg-gray-900 text-gray-900 dark:text-white sm:text-sm focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
                                             />
                                         </div>
                                         <div>
-                                            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                                            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
                                                 New Password
                                             </label>
                                             <input
@@ -310,11 +341,11 @@ export default function MyAccount() {
                                                 required
                                                 minLength={6}
                                                 placeholder="Min 6 characters"
-                                                className="focus:ring-indigo-500 focus:border-indigo-500 block w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-white sm:text-sm"
+                                                className="block w-full px-4 py-3 border border-gray-200 dark:border-gray-700 rounded-xl bg-white dark:bg-gray-900 text-gray-900 dark:text-white sm:text-sm focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
                                             />
                                         </div>
                                         <div>
-                                            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                                            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
                                                 Confirm New Password
                                             </label>
                                             <input
@@ -324,25 +355,25 @@ export default function MyAccount() {
                                                 required
                                                 minLength={6}
                                                 placeholder="Re-enter password"
-                                                className="focus:ring-indigo-500 focus:border-indigo-500 block w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-white sm:text-sm"
+                                                className="block w-full px-4 py-3 border border-gray-200 dark:border-gray-700 rounded-xl bg-white dark:bg-gray-900 text-gray-900 dark:text-white sm:text-sm focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
                                             />
                                         </div>
                                     </div>
 
-                                    <div className="mt-8 sm:flex sm:flex-row-reverse">
-                                        <button
-                                            type="submit"
-                                            disabled={updatingPassword}
-                                            className="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-indigo-600 text-base font-medium text-white hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 sm:ml-3 sm:w-auto sm:text-sm disabled:opacity-50"
-                                        >
-                                            {updatingPassword ? 'Updating...' : 'Update Password'}
-                                        </button>
+                                    <div className="mt-8 flex flex-col-reverse sm:flex-row gap-3 sm:justify-end">
                                         <button
                                             type="button"
                                             onClick={() => setShowPasswordModal(false)}
-                                            className="mt-3 w-full inline-flex justify-center rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-base font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm dark:bg-gray-700 dark:text-white dark:border-gray-600 dark:hover:bg-gray-600"
+                                            className="w-full sm:w-auto inline-flex justify-center rounded-xl border border-gray-300 dark:border-gray-600 px-6 py-2.5 bg-white dark:bg-gray-800 text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 focus:outline-none transition-colors"
                                         >
                                             Cancel
+                                        </button>
+                                        <button
+                                            type="submit"
+                                            disabled={updatingPassword}
+                                            className="w-full sm:w-auto inline-flex justify-center rounded-xl border border-transparent shadow-md px-6 py-2.5 bg-indigo-600 text-sm font-medium text-white hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50 transition-colors"
+                                        >
+                                            {updatingPassword ? 'Updating...' : 'Update Password'}
                                         </button>
                                     </div>
                                 </form>
