@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { Loader, CheckCircle, Clock } from 'lucide-react';
 import Navbar from '../components/layout/Navbar';
 import Footer from '../components/layout/Footer';
+import api from '../lib/api';
 
 export default function Services() {
     const [services, setServices] = useState([]);
@@ -11,8 +12,7 @@ export default function Services() {
     useEffect(() => {
         const fetchServices = async () => {
             try {
-                const res = await fetch(`${import.meta.env.VITE_API_URL}/api/services`);
-                const data = await res.json();
+                const { data } = await api.get('/services');
                 setServices(data);
             } catch (error) {
                 console.error('Error fetching services:', error);

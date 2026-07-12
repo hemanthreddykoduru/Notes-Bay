@@ -4,6 +4,7 @@ import { Loader, CheckCircle, ArrowRight } from 'lucide-react';
 import Navbar from '../components/layout/Navbar';
 import Footer from '../components/layout/Footer';
 import { supabase } from '../lib/supabase';
+import api from '../lib/api';
 import Toast from '../components/common/Toast';
 
 export default function ServiceOnboarding() {
@@ -27,24 +28,17 @@ export default function ServiceOnboarding() {
                 }
 
                 // Fetch Service Details (we only really need the questions)
-                const resService = await fetch(`${import.meta.env.VITE_API_URL}/api/services/${id}`);
-                if (!resService.ok) throw new Error('Service not found');
-                const serviceData = await resService.json();
+                const { data: serviceData } = await api.get(`/services/${id}`);
                 setService(serviceData);
 
                 // Check if this order actually belongs to the user and hasn't been onboarded yet
-                const resOrder = await fetch(`${import.meta.env.VITE_API_URL}/api/service-orders/${orderId}`, {
-                    headers: { 'Authorization': `Bearer ${session.access_token}` }
-                });
+                const { data: orderData } = await api.get(`/service-orders/${orderId}`);
                 
-                if (resOrder.ok) {
-                    const orderData = await resOrder.json();
-                    setOrder(orderData);
-                    
-                    // If order status is already 'in_progress' or 'completed', they already filled the form
-                    if (orderData.status !== 'pending') {
-                        setCompleted(true);
-                    }
+                setOrder(orderData);
+                
+                // If order status is already 'in_progress' or 'completed', they already filled the form
+                if (orderData.status !== 'pending') {
+                    setCompleted(true);
                 }
             } catch (error) {
                 console.error('Error fetching onboarding details:', error);
@@ -67,17 +61,7 @@ export default function ServiceOnboarding() {
         e.preventDefault();
         setSubmitting(true);
         try {
-            const { data: { session } } = await supabase.auth.getSession();
-            const res = await fetch(`${import.meta.env.VITE_API_URL}/api/service-orders/${orderId}/onboard`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${session.access_token}`
-                },
-                body: JSON.stringify({ answers })
-            });
-            
-            if (!res.ok) throw new Error('Failed to submit details');
+            await api.post(`/service-orders/${orderId}/onboard`, { answers });
             
             setCompleted(true);
             window.scrollTo({ top: 0, behavior: 'smooth' });

@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '../../lib/supabase';
-import { Plus, Edit2, Trash2, CheckCircle, XCircle, Save, Loader, X } from 'lucide-react';
+import api from '../../lib/api';
+import { Plus, Edit2, Trash2, Save, Loader, X } from 'lucide-react';
 import Toast from '../common/Toast';
 
 export default function AdminServices() {
@@ -35,12 +36,7 @@ export default function AdminServices() {
 
     const fetchServices = async () => {
         try {
-            const { data: { session } } = await supabase.auth.getSession();
-            const res = await fetch(`${import.meta.env.VITE_API_URL}/api/services/admin`, {
-                headers: { 'Authorization': `Bearer ${session.access_token}` }
-            });
-            if (!res.ok) throw new Error('Failed to fetch services');
-            const data = await res.json();
+            const { data } = await api.get('/services/admin');
             setServices(data);
         } catch (error) {
             console.error('Error fetching services:', error);
@@ -107,27 +103,17 @@ export default function AdminServices() {
         e.preventDefault();
         setSaving(true);
         try {
-            const { data: { session } } = await supabase.auth.getSession();
-            const url = editingService 
-                ? `${import.meta.env.VITE_API_URL}/api/services/${editingService.id}`
-                : `${import.meta.env.VITE_API_URL}/api/services`;
-            
             const payload = {
                 ...formData,
                 price: parseFloat(formData.price),
                 original_price: parseFloat(formData.original_price)
             };
 
-            const res = await fetch(url, {
-                method: editingService ? 'PUT' : 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${session.access_token}`
-                },
-                body: JSON.stringify(payload)
-            });
-
-            if (!res.ok) throw new Error('Failed to save service');
+            if (editingService) {
+                await api.put(`/services/${editingService.id}`, payload);
+            } else {
+                await api.post('/services', payload);
+            }
             
             setToast({ message: `Service ${editingService ? 'updated' : 'created'} successfully!`, type: 'success' });
             setShowForm(false);
@@ -162,12 +148,7 @@ export default function AdminServices() {
     const handleDelete = async (id) => {
         if (!window.confirm('Are you sure you want to delete this service?')) return;
         try {
-            const { data: { session } } = await supabase.auth.getSession();
-            const res = await fetch(`${import.meta.env.VITE_API_URL}/api/services/${id}`, {
-                method: 'DELETE',
-                headers: { 'Authorization': `Bearer ${session.access_token}` }
-            });
-            if (!res.ok) throw new Error('Failed to delete service');
+            await api.delete(`/services/${id}`);
             setToast({ message: 'Service deleted successfully!', type: 'success' });
             fetchServices();
         } catch (error) {

@@ -4,6 +4,7 @@ import { Loader, CheckCircle, Clock, ShieldCheck, ArrowRight } from 'lucide-reac
 import Navbar from '../components/layout/Navbar';
 import Footer from '../components/layout/Footer';
 import { supabase } from '../lib/supabase';
+import api from '../lib/api';
 import Toast from '../components/common/Toast';
 
 export default function ServiceDetails() {
@@ -18,9 +19,7 @@ export default function ServiceDetails() {
     useEffect(() => {
         const fetchService = async () => {
             try {
-                const res = await fetch(`${import.meta.env.VITE_API_URL}/api/services/${id}`);
-                if (!res.ok) throw new Error('Service not found');
-                const data = await res.json();
+                const { data } = await api.get(`/services/${id}`);
                 setService(data);
                 // Pre-select first variant if it exists, otherwise leave null (base price)
                 if (data.variants && data.variants.length > 0) {
@@ -63,19 +62,10 @@ export default function ServiceDetails() {
             }
 
             // Create Order
-            const orderRes = await fetch(`${import.meta.env.VITE_API_URL}/api/payments/create-service-order`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${session.access_token}`
-                },
-                body: JSON.stringify({ 
-                    serviceId: id,
-                    variant: selectedVariant 
-                })
+            const { data: order } = await api.post('/payments/create-service-order', {
+                serviceId: id,
+                variant: selectedVariant 
             });
-            const order = await orderRes.json();
-            if (order.error) throw new Error(order.error);
 
             const options = {
                 key: import.meta.env.VITE_RAZORPAY_KEY_ID,
@@ -86,23 +76,13 @@ export default function ServiceDetails() {
                 order_id: order.id,
                 handler: async function (response) {
                     try {
-                        const verifyRes = await fetch(`${import.meta.env.VITE_API_URL}/api/payments/verify-service`, {
-                            method: 'POST',
-                            headers: {
-                                'Content-Type': 'application/json',
-                                'Authorization': `Bearer ${session.access_token}`
-                            },
-                            body: JSON.stringify({
-                                razorpay_order_id: response.razorpay_order_id,
-                                razorpay_payment_id: response.razorpay_payment_id,
-                                razorpay_signature: response.razorpay_signature,
-                                serviceId: id,
-                                variant: selectedVariant
-                            })
+                        const { data: verifyData } = await api.post('/payments/verify-service', {
+                            razorpay_order_id: response.razorpay_order_id,
+                            razorpay_payment_id: response.razorpay_payment_id,
+                            razorpay_signature: response.razorpay_signature,
+                            serviceId: id,
+                            variant: selectedVariant
                         });
-                        
-                        const verifyData = await verifyRes.json();
-                        if (verifyData.error) throw new Error(verifyData.error);
                         
                         // Navigate to onboarding page, pass order ID
                         navigate(`/services/${id}/onboarding/${verifyData.orderId}`);
