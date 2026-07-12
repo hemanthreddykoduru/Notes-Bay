@@ -1,8 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Loader, CheckCircle, Clock, ShieldCheck, ArrowRight } from 'lucide-react';
-import Navbar from '../components/layout/Navbar';
-import Footer from '../components/layout/Footer';
 import { supabase } from '../lib/supabase';
 import api from '../lib/api';
 import Toast from '../components/common/Toast';
@@ -112,7 +110,6 @@ export default function ServiceDetails() {
     if (loading) {
         return (
             <div className="min-h-screen flex flex-col">
-                <Navbar />
                 <div className="flex-grow flex justify-center items-center">
                     <Loader className="animate-spin h-10 w-10 text-indigo-500" />
                 </div>
@@ -123,7 +120,6 @@ export default function ServiceDetails() {
     if (!service) {
         return (
             <div className="min-h-screen flex flex-col">
-                <Navbar />
                 <div className="flex-grow flex justify-center items-center text-gray-500">Service not found.</div>
             </div>
         );
@@ -134,7 +130,6 @@ export default function ServiceDetails() {
 
     return (
         <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex flex-col">
-            <Navbar />
             {toast && <Toast message={toast.message} type={toast.type} onClose={() => setToast(null)} />}
             
             <main className="flex-grow max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 w-full">
@@ -255,7 +250,6 @@ export default function ServiceDetails() {
                     </div>
                 </div>
             </main>
-            <Footer />
         </div>
     );
 }

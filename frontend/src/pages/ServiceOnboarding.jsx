@@ -1,8 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Loader, CheckCircle, ArrowRight } from 'lucide-react';
-import Navbar from '../components/layout/Navbar';
-import Footer from '../components/layout/Footer';
 import { supabase } from '../lib/supabase';
 import api from '../lib/api';
 import Toast from '../components/common/Toast';
@@ -76,7 +74,6 @@ export default function ServiceOnboarding() {
     if (loading) {
         return (
             <div className="min-h-screen flex flex-col bg-gray-50 dark:bg-gray-900">
-                <Navbar />
                 <div className="flex-grow flex justify-center items-center">
                     <Loader className="animate-spin h-10 w-10 text-indigo-500" />
                 </div>
@@ -87,7 +84,6 @@ export default function ServiceOnboarding() {
     if (completed) {
         return (
             <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex flex-col">
-                <Navbar />
                 <main className="flex-grow flex items-center justify-center p-4">
                     <div className="bg-white dark:bg-gray-800 rounded-3xl shadow-xl p-10 text-center max-w-md w-full border border-gray-100 dark:border-gray-700">
                         <div className="w-20 h-20 bg-green-100 dark:bg-green-900/30 rounded-full flex items-center justify-center mx-auto mb-6">
@@ -113,7 +109,6 @@ export default function ServiceOnboarding() {
         // No questions for this service, automatically mark as completed
         return (
              <div className="min-h-screen flex flex-col bg-gray-50 dark:bg-gray-900">
-                <Navbar />
                 <div className="flex-grow flex flex-col justify-center items-center text-center p-4">
                     <CheckCircle className="h-16 w-16 text-green-500 mb-4" />
                     <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">Payment Successful!</h2>
@@ -126,7 +121,6 @@ export default function ServiceOnboarding() {
 
     return (
         <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex flex-col">
-            <Navbar />
             {toast && <Toast message={toast.message} type={toast.type} onClose={() => setToast(null)} />}
             
             <main className="flex-grow max-w-3xl mx-auto px-4 sm:px-6 py-12 w-full">
@@ -193,7 +187,6 @@ export default function ServiceOnboarding() {
                     </form>
                 </div>
             </main>
-            <Footer />
         </div>
     );
 }

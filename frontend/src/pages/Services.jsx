@@ -1,8 +1,8 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { Loader, CheckCircle, Clock } from 'lucide-react';
-import Navbar from '../components/layout/Navbar';
-import Footer from '../components/layout/Footer';
+import { Loader, CheckCircle, Clock } from 'lucide-react';
+import api from '../lib/api';
 import api from '../lib/api';
 
 export default function Services() {
@@ -26,7 +26,6 @@ export default function Services() {
 
     return (
         <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex flex-col">
-            <Navbar />
             <main className="flex-grow max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 w-full">
                 <div className="text-center mb-12">
                     <h1 className="text-4xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-indigo-600 to-purple-600 dark:from-indigo-400 dark:to-purple-400 mb-4">
@@ -111,7 +110,6 @@ export default function Services() {
                     </div>
                 )}
             </main>
-            <Footer />
         </div>
     );
 }
