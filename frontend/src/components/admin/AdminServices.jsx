@@ -234,15 +234,15 @@ export default function AdminServices() {
                             <h4 className="font-semibold text-gray-900 dark:text-white mb-2">Variants (Optional Pricing Tiers)</h4>
                             <p className="text-xs text-gray-500 mb-3">If added, users can select a tier instead of the base price (e.g., 1000 Commits, 5000 Commits).</p>
                             <div className="flex gap-2 mb-3">
-                                <input type="text" placeholder="Variant Name (e.g. 5000 Commits)" value={newVariant.name} onChange={e => setNewVariant({...newVariant, name: e.target.value})} className="flex-1 p-2 border rounded bg-gray-50 dark:bg-gray-900 border-gray-300 dark:border-gray-600 text-white outline-none" />
-                                <input type="number" placeholder="Price (₹)" value={newVariant.price} onChange={e => setNewVariant({...newVariant, price: e.target.value})} className="w-32 p-2 border rounded bg-gray-50 dark:bg-gray-900 border-gray-300 dark:border-gray-600 text-white outline-none" />
-                                <button type="button" onClick={addVariant} className="bg-gray-200 dark:bg-gray-700 px-3 rounded hover:bg-gray-300 dark:hover:bg-gray-600">+</button>
+                                <input type="text" placeholder="Variant Name (e.g. 5000 Commits)" value={newVariant.name} onChange={e => setNewVariant({...newVariant, name: e.target.value})} className="flex-1 p-2 border rounded bg-gray-50 dark:bg-gray-900 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white outline-none" />
+                                <input type="number" placeholder="Price (₹)" value={newVariant.price} onChange={e => setNewVariant({...newVariant, price: e.target.value})} className="w-32 p-2 border rounded bg-gray-50 dark:bg-gray-900 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white outline-none" />
+                                <button type="button" onClick={addVariant} className="bg-gray-200 dark:bg-gray-700 text-gray-900 dark:text-white px-3 rounded hover:bg-gray-300 dark:hover:bg-gray-600">+</button>
                             </div>
                             <div className="space-y-2">
                                 {formData.variants.map((v, i) => (
-                                    <div key={i} className="flex justify-between items-center bg-gray-50 dark:bg-gray-900 p-2 rounded text-sm text-gray-300">
+                                    <div key={i} className="flex justify-between items-center bg-gray-50 dark:bg-gray-900 p-2 rounded text-sm text-gray-700 dark:text-gray-300 border border-gray-200 dark:border-gray-700">
                                         <span>{v.name} - ₹{v.price}</span>
-                                        <button type="button" onClick={() => removeVariant(i)} className="text-red-500 hover:text-red-400"><X className="h-4 w-4"/></button>
+                                        <button type="button" onClick={() => removeVariant(i)} className="text-red-500 hover:text-red-600 dark:hover:text-red-400"><X className="h-4 w-4"/></button>
                                     </div>
                                 ))}
                             </div>
@@ -253,20 +253,20 @@ export default function AdminServices() {
                             <h4 className="font-semibold text-gray-900 dark:text-white mb-2">Post-Purchase Questions</h4>
                             <p className="text-xs text-gray-500 mb-3">Questions to ask the buyer immediately after payment (e.g. GitHub URL, Start Date).</p>
                             <div className="flex gap-2 mb-3">
-                                <input type="text" placeholder="Question text..." value={newQuestion.text} onChange={e => setNewQuestion({...newQuestion, text: e.target.value})} className="flex-1 p-2 border rounded bg-gray-50 dark:bg-gray-900 border-gray-300 dark:border-gray-600 text-white outline-none" />
-                                <select value={newQuestion.type} onChange={e => setNewQuestion({...newQuestion, type: e.target.value})} className="p-2 border rounded bg-gray-50 dark:bg-gray-900 border-gray-300 dark:border-gray-600 text-white outline-none">
+                                <input type="text" placeholder="Question text..." value={newQuestion.text} onChange={e => setNewQuestion({...newQuestion, text: e.target.value})} className="flex-1 p-2 border rounded bg-gray-50 dark:bg-gray-900 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white outline-none" />
+                                <select value={newQuestion.type} onChange={e => setNewQuestion({...newQuestion, type: e.target.value})} className="p-2 border rounded bg-gray-50 dark:bg-gray-900 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white outline-none">
                                     <option value="text">Text (Short)</option>
                                     <option value="textarea">Textarea (Long)</option>
                                     <option value="date">Date</option>
                                     <option value="url">URL Link</option>
                                 </select>
-                                <button type="button" onClick={addQuestion} className="bg-gray-200 dark:bg-gray-700 px-3 rounded hover:bg-gray-300 dark:hover:bg-gray-600">+</button>
+                                <button type="button" onClick={addQuestion} className="bg-gray-200 dark:bg-gray-700 text-gray-900 dark:text-white px-3 rounded hover:bg-gray-300 dark:hover:bg-gray-600">+</button>
                             </div>
                             <div className="space-y-2">
                                 {formData.questions.map((q, i) => (
-                                    <div key={i} className="flex justify-between items-center bg-gray-50 dark:bg-gray-900 p-2 rounded text-sm text-gray-300">
+                                    <div key={i} className="flex justify-between items-center bg-gray-50 dark:bg-gray-900 p-2 rounded text-sm text-gray-700 dark:text-gray-300 border border-gray-200 dark:border-gray-700">
                                         <span>{q.text} <span className="text-gray-500">({q.type})</span></span>
-                                        <button type="button" onClick={() => removeQuestion(i)} className="text-red-500 hover:text-red-400"><X className="h-4 w-4"/></button>
+                                        <button type="button" onClick={() => removeQuestion(i)} className="text-red-500 hover:text-red-600 dark:hover:text-red-400"><X className="h-4 w-4"/></button>
                                     </div>
                                 ))}
                             </div>
