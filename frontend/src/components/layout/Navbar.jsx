@@ -70,6 +70,9 @@ export default function Navbar() {
                         <Link to="/courses" className="text-gray-900 dark:text-gray-100 px-3 py-2 rounded-md text-sm font-medium hover:text-indigo-600 dark:hover:text-indigo-400">
                             Courses
                         </Link>
+                        <Link to="/services" className="text-gray-900 dark:text-gray-100 px-3 py-2 rounded-md text-sm font-medium hover:text-indigo-600 dark:hover:text-indigo-400">
+                            Services
+                        </Link>
 
                         {user ? (
                             <>
@@ -146,6 +149,9 @@ export default function Navbar() {
                         </Link>
                         <Link to="/courses" onClick={() => setIsMenuOpen(false)} className="block px-3 py-2 rounded-md text-base font-medium text-gray-700 dark:text-gray-200 hover:text-indigo-600 dark:hover:text-indigo-400 hover:bg-gray-50 dark:hover:bg-gray-700">
                             Courses
+                        </Link>
+                        <Link to="/services" onClick={() => setIsMenuOpen(false)} className="block px-3 py-2 rounded-md text-base font-medium text-gray-700 dark:text-gray-200 hover:text-indigo-600 dark:hover:text-indigo-400 hover:bg-gray-50 dark:hover:bg-gray-700">
+                            Services
                         </Link>
                         
                         {user ? (
