@@ -1,8 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { Loader, CheckCircle, Clock } from 'lucide-react';
-import { Loader, CheckCircle, Clock } from 'lucide-react';
-import api from '../lib/api';
 import api from '../lib/api';
 
 export default function Services() {
