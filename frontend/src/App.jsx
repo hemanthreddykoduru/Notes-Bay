@@ -40,6 +40,9 @@ const TermsOfService = lazy(() => import('./pages/TermsOfService'));
 const PrivacyPolicy = lazy(() => import('./pages/PrivacyPolicy'));
 const CancellationRefund = lazy(() => import('./pages/CancellationRefund'));
 const MyLearning = lazy(() => import('./pages/MyLearning'));
+const Services = lazy(() => import('./pages/Services'));
+const ServiceDetails = lazy(() => import('./pages/ServiceDetails'));
+const ServiceOnboarding = lazy(() => import('./pages/ServiceOnboarding'));
 
 function App() {
   return (
@@ -160,8 +163,23 @@ function App() {
 
                 {/* Legal & Text Pages */}
                 <Route path="/support" element={
-                  <Suspense fallback={<GenericPageSkeleton />}>
+                  <Suspense fallback={<HomeSkeleton />}>
                     <Support />
+                  </Suspense>
+                } />
+                <Route path="/services" element={
+                  <Suspense fallback={<HomeSkeleton />}>
+                    <Services />
+                  </Suspense>
+                } />
+                <Route path="/services/:id" element={
+                  <Suspense fallback={<HomeSkeleton />}>
+                    <ServiceDetails />
+                  </Suspense>
+                } />
+                <Route path="/services/:id/onboarding/:orderId" element={
+                  <Suspense fallback={<HomeSkeleton />}>
+                    <ServiceOnboarding />
                   </Suspense>
                 } />
                 <Route path="/terms-of-service" element={
