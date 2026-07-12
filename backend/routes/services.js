@@ -1,7 +1,21 @@
 const express = require('express');
 const router = express.Router();
-const { supabase, checkAdmin } = require('../config/supabase');
-const { requireAuth } = require('../middleware/auth');
+const supabase = require('../config/supabase');
+const requireAuth = require('../middleware/auth');
+
+const checkAdmin = async (userId) => {
+    try {
+        const { data, error } = await supabase
+            .from('profiles')
+            .select('role')
+            .eq('id', userId)
+            .single();
+        if (error) return false;
+        return data?.role === 'admin';
+    } catch (error) {
+        return false;
+    }
+};
 
 // Public: Get all published services
 router.get('/', async (req, res) => {
