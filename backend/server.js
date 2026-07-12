@@ -25,6 +25,7 @@ const cryptoRoutes = require('./routes/crypto');
 const adminRoutes = require('./routes/admin');
 const supportRoutes = require('./routes/support');
 const servicesRoutes = require('./routes/services');
+const serviceOrdersRoutes = require('./routes/service_orders');
 
 app.use('/api/auth', authRoutes);
 app.use('/api/notes', noteRoutes);
@@ -34,6 +35,7 @@ app.use('/api/crypto', cryptoRoutes);
 app.use('/api/admin', adminRoutes);
 app.use('/api/support', supportRoutes);
 app.use('/api/services', servicesRoutes);
+app.use('/api/service-orders', serviceOrdersRoutes);
 app.use('/api/reviews', require('./routes/reviews'));
 app.use('/api/analytics', require('./routes/analytics'));
 app.use('/api/wishlist', require('./routes/wishlist'));

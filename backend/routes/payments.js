@@ -15,6 +15,12 @@ router.post('/create-course-order', requireAuth, paymentsController.createCourse
 // POST /api/payments/verify-course
 router.post('/verify-course', requireAuth, paymentsController.verifyCoursePayment);
 
+// POST /api/payments/create-service-order
+router.post('/create-service-order', requireAuth, paymentsController.createServiceOrder);
+
+// POST /api/payments/verify-service
+router.post('/verify-service', requireAuth, paymentsController.verifyService);
+
 // POST /api/payments/create-subscription-order
 router.post('/create-subscription-order', requireAuth, paymentsController.createSubscriptionOrder);
 

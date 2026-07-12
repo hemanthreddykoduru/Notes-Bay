@@ -463,3 +463,101 @@ exports.verifyCoursePayment = async (req, res) => {
     res.status(500).json({ error: 'Error verifying course payment' });
   }
 };
+
+// POST /create-service-order
+exports.createServiceOrder = async (req, res) => {
+  try {
+    const { serviceId, variant } = req.body;
+    
+    const { data: service, error: serviceError } = await supabase
+      .from('services')
+      .select('*')
+      .eq('id', serviceId)
+      .single();
+
+    if (serviceError || !service) {
+      return res.status(404).json({ error: 'Service not found' });
+    }
+
+    const amountToCharge = variant ? variant.price : service.price;
+
+    const options = {
+      amount: amountToCharge * 100, // amount in paisa
+      currency: 'INR',
+      receipt: `srv_${Date.now()}`,
+      notes: { serviceId, userId: req.user.id }
+    };
+
+    const order = await razorpay.orders.create(options);
+    res.json(order);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: 'Error creating service order' });
+  }
+};
+
+// POST /verify-service
+exports.verifyService = async (req, res) => {
+  try {
+    const {
+      razorpay_order_id,
+      razorpay_payment_id,
+      razorpay_signature,
+      serviceId,
+      variant
+    } = req.body;
+
+    const body = razorpay_order_id + '|' + razorpay_payment_id;
+    const expectedSignature = crypto
+      .createHmac('sha256', process.env.RAZORPAY_KEY_SECRET)
+      .update(body.toString())
+      .digest('hex');
+
+    if (expectedSignature === razorpay_signature) {
+      const { data: service } = await supabase
+        .from('services')
+        .select('*')
+        .eq('id', serviceId)
+        .single();
+        
+      const amountPaid = variant ? variant.price : service.price;
+
+      // 1. Create service_order
+      const { data: orderData, error: orderError } = await supabase
+        .from('service_orders')
+        .insert([{
+          service_id: serviceId,
+          user_id: req.user.id,
+          variant_selected: variant || null,
+          amount_paid: amountPaid,
+          payment_id: razorpay_payment_id,
+          status: 'pending'
+        }])
+        .select()
+        .single();
+
+      if (orderError) throw orderError;
+
+      // 2. Add to total revenue
+      await addRevenue(amountPaid);
+
+      // 3. Create a transaction record
+      await supabase
+        .from('transactions')
+        .insert([{
+            user_id: req.user.id,
+            amount: amountPaid,
+            type: 'purchase',
+            description: `Purchased Service: ${service.title}${variant ? ` - ${variant.name}` : ''}`,
+            reference_id: razorpay_payment_id
+        }]);
+
+      res.json({ success: true, orderId: orderData.id });
+    } else {
+      res.status(400).json({ error: 'Invalid signature' });
+    }
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: 'Verification failed' });
+  }
+};
