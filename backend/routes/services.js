@@ -24,8 +24,7 @@ router.get('/', async (req, res) => {
             .from('services')
             .select(`
                 id, title, description, price, original_price, offer_text, thumbnail_url, is_published,
-                features, turnaround_time, variants, questions, created_at,
-                profiles (full_name, bio, title, avatar_url)
+                features, turnaround_time, variants, questions, created_at
             `)
             .eq('is_published', true)
             .order('created_at', { ascending: false });
@@ -67,8 +66,7 @@ router.get('/:id', async (req, res) => {
             .from('services')
             .select(`
                 id, title, description, price, original_price, offer_text, thumbnail_url, is_published,
-                features, turnaround_time, variants, questions, created_at,
-                profiles (full_name, bio, title, avatar_url)
+                features, turnaround_time, variants, questions, created_at
             `)
             .eq('id', req.params.id)
             .single();
