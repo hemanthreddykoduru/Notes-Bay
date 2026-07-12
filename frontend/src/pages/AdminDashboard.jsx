@@ -5,6 +5,7 @@ import { Plus, Trash2, Pencil, X, TrendingUp, Users, FileText, DollarSign, Messa
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import AdminDashboardSkeleton from '../components/skeletons/AdminDashboardSkeleton'; // Import Skeleton
 import AdminCourses from '../components/admin/AdminCourses';
+import AdminServices from '../components/admin/AdminServices';
 
 import Toast from '../components/common/Toast';
 
@@ -654,6 +655,8 @@ export default function AdminDashboard() {
             </div>
 
             <AdminCourses setToast={setToast} />
+            <div className="mt-8"></div>
+            <AdminServices setToast={setToast} />
         </div >
     );
 }
