@@ -22,8 +22,6 @@ const noteRoutes = require('./routes/notes');
 const paymentRoutes = require('./routes/payments');
 const courseRoutes = require('./routes/courses');
 const cryptoRoutes = require('./routes/crypto');
-const adminRoutes = require('./routes/admin');
-const supportRoutes = require('./routes/support');
 const servicesRoutes = require('./routes/services');
 const serviceOrdersRoutes = require('./routes/service_orders');
 
@@ -32,8 +30,6 @@ app.use('/api/notes', noteRoutes);
 app.use('/api/courses', courseRoutes);
 app.use('/api/payments', paymentRoutes);
 app.use('/api/crypto', cryptoRoutes);
-app.use('/api/admin', adminRoutes);
-app.use('/api/support', supportRoutes);
 app.use('/api/services', servicesRoutes);
 app.use('/api/service-orders', serviceOrdersRoutes);
 app.use('/api/reviews', require('./routes/reviews'));
